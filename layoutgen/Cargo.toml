@@ -1,0 +1,10 @@
+[package]
+name = "layoutgen"
+version = "0.1.0"
+edition = "2024"
+description = "One layout.toml -> kanata config + WoW addon bindings"
+publish = false
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+toml = "1"
