@@ -20,8 +20,7 @@
 #   { mode = "chat", send = "ret" }            switch mode, optionally sending
 #                                              a key (Enter opens chat)
 #
-# Bars: 1 = main bar (skyriding takes these slots over when mounted),
-# 2..8 = Action Bar 2..8 in WoW's settings. Buttons are 1..12.
+# Bars: 1 = main bar, 2..8 = Action Bar 2..8 in WoW's settings. Buttons are 1..12.
 #
 # Mode fields:
 #   banner       key sent as Ctrl+Alt+Shift+<banner> on entering the mode;
@@ -52,35 +51,36 @@ w = "TURNLEFT"
 r = "TURNRIGHT"
 spc = "JUMP"
 t = "TOGGLEAUTORUN"
-g = "PITCHUP"
-b = "PITCHDOWN"
 q = "TARGETNEARESTENEMY"
 a = "INTERACTTARGET"
 
+# Frost Mage, WoW: Forever. Beta caps at 30; spells or talents you don't
+# have yet are skipped (the addon lists them) until you learn them.
 # Rotation (right hand, main bar)
 j = { bar = 1, button = 1, spell = "Frostbolt" }
 k = { bar = 1, button = 2, spell = "Ice Lance" }
-l = { bar = 1, button = 3, spell = "Flurry" }
-";" = { bar = 1, button = 4, spell = "Frozen Orb" }
-u = { bar = 1, button = 5, spell = "Glacial Spike" }
-i = { bar = 1, button = 6, spell = "Comet Storm" }
-o = { bar = 1, button = 7, spell = "Ray of Frost" }
+l = { bar = 1, button = 3, spell = "Fire Blast" }
+";" = { bar = 1, button = 4, spell = "Fireball" }
+u = { bar = 1, button = 5, spell = "Arcane Missiles" }
+i = { bar = 1, button = 6, spell = "Arcane Explosion" }
+o = { bar = 1, button = 7, spell = "Cold Snap" }
 p = { bar = 1, button = 8, macro = "Blizzard", body = "#showtooltip\n/cast [@player] Blizzard" }
 
 # Interrupt, defensives, cooldowns
 h = { bar = 1, button = 9, spell = "Counterspell" }
-y = { bar = 1, button = 10, spell = "Ice Barrier" }
+y = { bar = 1, button = 10, spell = "Mana Shield" }
 n = { bar = 1, button = 11, spell = "Ice Block" }
-m = { bar = 1, button = 12, spell = "Icy Veins" }
-"," = { bar = 2, button = 1, spell = "Shifting Power" }
-"." = { bar = 2, button = 2, spell = "Mirror Image" }
-"/" = { bar = 2, button = 3, spell = "Spellsteal" }
+m = { bar = 1, button = 12, spell = "Evocation" }
+"," = { bar = 2, button = 1, spell = "Polymorph" }
+"." = { bar = 2, button = 2, spell = "Frost Ward" }
+"/" = { bar = 2, button = 3, spell = "Remove Lesser Curse" }
 
 # Extras (left hand)
 x = { bar = 2, button = 4, spell = "Frost Nova" }
 c = { bar = 2, button = 5, spell = "Cone of Cold" }
 v = { bar = 2, button = 6, spell = "Blink" }
-z = { bar = 2, button = 7, macro = "Mount", body = "/run C_MountJournal.SummonByID(0)" }
+# z: mount, once you have one (level 40; not in the beta).
+# g, b: free.
 
 [[mode]]
 name = "chat"

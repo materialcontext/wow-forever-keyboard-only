@@ -28,7 +28,9 @@ Adjust both paths. If the addon list says "out of date", run
 
 On login the addon sets every binding. It re-places spells and macros on
 your bars only when those changed, since that overwrites whatever is in
-those slots. `/wowkeys bars` forces it.
+those slots. `/wowkeys bars` forces it: run it after learning a new spell
+while leveling, so it lands on its key (WoW may also drop new spells into
+empty bar slots on its own).
 
 The bindings are "override" bindings: they sit on top of WoW's normal
 ones and WoW's keybinding menu won't show them. Disable the addon and
@@ -42,6 +44,6 @@ your old bindings are back untouched.
 | Soft targeting (enemy) | on | picks a target from what you face |
 | Auto loot | on | no loot window to navigate |
 | Camera following style | Always | the camera swings behind you, since you can't drag it |
-| Assisted Highlight | on | glows the suggested next spell on your bars; you still pick |
+| Assisted Highlight | on, if Forever has it | glows the suggested next spell on your bars; you still pick |
 | Click-to-move | off | mouse only |
 | Action Bar 2 | shown | holds the bar-2 buttons in `layout.toml` |
