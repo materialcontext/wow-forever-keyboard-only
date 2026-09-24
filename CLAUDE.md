@@ -12,6 +12,12 @@ the current source of truth and update it as decisions change.
   purity. Prefer small, boring, obvious code.
 - Edits in Neovim. Keep files plain-text and diff-friendly.
 - New to WoW. Explain game-specific assumptions when they matter.
+- Existing addons are fine, but the owner verifies each one before it goes
+  in. Suggest, don't assume.
+- Plays **Frost Mage**. Doesn't need to learn the rotation by heart, but
+  wants to choose each cast rather than rely on the Single-Button Assistant.
+  Plan: normal bars plus Blizzard's Assisted Highlight (glows the suggested
+  button).
 
 ## Architecture (decided)
 
@@ -29,6 +35,7 @@ kanata variant on Windows:
 - `wintercept` (Interception driver) is optional for the home PC only if
   winIOv2 misbehaves. Known issue: it can disable keyboard/mouse until reboot
   after sleep or heavy USB plug/unplug.
+- One machine. kanata is installed and running there.
 - Replaces the owner's iCUE macros. Disable the iCUE remaps on the home
   keyboard so the two don't stack.
 
@@ -57,7 +64,11 @@ Left hand (movement + utility):
 | W | turn left | R | turn right |
 | Q | target (tab) | A | interact |
 | T | autorun | Z | mount |
-| Space | jump | G, X, C, V, B | free |
+| G | pitch up | B | pitch down |
+| X, C, V | extra abilities (Frost: Nova, Cone, Blink) | Space | jump |
+| Esc | passthrough (close / clear target / menu) | | |
+
+Pitch lives here, not in world mode: steering while skyriding is movement.
 
 Right hand (abilities):
 
@@ -78,8 +89,42 @@ Mode keys:
 | Right Alt | leader (one-shot) |
 | Enter | → chat (passthrough) |
 
+Chat exit rules: in chat, Enter sends + returns to combat; Esc **and Caps**
+cancel + return to combat. Caps must send Esc there, otherwise the chat box
+keeps focus and movement keys type into it. Banner chords are sent with
+`macro` so they never land in an open chat box or add modifiers to Enter.
+
+Known desync: text boxes that open without Enter (mail, AH search, DELETE
+confirm). Esc closes them; UI mode will get a passthrough key for typing
+into them.
+
+Why kanata owns the layers: WoW's combat lockdown blocks addons from
+changing keybindings mid-fight, so an addon can't swap bindings per mode.
+
 Skyriding abilities land on the main bar automatically when mounted, so they
 use the combat keys with no extra work.
+
+## Layout sync (decided, pulled forward from phase 2)
+
+`layout.toml` is the single source of truth. `layoutgen` (Rust, `cargo run`
+from the repo root) generates `kanata/wow.kbd` and
+`addon/WowKeys/Layout.lua`; never hand-edit those. `cargo run -- --check`
+fails if they're stale.
+
+The WowKeys addon (one addon, not a separate ModeBanner):
+- sets every binding as an **override binding** on each login, so WoW's
+  saved bindings are never touched and the layout file always wins;
+- places spells and creates macros on bars, but only when the buttons in
+  the layout change (tracked by a revision hash) or on `/wowkeys bars`;
+- binds each mode's banner chord to a hidden button that updates the
+  on-screen mode label, and plays a warning if combat starts outside the
+  home (first) mode.
+
+Non-combat modes get `mods` (e.g. `["ctrl", "alt"]`): kanata emits
+modifier+key and the addon binds that chord, so modes never collide.
+Keys a mode leaves unmapped fall through to combat, which keeps movement
+identical everywhere. The generator rejects two keys fighting over one WoW
+chord.
 
 ## Other modes (draft)
 
@@ -93,13 +138,10 @@ use the combat keys with no extra work.
   views, professions.
 - **Chat (Enter):** full passthrough until Enter or Esc.
 
-## Mode banner addon (planned)
+## Mode banner
 
-Each mode-entry key also emits one unused chord (tentatively
-Ctrl+Alt+Shift+F9..F12; verify WoW accepts these). A tiny addon binds each
-chord to an on-screen mode label, like Vim's `-- INSERT --`. Because the addon
-also sees combat state, it should flash a warning when combat starts while the
-mode isn't combat.
+Each mode-entry key also emits Ctrl+Alt+Shift+<banner> (F9 combat, F12
+chat so far). WowKeys shows the mode label, like Vim's `-- INSERT --`.
 
 ## Addons to evaluate
 
@@ -120,27 +162,47 @@ ground-targeted spells.
 ## Proposed repo layout
 
 ```
-wow-keys/
-  CLAUDE.md
-  kanata/wow.kbd          # the layers; first deliverable
-  addon/ModeBanner/       # .toc, .lua, Bindings.xml
-  layoutgen/              # later: Rust crate, one layout -> kanata + WoW bindings + addon
+CLAUDE.md
+layout.toml               # the layout; edit this
+layoutgen/                # Rust: layout.toml -> the generated files below
+kanata/wow.kbd            # GENERATED
+addon/WowKeys/Layout.lua  # GENERATED
+addon/WowKeys/WowKeys.lua # applies Layout.lua, mode banner
+wow/setup.md              # addon install, one-time game settings
 ```
-
-`layoutgen` is phase 2. Build the kanata config by hand first, play with it,
-and only generate once the layout stabilizes.
 
 ## Open questions
 
-- Class and spec, which sets how many ability slots combat mode really needs.
 - Whether the owner accepts kanata mouse-movement keys as a last-resort UI
   fallback (keyboard input, but it drives a pointer).
 - Leader timeout value and whether a second leader is ever needed.
 - Exact key set for UI mode, which depends on which UI addon works in current
   retail.
 
+## To verify in game (test 1)
+
+- [ ] WowKeys loads (toc Interface number) and prints "bars placed".
+- [ ] Banner: Caps shows `-- COMBAT --`, Enter shows `-- CHAT --`
+      (proves the Ctrl+Alt+Shift+F chords reach WoW).
+- [ ] Punctuation keys (`;` `,` `.` `/`) fire their buttons (WoW's names
+      for them are assumed to be the literal characters).
+- [ ] Button hotkey labels show the new keys (override bindings may not
+      update them; cosmetic).
+- [ ] `A` interacts (assumed binding command `INTERACTTARGET`).
+- [ ] `Z` mounts (`/run C_MountJournal.SummonByID(0)` macro).
+- [ ] Spell names in `layout.toml` match your talents (the addon lists
+      any it couldn't place).
+- [ ] Caps / Enter while holding a movement key doesn't stutter movement.
+- [ ] Chat: Enter opens, Enter sends, Esc and Caps cancel; all land in combat.
+- [ ] Keyboard turn speed with W/R is usable for facing a target.
+- [ ] Is there a camera-rotate keybinding that doesn't turn the character?
+- [ ] Pitch Up / Pitch Down bindings exist and work while skyriding.
+- [ ] Assisted Highlight exists in Midnight.
+- [ ] `/cast [@target,exists][@player] Blizzard` lands on the target.
+- [ ] F13–F24 are bindable in WoW (spare key namespace for later modes).
+
 ## Next steps
 
-1. Write `kanata/wow.kbd` with combat, leader, UI, world and chat layers.
-2. Matching WoW keybinding checklist.
-3. ModeBanner addon.
+1. Test 1: install per `wow/setup.md`, play, record results above.
+2. Add UI, world and leader modes to `layout.toml` (using `mods`).
+3. Maybe: in-game settings as CVars in `layout.toml`, applied by WowKeys.

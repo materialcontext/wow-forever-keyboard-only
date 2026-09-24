@@ -1,0 +1,7 @@
+## Interface: 120000, 120001, 120005, 120007
+## Title: WowKeys
+## Notes: Keyboard-only layout: bindings, bars and mode banner from layout.toml.
+## SavedVariablesPerCharacter: WowKeysDB
+
+Layout.lua
+WowKeys.lua
