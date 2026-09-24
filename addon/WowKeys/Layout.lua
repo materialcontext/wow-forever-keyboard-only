@@ -72,7 +72,7 @@ WowKeysLayout = {
     { "CTRL-K", "MACRO ManaPot" },
     { "CTRL-L", "MULTIACTIONBAR1BUTTON8" },
     { "CTRL-C", "MACRO ClearFocus" },
-    { "CTRL-V", "NAMEPLATES" },
+    { "CTRL-/", "NAMEPLATES" },
   },
   buttons = {
     { slot = 1, spell = "Frostbolt" },

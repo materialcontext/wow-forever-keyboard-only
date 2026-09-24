@@ -176,7 +176,7 @@ l = { bar = 2, button = 8, spell = "Frost Ward" }
 f = "FOCUSTARGET"                               # current target becomes focus
 t = "TARGETFOCUS"                               # target your focus
 c = { macro = "ClearFocus", body = "/clearfocus" }
-v = "NAMEPLATES"   # toggle enemy nameplates (WoW's old V); back on at login
+"/" = "NAMEPLATES" # toggle enemy nameplates; back on at login
 
 [[mode]]
 name = "chat"

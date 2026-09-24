@@ -182,7 +182,7 @@ loot window opens.
   straight back. J health potion, K mana potion (macros; update item names
   as you find better potions), L Frost Ward (situational; on bar 2 button 8
   so its cooldown shows), F set focus to target, T target focus, C clear
-  focus, V toggle enemy nameplates. Later: long cooldowns.
+  focus, / toggle enemy nameplates. Later: long cooldowns.
   `,` is a Polymorph macro that sheeps the focus if you have one, else the
   target.
 - **UI (Tab, Ctrl+Alt+key):** U bags, I character, O spellbook, P talents,
@@ -293,7 +293,7 @@ Needs a kanata restart (new layers) and `/reload`.
 - [ ] `.` casts Blood Fury; Right Alt then L casts Frost Ward (once learned).
 - [ ] Q cycles forward through enemies, B cycles back; enemy nameplates on.
 - [ ] Leader F sets focus (focus frame appears), T targets it, C clears it.
-- [ ] Leader V toggles enemy nameplates (assumed binding `NAMEPLATES`).
+- [ ] Leader / toggles enemy nameplates (assumed binding `NAMEPLATES`).
 - [ ] `,` Polymorphs the focus when set, the target otherwise (level 8).
 - [ ] Talk to a quest NPC (A): options print numbered in chat; 1–9 picks.
 - [ ] G accepts a quest, completes it, takes the only reward; with several
