@@ -1,9 +1,30 @@
 # WoW keyboard-only modal input
 
-Play World of Warcraft (retail, Windows) with **zero mouse input**, using a
+Play **World of Warcraft: Forever** (Windows) with **zero mouse input**, using a
 Vim-style modal layer system that minimizes both finger reach and held keys.
 This file is the handoff from a design conversation in claude.ai; treat it as
 the current source of truth and update it as decisions change.
+
+## The game: WoW: Forever (not retail, not Classic Era)
+
+Always assume WoW: Forever. It's Blizzard's "Classic+": the original
+continents, level 60 cap, reworked Classic-style classes, permanent (not
+seasonal). Launches 2026-11-04. The beta (2026-09-17 to 2026-10-21) caps at
+level 30. The client installs to
+`World of Warcraft\_classic_beta_\` (beta); expect a different folder at
+launch.
+
+What follows from that, as reported by early-beta sources (verify in game):
+- **Modern client and addon API** (mainline 12.1.5), including Midnight's
+  combat restrictions for addons. Retail API docs apply, Classic Era ones
+  don't. Classic-era addons need a Forever build.
+- **toc Interface**: reported as `120105`; some addons also list `16001`.
+- **No flying**, so no skyriding and no pitch keys. Ground mounts come at
+  level 40 (riding trainer grants one), so none in the beta.
+- **Frost Mage kit** is Classic-style plus Ice Lance and Fingers of Frost
+  (talents). Ice Barrier at 40. No Flurry, Glacial Spike, Comet Storm, Ray
+  of Frost, Shifting Power.
+- Built-in damage meter and Cooldown Manager.
 
 ## Owner preferences
 
@@ -17,7 +38,7 @@ the current source of truth and update it as decisions change.
 - Plays **Frost Mage**. Doesn't need to learn the rotation by heart, but
   wants to choose each cast rather than rely on the Single-Button Assistant.
   Plan: normal bars plus Blizzard's Assisted Highlight (glows the suggested
-  button).
+  button), if Forever has it.
 
 ## Architecture (decided)
 
@@ -63,12 +84,11 @@ Left hand (movement + utility):
 | S | strafe left | F | strafe right |
 | W | turn left | R | turn right |
 | Q | target (tab) | A | interact |
-| T | autorun | Z | mount |
-| G | pitch up | B | pitch down |
+| T | autorun | Z | mount (level 40) |
+| G, B | free (no flying in Forever) | | |
 | X, C, V | extra abilities (Frost: Nova, Cone, Blink) | Space | jump |
 | Esc | passthrough (close / clear target / menu) | | |
 
-Pitch lives here, not in world mode: steering while skyriding is movement.
 
 Right hand (abilities):
 
@@ -101,8 +121,6 @@ into them.
 Why kanata owns the layers: WoW's combat lockdown blocks addons from
 changing keybindings mid-fight, so an addon can't swap bindings per mode.
 
-Skyriding abilities land on the main bar automatically when mounted, so they
-use the combat keys with no extra work.
 
 ## Layout sync (decided, pulled forward from phase 2)
 
@@ -134,7 +152,7 @@ chord.
 - **UI (Tab):** J/K/H/L translate to the UI addon's navigation chords (likely
   KeyboardUI's Ctrl+arrows), number row picks dialogue options, letters open
   bags/character/spellbook/map. Movement still works.
-- **World (Shift):** flight pitch, hearthstone, toys, camera zoom and saved
+- **World (Shift):** hearthstone, toys, camera zoom and saved
   views, professions.
 - **Chat (Enter):** full passthrough until Enter or Esc.
 
@@ -145,7 +163,11 @@ chat so far). WowKeys shows the mode label, like Vim's `-- INSERT --`.
 
 ## Addons to evaluate
 
-Midnight changed the addon API, so confirm each works on current retail.
+Forever uses the modern API with Midnight's combat restrictions, so each
+addon needs a Forever-compatible build. Confirm before installing.
+
+- Interaction (Adaptvx): keyboard-driven NPC/quest dialogs; has a PR adding
+  Forever support.
 
 - KeyboardUI: keyboard navigation of bags, NPC dialogs, quest log, options.
   Last seen listing dated 2022, so verify it's maintained.
@@ -173,11 +195,12 @@ wow/setup.md              # addon install, one-time game settings
 
 ## Open questions
 
+
 - Whether the owner accepts kanata mouse-movement keys as a last-resort UI
   fallback (keyboard input, but it drives a pointer).
 - Leader timeout value and whether a second leader is ever needed.
 - Exact key set for UI mode, which depends on which UI addon works in current
-  retail.
+  Forever.
 
 ## To verify in game (test 1)
 
@@ -189,15 +212,17 @@ wow/setup.md              # addon install, one-time game settings
 - [ ] Button hotkey labels show the new keys (override bindings may not
       update them; cosmetic).
 - [ ] `A` interacts (assumed binding command `INTERACTTARGET`).
-- [ ] `Z` mounts (`/run C_MountJournal.SummonByID(0)` macro).
+- [ ] `/dump select(4, GetBuildInfo())` matches the toc Interface line.
+- [ ] Soft targeting and the Interact key exist in Forever.
+- [ ] `Z` mounts at 40 (`/run C_MountJournal.SummonByID(0)`; assumes the
+      trainer's mount lands in the mount journal).
 - [ ] Spell names in `layout.toml` match your talents (the addon lists
       any it couldn't place).
 - [ ] Caps / Enter while holding a movement key doesn't stutter movement.
 - [ ] Chat: Enter opens, Enter sends, Esc and Caps cancel; all land in combat.
 - [ ] Keyboard turn speed with W/R is usable for facing a target.
 - [ ] Is there a camera-rotate keybinding that doesn't turn the character?
-- [ ] Pitch Up / Pitch Down bindings exist and work while skyriding.
-- [ ] Assisted Highlight exists in Midnight.
+- [ ] Assisted Highlight exists in Forever.
 - [ ] `/cast [@target,exists][@player] Blizzard` lands on the target.
 - [ ] F13–F24 are bindable in WoW (spare key namespace for later modes).
 
