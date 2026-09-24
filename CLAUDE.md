@@ -12,6 +12,12 @@ the current source of truth and update it as decisions change.
   purity. Prefer small, boring, obvious code.
 - Edits in Neovim. Keep files plain-text and diff-friendly.
 - New to WoW. Explain game-specific assumptions when they matter.
+- Existing addons are fine, but the owner verifies each one before it goes
+  in. Suggest, don't assume.
+- Plays **Frost Mage**. Doesn't need to learn the rotation by heart, but
+  wants to choose each cast rather than rely on the Single-Button Assistant.
+  Plan: normal bars plus Blizzard's Assisted Highlight (glows the suggested
+  button).
 
 ## Architecture (decided)
 
@@ -29,6 +35,7 @@ kanata variant on Windows:
 - `wintercept` (Interception driver) is optional for the home PC only if
   winIOv2 misbehaves. Known issue: it can disable keyboard/mouse until reboot
   after sleep or heavy USB plug/unplug.
+- One machine. kanata is installed and running there.
 - Replaces the owner's iCUE macros. Disable the iCUE remaps on the home
   keyboard so the two don't stack.
 
@@ -57,7 +64,11 @@ Left hand (movement + utility):
 | W | turn left | R | turn right |
 | Q | target (tab) | A | interact |
 | T | autorun | Z | mount |
-| Space | jump | G, X, C, V, B | free |
+| G | pitch up | B | pitch down |
+| X, C, V | extra abilities (Frost: Nova, Cone, Blink) | Space | jump |
+| Esc | passthrough (close / clear target / menu) | | |
+
+Pitch lives here, not in world mode: steering while skyriding is movement.
 
 Right hand (abilities):
 
@@ -77,6 +88,18 @@ Mode keys:
 | Left Shift | → world mode |
 | Right Alt | leader (one-shot) |
 | Enter | → chat (passthrough) |
+
+Chat exit rules: in chat, Enter sends + returns to combat; Esc **and Caps**
+cancel + return to combat. Caps must send Esc there, otherwise the chat box
+keeps focus and movement keys type into it. Banner chords are sent with
+`macro` so they never land in an open chat box or add modifiers to Enter.
+
+Known desync: text boxes that open without Enter (mail, AH search, DELETE
+confirm). Esc closes them; UI mode will get a passthrough key for typing
+into them.
+
+Why kanata owns the layers: WoW's combat lockdown blocks addons from
+changing keybindings mid-fight, so an addon can't swap bindings per mode.
 
 Skyriding abilities land on the main bar automatically when mounted, so they
 use the combat keys with no extra work.
@@ -123,6 +146,7 @@ ground-targeted spells.
 wow-keys/
   CLAUDE.md
   kanata/wow.kbd          # the layers; first deliverable
+  wow/keybindings.md      # in-game bindings and settings checklist
   addon/ModeBanner/       # .toc, .lua, Bindings.xml
   layoutgen/              # later: Rust crate, one layout -> kanata + WoW bindings + addon
 ```
@@ -132,15 +156,27 @@ and only generate once the layout stabilizes.
 
 ## Open questions
 
-- Class and spec, which sets how many ability slots combat mode really needs.
 - Whether the owner accepts kanata mouse-movement keys as a last-resort UI
   fallback (keyboard input, but it drives a pointer).
 - Leader timeout value and whether a second leader is ever needed.
 - Exact key set for UI mode, which depends on which UI addon works in current
   retail.
 
+## To verify in game (test 1)
+
+- [ ] Ctrl+Alt+Shift+F9..F12 chords reach WoW (bind-capture test).
+- [ ] Caps / Enter while holding a movement key doesn't stutter movement.
+- [ ] Chat: Enter opens, Enter sends, Esc and Caps cancel; all land in combat.
+- [ ] Keyboard turn speed with W/R is usable for facing a target.
+- [ ] Is there a camera-rotate keybinding that doesn't turn the character?
+- [ ] Pitch Up / Pitch Down bindings exist and work while skyriding.
+- [ ] Assisted Highlight exists in Midnight.
+- [ ] `/cast [@target,exists][@player] Blizzard` lands on the target.
+- [ ] F13–F24 are bindable in WoW (spare key namespace for later modes).
+
 ## Next steps
 
-1. Write `kanata/wow.kbd` with combat, leader, UI, world and chat layers.
-2. Matching WoW keybinding checklist.
+1. Test 1: combat + chat layers (`kanata/wow.kbd`) with
+   `wow/keybindings.md`. Record results above.
+2. Add UI, world and leader layers.
 3. ModeBanner addon.

@@ -1,0 +1,65 @@
+;; WoW keyboard-only modal layers. See CLAUDE.md for the design.
+;;
+;; Test 1 scope: combat + chat only. Combat passes every key through
+;; unchanged; WoW's own keybindings (wow/keybindings.md) give them meaning.
+;; Tab, Left Shift and Right Alt stay plain keys until the UI, world and
+;; leader layers exist.
+;;
+;; Emergency exit (winIOv2 default): hold Left Ctrl + Space + Esc.
+
+(defcfg
+  process-unmapped-keys yes
+)
+
+(defsrc
+  esc
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+)
+
+(defalias
+  ;; Mode banner chords, one per mode, consumed by the ModeBanner addon
+  ;; later. Unbound in WoW until then, so they do nothing yet.
+  bn-combat C-A-S-f9
+  bn-ui     C-A-S-f10
+  bn-world  C-A-S-f11
+  bn-chat   C-A-S-f12
+
+  ;; Mode entries are absolute: they always land in the named mode.
+  ;; `macro` taps outputs in order, so the banner chord never reaches an
+  ;; open chat box and Enter never picks up the chord's modifiers.
+  to-combat (multi (layer-switch combat) (macro @bn-combat))
+
+  ;; Banner first, then Enter opens the chat box.
+  to-chat   (multi (layer-switch chat) (macro @bn-chat ret))
+
+  ;; Leaving chat: send or cancel first, then banner.
+  chat-send (multi (layer-switch combat) (macro ret @bn-combat))
+  chat-esc  (multi (layer-switch combat) (macro esc @bn-combat))
+)
+
+(deflayer combat
+  esc
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  @to-combat
+       _    _    _    _    _    _    _    _    _    _    _    @to-chat
+  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _              _              _    _    _
+)
+
+;; Insert mode: everything passes through so you can type. Enter sends,
+;; Esc cancels, and Caps also cancels (it must close the chat box, or
+;; movement keys would keep typing into it).
+(deflayer chat
+  @chat-esc
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _    _    _    _    _    _    _    _    _    _    _    _
+  @chat-esc
+       _    _    _    _    _    _    _    _    _    _    _    @chat-send
+  _    _    _    _    _    _    _    _    _    _    _    _
+  _    _    _              _              _    _    _
+)
