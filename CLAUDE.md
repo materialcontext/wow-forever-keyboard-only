@@ -1,6 +1,6 @@
 # WoW keyboard-only modal input
 
-Play World of Warcraft (retail, Windows) with **zero mouse input**, using a
+Play World of Warcraft (Windows, client folder `_classic_beta_`, not retail) with **zero mouse input**, using a
 Vim-style modal layer system that minimizes both finger reach and held keys.
 This file is the handoff from a design conversation in claude.ai; treat it as
 the current source of truth and update it as decisions change.
@@ -172,6 +172,11 @@ wow/setup.md              # addon install, one-time game settings
 ```
 
 ## Open questions
+
+- Which game version the `_classic_beta_` client is. Several retail
+  assumptions depend on it: skyriding, Assisted Highlight, soft targeting,
+  the Midnight spell list, action bars 6–8, `C_MountJournal`, and the toc
+  Interface number.
 
 - Whether the owner accepts kanata mouse-movement keys as a last-resort UI
   fallback (keyboard input, but it drives a pointer).

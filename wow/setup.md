@@ -11,7 +11,7 @@ Link the repo's addon folder into WoW so every regenerate is picked up by a
 
 ```powershell
 New-Item -ItemType Junction `
-  -Path "C:\Program Files (x86)\World of Warcraft\_retail_\Interface\AddOns\WowKeys" `
+  -Path "C:\Program Files (x86)\World of Warcraft\_classic_beta_\Interface\AddOns\WowKeys" `
   -Target "C:\path\to\wow-forever-keyboard-only\addon\WowKeys"
 ```
 
