@@ -39,12 +39,13 @@ What follows from that, as reported by early-beta sources (verify in game):
 - Plays an **Orc Frost Mage**. Orc's only active racial is Blood Fury (a
   damage cooldown, caster version confirmed in Forever); the rest are
   passive. It's used every fight, so it sits on a combat key (`.`).
+- Doesn't need to learn the rotation by heart, but wants to choose each
+  cast rather than rely on the Single-Button Assistant. Plan: normal bars
+  plus Blizzard's Assisted Highlight (glows the suggested button), if
+  Forever has it.
 
 Rule of thumb for placing abilities: pressed every fight -> a combat key;
-situational or rare -> leader; out of combat -> world. Doesn't need to learn the rotation by heart, but
-  wants to choose each cast rather than rely on the Single-Button Assistant.
-  Plan: normal bars plus Blizzard's Assisted Highlight (glows the suggested
-  button), if Forever has it.
+situational or rare -> leader; out of combat -> world.
 
 ## Architecture (decided)
 
@@ -89,9 +90,10 @@ Left hand (movement + utility):
 | E | forward | D | back |
 | S | strafe left | F | strafe right |
 | W | turn left | R | turn right |
-| Q | target (tab) | A | interact |
+| Q | next enemy (repeat to cycle) | B | previous enemy |
+| A | interact | Esc | also clears the target |
 | T | autorun | Z | mount (level 40) |
-| G | confirm (accept/complete quest, popup, loot all) | B | free |
+| G | confirm (accept/complete quest, popup, loot all) | | |
 | 1–9 | pick dialog option N (gossip, quests, rewards, loot) | | |
 | X, C, V | extra abilities (Frost: Nova, Cone, Blink) | Space | jump |
 | Esc | passthrough (close / clear target / menu) | | |
@@ -179,7 +181,10 @@ loot window opens.
 - **Leader (Right Alt, one-shot 1000 ms, emits Ctrl+key):** one key, then
   straight back. J health potion, K mana potion (macros; update item names
   as you find better potions), L Frost Ward (situational; on bar 2 button 8
-  so its cooldown shows). Later: long cooldowns.
+  so its cooldown shows), F set focus to target, T target focus, C clear
+  focus. Later: long cooldowns.
+  `,` is a Polymorph macro that sheeps the focus if you have one, else the
+  target.
 - **UI (Tab, Ctrl+Alt+key):** U bags, I character, O spellbook, P talents,
   L quest log, M map, K vendor (sell junk + repair), `'` type into a text
   box. Esc closes windows. Navigating *inside* windows (bags, talents) still
@@ -286,6 +291,9 @@ Needs a kanata restart (new layers) and `/reload`.
 - [ ] Leader: Right Alt then J uses a healing potion; a stray Right Alt
       times out after 1 s; Right Alt then E just moves.
 - [ ] `.` casts Blood Fury; Right Alt then L casts Frost Ward (once learned).
+- [ ] Q cycles forward through enemies, B cycles back; enemy nameplates on.
+- [ ] Leader F sets focus (focus frame appears), T targets it, C clears it.
+- [ ] `,` Polymorphs the focus when set, the target otherwise (level 8).
 - [ ] Talk to a quest NPC (A): options print numbered in chat; 1–9 picks.
 - [ ] G accepts a quest, completes it, takes the only reward; with several
       rewards it asks for a number.

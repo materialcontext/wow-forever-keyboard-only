@@ -46,6 +46,7 @@
 autoLootDefault = "1"            # loot corpses on interact, no loot window
 AutoPushSpellToActionBar = "0"   # don't drop new spells on the bars; the
                                  # addon places them on their keys instead
+nameplateShowEnemies = "1"       # Q/B cycle through enemies with nameplates
 
 [[mode]]
 name = "combat"
@@ -84,7 +85,8 @@ w = "TURNLEFT"
 r = "TURNRIGHT"
 spc = "JUMP"
 t = "TOGGLEAUTORUN"
-q = "TARGETNEARESTENEMY"
+q = "TARGETNEARESTENEMY"     # press again to cycle to the next enemy
+b = "TARGETPREVIOUSENEMY"    # cycle back
 a = "INTERACTTARGET"
 
 # Frost Mage, WoW: Forever. Beta caps at 30; spells or talents you don't
@@ -104,7 +106,9 @@ h = { bar = 1, button = 9, spell = "Counterspell" }
 y = { bar = 1, button = 10, spell = "Mana Shield" }
 n = { bar = 1, button = 11, spell = "Ice Block" }
 m = { bar = 1, button = 12, spell = "Evocation" }
-"," = { bar = 2, button = 1, spell = "Polymorph" }
+# Polymorph your focus if you have one, else your target: set a focus on
+# the add, keep killing your target, sheep the add without switching.
+"," = { bar = 2, button = 1, macro = "Poly", body = "#showtooltip Polymorph\n/cast [@focus,harm,nodead][] Polymorph" }
 "." = { bar = 2, button = 2, spell = "Blood Fury" }   # Orc racial, every fight
 "/" = { bar = 2, button = 3, spell = "Remove Lesser Curse" }
 
@@ -115,7 +119,6 @@ v = { bar = 2, button = 6, spell = "Blink" }
 # Mount: random favorite from the mount journal. Does nothing until you
 # have one (level 40).
 z = { bar = 2, button = 7, macro = "Mount", body = "/run C_MountJournal.SummonByID(0)" }
-# b: free.
 
 # Windows and vendors. Tab, then a key; Caps to leave. Esc closes windows.
 [[mode]]
@@ -169,6 +172,10 @@ j = { macro = "HealthPot", body = "#showtooltip\n/use Minor Healing Potion" }
 k = { macro = "ManaPot", body = "#showtooltip\n/use Minor Mana Potion" }
 # Situational: only against frost damage. On a bar so its cooldown shows.
 l = { bar = 2, button = 8, spell = "Frost Ward" }
+# Focus: a second remembered target, for CC or watching an add.
+f = "FOCUSTARGET"                               # current target becomes focus
+t = "TARGETFOCUS"                               # target your focus
+c = { macro = "ClearFocus", body = "/clearfocus" }
 
 [[mode]]
 name = "chat"
