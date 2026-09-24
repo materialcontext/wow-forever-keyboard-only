@@ -237,11 +237,34 @@ end)
 showMode()
 
 SLASH_WOWKEYS1 = "/wowkeys"
+-- Lists binding commands matching some text, so addon bindings (Auctionator,
+-- DBM, ...) can go into layout.toml by their exact command name.
+local function findBindings(text)
+  text = text:lower()
+  local shown = 0
+  for i = 1, GetNumBindings() do
+    local command, _, key1, key2 = GetBinding(i)
+    local name = command and GetBindingName(command) or ""
+    if command and (command:lower():find(text, 1, true) or name:lower():find(text, 1, true)) then
+      shown = shown + 1
+      if shown <= 40 then
+        local keys = key1 and (" [" .. key1 .. (key2 and (", " .. key2) or "") .. "]") or ""
+        print(("  %s  |cff999999%s%s|r"):format(command, name, keys))
+      end
+    end
+  end
+  print(("WowKeys: %d binding(s) match \"%s\"%s"):format(shown, text, shown > 40 and " (first 40 shown)" or ""))
+end
+
 SlashCmdList.WOWKEYS = function(arg)
+  local text = arg:match("^find%s+(.+)$")
   if arg == "bars" then
     outOfCombat(applyBarsVerbose)
+  elseif text then
+    findBindings(text)
   else
     print("WowKeys: mode " .. current.label .. ", layout " .. L.revision)
-    print("  /wowkeys bars  re-place spells and macros on the bars")
+    print("  /wowkeys bars         re-place spells and macros on the bars")
+    print("  /wowkeys find <text>  list binding commands to use in layout.toml")
   end
 end

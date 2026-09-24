@@ -199,21 +199,40 @@ loot window opens.
 Each mode-entry key also emits Ctrl+Alt+Shift+<banner> (F9 combat, F10 UI,
 F11 world, F12 chat; leader has none). WowKeys shows the mode label, like Vim's `-- INSERT --`.
 
-## Addons to evaluate
+## Addons
 
 Forever uses the modern API with Midnight's combat restrictions, so each
-addon needs a Forever-compatible build. Confirm before installing.
+addon needs a Forever-compatible build. The owner verifies each one before
+it goes in.
 
-- Interaction (Adaptvx): keyboard-driven NPC/quest dialogs; has a PR adding
-  Forever support.
+**Owner's picks** and how each meets the keyboard layer:
 
-- KeyboardUI: keyboard navigation of bags, NPC dialogs, quest log, options.
-  Last seen listing dated 2022, so verify it's maintained.
-- DialogueUI: quest and gossip dialogs by key.
-- Leatrix Plus: auto quest accept/turn-in, sell junk, repair.
-- Bartender4 or Dominos: action bar layout and paging.
-- KeyUI: on-screen keyboard view of bindings for tuning layers.
-- ConsolePort: only relevant if we ever go the virtual-gamepad route.
+| Addon | Job | Keyboard impact |
+|---|---|---|
+| Leatrix Plus | auto quest accept/turn-in, sell junk, repair, QoL | Overlaps G (confirm) and UI K (vendor). Leatrix automates; ours stay as the manual fallback. Pick one owner per job so they don't both fire. |
+| Bagnon | combined bag window | UI U should open it (it takes over the bag toggle). Navigating inside it is still unsolved. |
+| Plater | enemy nameplates | Q/B cycling and leader / depend on nameplates. Plater manages nameplate CVars; if it fights our `nameplateShowEnemies`, drop ours from `[cvars]`. Midnight limits nameplate addons in combat. |
+| DBM | boss timers and warnings | Display only. Midnight limits boss mods hardest and the modern client has built-in boss warnings; check what the Forever build can still do. |
+| Auctionator | auction house search and selling | Hardest for keyboard-only play (lists, picking a bag item to sell). Its own keybindings (believed: post / cancel undercut) can go on UI-mode keys once named. |
+| AtlasLoot | loot table browser | Mouse-driven browsing; a key to open it at most. |
+
+**Adding an addon's keybinding:** in game, `/wowkeys find <text>` lists
+matching binding commands with their readable names. Put the command into
+`layout.toml` (usually UI mode), `cargo run`, `/reload`. Don't guess
+command names.
+
+**Rules for coexisting:**
+- `Commands.lua` finds dialogs by Blizzard's frame names. An addon that
+  replaces the gossip, quest or loot frames (DialogueUI, Immersion) would
+  break 1–9 and G; none of the picks above does.
+- WowKeys rewrites only the keys in `layout.toml` at login, so an addon's
+  own default keys survive unless they collide with ours (ours win).
+- An addon that changes the same CVar as `[cvars]` will fight it; remove
+  the entry from `[cvars]` and let the addon own it.
+
+**Other candidates** (not picked): Interaction (Adaptvx) or DialogueUI for
+keyboard dialogs; KeyboardUI (maintenance unclear); Bartender4/Dominos;
+KeyUI; ConsolePort (only for a virtual-gamepad route).
 
 Useful in-game settings: Interact key, soft targeting, auto-loot, camera
 following style "Always", and `/cast [@player] Spell` macros for
@@ -303,8 +322,17 @@ Needs a kanata restart (new layers) and `/reload`.
 - [ ] Ctrl+Alt / Ctrl+Alt+Shift chords don't trigger anything in Windows
       (language switch, overlays).
 
+## To verify in game (addons)
+
+- [ ] Each pick has a Forever build and loads (no "out of date" or Lua errors).
+- [ ] Leatrix Plus: decide who owns quest accept/turn-in and vendor chores.
+- [ ] Bagnon opens with UI U.
+- [ ] Plater: Q/B still cycle; leader / still toggles; login CVar doesn't fight it.
+- [ ] `/wowkeys find auctionator` (and `dbm`, `atlas`, `bagnon`) lists
+      their binding commands; paste the output here.
+
 ## Next steps
 
-1. Tests 2 and 3 in game.
+1. Tests 2 and 3 in game, with the addons installed.
 2. Loot rolls, bag navigation, talents: pick a UI addon or extend Commands.
 3. Long cooldowns on the leader layer.

@@ -190,6 +190,15 @@ open.MerchantFrame = true
 cmd("vendor")
 check(called("SellAllJunkItems") and called("RepairAllItems"), "vendor sells junk and repairs")
 
+-- /wowkeys find lists binding commands for layout.toml.
+local allBindings = { { "MOVEFORWARD", "HEADER", "E" }, { "AUCTIONATOR_POST", "ADDONS" }, { "AUCTIONATOR_CANCEL", "ADDONS" } }
+function GetNumBindings() return #allBindings end
+function GetBinding(i) return unpack(allBindings[i]) end
+function GetBindingName(c) return ({ AUCTIONATOR_POST = "Post item" })[c] or c end
+printed = {}
+SlashCmdList.WOWKEYS("find auctionator")
+check(said("AUCTIONATOR_POST.*Post item") and said("2 binding%(s%) match"), "find lists matching bindings")
+
 -- Chat banner, then combat starts: warning sound.
 frames.WowKeysMode_chat.scripts.OnClick()
 check(banner == "-- CHAT --", "banner")
