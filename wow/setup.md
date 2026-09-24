@@ -26,15 +26,19 @@ Adjust both paths. If the addon list says "out of date", run
 3. Restart kanata (or reload its config).
 4. `/reload` in WoW.
 
-On login the addon sets every binding. It re-places spells and macros on
-your bars only when those changed, since that overwrites whatever is in
-those slots. `/wowkeys bars` forces it: run it after learning a new spell
-while leveling, so it lands on its key (WoW may also drop new spells into
-empty bar slots on its own).
+On every login the addon rewrites your keybindings from the layout and
+saves them, so WoW's keybinding menu and the button labels show the real
+keys. It also unbinds the old keys from those actions (e.g. `1` no longer
+casts button 1). To undo: disable the addon, then Options → Keybindings →
+Reset to Default.
 
-The bindings are "override" bindings: they sit on top of WoW's normal
-ones and WoW's keybinding menu won't show them. Disable the addon and
-your old bindings are back untouched.
+Spells go onto their keys when the layout changes and whenever you learn
+one. A slot whose spell you haven't learned yet is emptied of other spells
+so nothing shows up twice; items and macros are left alone.
+`/wowkeys bars` re-places everything by hand.
+
+The addon also applies the `[cvars]` settings in `layout.toml` on login
+(auto loot, and stopping WoW from dropping new spells on the bars).
 
 ## Settings (once, in Esc → Options)
 
@@ -42,7 +46,6 @@ your old bindings are back untouched.
 |---|---|---|
 | Interact key | on | `A` loots, talks to NPCs, uses objects without clicking |
 | Soft targeting (enemy) | on | picks a target from what you face |
-| Auto loot | on | no loot window to navigate |
 | Camera following style | Always | the camera swings behind you, since you can't drag it |
 | Assisted Highlight | on, if Forever has it | glows the suggested next spell on your bars; you still pick |
 | Click-to-move | off | mouse only |

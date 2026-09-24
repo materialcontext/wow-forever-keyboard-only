@@ -46,6 +46,12 @@ pub fn render(layout: &Layout) -> String {
         }
     }
 
+    let cvars: String = layout
+        .cvars
+        .iter()
+        .map(|(name, value)| format!("    {{ {}, {} }},\n", lua_str(name), lua_str(value)))
+        .collect();
+
     buttons.sort();
     buttons.dedup();
     let buttons: String = buttons.into_iter().map(|(_, line)| line).collect();
@@ -57,7 +63,8 @@ pub fn render(layout: &Layout) -> String {
            revision = {},\n  \
            modes = {{\n{modes}  }},\n  \
            bindings = {{\n{bindings}  }},\n  \
-           buttons = {{\n{buttons}  }},\n\
+           buttons = {{\n{buttons}  }},\n  \
+           cvars = {{\n{cvars}  }},\n\
          }}\n",
         lua_str(&format!("{:08x}", fnv1a(buttons.as_bytes()))),
     )

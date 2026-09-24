@@ -18,7 +18,8 @@ What follows from that, as reported by early-beta sources (verify in game):
 - **Modern client and addon API** (mainline 12.1.5), including Midnight's
   combat restrictions for addons. Retail API docs apply, Classic Era ones
   don't. Classic-era addons need a Forever build.
-- **toc Interface**: reported as `120105`; some addons also list `16001`.
+- **toc Interface**: the beta client reports `16001` (confirmed in game);
+  the toc also lists `120105` in case that's what launch uses.
 - **No flying**, so no skyriding and no pitch keys. Ground mounts come at
   level 40 (riding trainer grants one), so none in the beta.
 - **Frost Mage kit** is Classic-style plus Ice Lance and Fingers of Frost
@@ -85,7 +86,7 @@ Left hand (movement + utility):
 | W | turn left | R | turn right |
 | Q | target (tab) | A | interact |
 | T | autorun | Z | mount (level 40) |
-| G, B | free (no flying in Forever) | | |
+| G, B | Frost Armor, Arcane Intellect (until world mode) | | |
 | X, C, V | extra abilities (Frost: Nova, Cone, Blink) | Space | jump |
 | Esc | passthrough (close / clear target / menu) | | |
 
@@ -130,10 +131,16 @@ from the repo root) generates `kanata/wow.kbd` and
 fails if they're stale.
 
 The WowKeys addon (one addon, not a separate ModeBanner):
-- sets every binding as an **override binding** on each login, so WoW's
-  saved bindings are never touched and the layout file always wins;
-- places spells and creates macros on bars, but only when the buttons in
-  the layout change (tracked by a revision hash) or on `/wowkeys bars`;
+- rewrites and saves the real bindings on each login, so the layout file
+  always wins. It unbinds other keys from commands it owns (e.g. `1` from
+  ACTIONBUTTON1). Real bindings, not override bindings: with overrides the
+  button hotkey labels kept showing the old keys (test 1);
+- applies `[cvars]` from the layout on login (auto loot, no auto-push of
+  new spells onto bars);
+- places spells and creates macros on bars when the layout's buttons change
+  (revision hash), when you learn a spell, or on `/wowkeys bars`. Managed
+  slots whose spell isn't learned yet are cleared of other spells (WoW's
+  starter bar left duplicates); items and macros there are left alone;
 - binds each mode's banner chord to a hidden button that updates the
   on-screen mode label, and plays a warning if combat starts outside the
   home (first) mode.
@@ -143,6 +150,9 @@ modifier+key and the addon binds that chord, so modes never collide.
 Keys a mode leaves unmapped fall through to combat, which keeps movement
 identical everywhere. The generator rejects two keys fighting over one WoW
 chord.
+
+`lua5.1 addon/tests/dryrun.lua` runs the addon against stubbed WoW APIs
+(the level-5 scenario from test 1). Run it after changing `WowKeys.lua`.
 
 ## Other modes (draft)
 
@@ -190,6 +200,7 @@ layoutgen/                # Rust: layout.toml -> the generated files below
 kanata/wow.kbd            # GENERATED
 addon/WowKeys/Layout.lua  # GENERATED
 addon/WowKeys/WowKeys.lua # applies Layout.lua, mode banner
+addon/tests/dryrun.lua    # offline test of the addon with stubbed WoW APIs
 wow/setup.md              # addon install, one-time game settings
 ```
 
@@ -202,32 +213,45 @@ wow/setup.md              # addon install, one-time game settings
 - Exact key set for UI mode, which depends on which UI addon works in current
   Forever.
 
-## To verify in game (test 1)
+## Test 1 results (level 5, beta)
 
-- [ ] WowKeys loads (toc Interface number) and prints "bars placed".
-- [ ] Banner: Caps shows `-- COMBAT --`, Enter shows `-- CHAT --`
-      (proves the Ctrl+Alt+Shift+F chords reach WoW).
-- [ ] Punctuation keys (`;` `,` `.` `/`) fire their buttons (WoW's names
-      for them are assumed to be the literal characters).
-- [ ] Button hotkey labels show the new keys (override bindings may not
-      update them; cosmetic).
-- [ ] `A` interacts (assumed binding command `INTERACTTARGET`).
-- [ ] `/dump select(4, GetBuildInfo())` matches the toc Interface line.
-- [ ] Soft targeting and the Interact key exist in Forever.
+Works: kanata config, addon loads, banner (so Ctrl+Alt+Shift+F chords reach
+WoW), chat round trips, Caps (goes to combat; nothing visible if already
+there), movement, Q targeting, letter and `;` spell keys, keyboard turning
+("okay"). Camera set to rotate with the character; soft targeting on.
+
+Found and fixed in test 2's build:
+- Hotkey labels showed old keys -> real bindings instead of overrides.
+- Duplicate spells on bars -> clear stale spells from managed slots, place
+  spells as they're learned, turn off WoW's auto-push.
+- `A` opened corpses but didn't loot -> `autoLootDefault = 1`.
+
+Not available: F13–F24 (keyboard can't send them).
+
+## To verify in game (test 2)
+
+- [ ] Hotkey labels show J, K, L… instead of 1, 2, 3….
+- [ ] Login prints what it took off the bars; no spell shows up twice.
+- [ ] `A` on a corpse loots everything.
+- [ ] Does the client know `AutoPushSpellToActionBar`? (It prints if not.)
+- [ ] Learning a spell (Fire Blast at 6) puts it on its key with no
+      `/wowkeys bars`.
+- [ ] G casts Frost Armor, B casts Arcane Intellect (bar 2 must be shown).
+- [ ] Punctuation keys `,` `.` `/` once their spells are learned
+      (Polymorph first).
+- [ ] Loot rolls and full-bag loot windows still need keyboard navigation:
+      note when they come up.
+
+Later:
+- [ ] `A` interacts with objects too (assumed `INTERACTTARGET`).
 - [ ] `Z` mounts at 40 (`/run C_MountJournal.SummonByID(0)`; assumes the
       trainer's mount lands in the mount journal).
-- [ ] Spell names in `layout.toml` match your talents (the addon lists
-      any it couldn't place).
-- [ ] Caps / Enter while holding a movement key doesn't stutter movement.
-- [ ] Chat: Enter opens, Enter sends, Esc and Caps cancel; all land in combat.
-- [ ] Keyboard turn speed with W/R is usable for facing a target.
 - [ ] Is there a camera-rotate keybinding that doesn't turn the character?
 - [ ] Assisted Highlight exists in Forever.
 - [ ] `/cast [@target,exists][@player] Blizzard` lands on the target.
-- [ ] F13–F24 are bindable in WoW (spare key namespace for later modes).
 
 ## Next steps
 
-1. Test 1: install per `wow/setup.md`, play, record results above.
+1. Test 2: `/reload` with the new build, check the list above.
 2. Add UI, world and leader modes to `layout.toml` (using `mods`).
 3. Maybe: in-game settings as CVars in `layout.toml`, applied by WowKeys.

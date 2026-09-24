@@ -32,6 +32,12 @@
 # The first mode is home: kanata starts there, and the banner warns if
 # combat starts anywhere else.
 
+# Game settings, applied by the addon on every login.
+[cvars]
+autoLootDefault = "1"            # loot corpses on interact, no loot window
+AutoPushSpellToActionBar = "0"   # don't drop new spells on the bars; the
+                                 # addon places them on their keys instead
+
 [[mode]]
 name = "combat"
 label = "COMBAT"
@@ -82,7 +88,9 @@ v = { bar = 2, button = 6, spell = "Blink" }
 # Mount: random favorite from the mount journal. Does nothing until you
 # have one (level 40).
 z = { bar = 2, button = 7, macro = "Mount", body = "/run C_MountJournal.SummonByID(0)" }
-# g, b: free.
+# Buffs. They belong in world mode once it exists; here until then.
+g = { bar = 2, button = 8, spell = "Frost Armor" }
+b = { bar = 2, button = 9, spell = "Arcane Intellect" }
 
 [[mode]]
 name = "chat"

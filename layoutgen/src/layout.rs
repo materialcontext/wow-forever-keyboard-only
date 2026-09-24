@@ -7,6 +7,9 @@ use std::collections::{BTreeMap, HashMap};
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Layout {
+    /// Game settings the addon applies on login (name -> value).
+    #[serde(default)]
+    pub cvars: BTreeMap<String, String>,
     #[serde(rename = "mode")]
     pub modes: Vec<Mode>,
 }
