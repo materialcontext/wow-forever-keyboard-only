@@ -79,7 +79,9 @@ m = { bar = 1, button = 12, spell = "Evocation" }
 x = { bar = 2, button = 4, spell = "Frost Nova" }
 c = { bar = 2, button = 5, spell = "Cone of Cold" }
 v = { bar = 2, button = 6, spell = "Blink" }
-# z: mount, once you have one (level 40; not in the beta).
+# Mount: random favorite from the mount journal. Does nothing until you
+# have one (level 40).
+z = { bar = 2, button = 7, macro = "Mount", body = "/run C_MountJournal.SummonByID(0)" }
 # g, b: free.
 
 [[mode]]

@@ -214,6 +214,8 @@ wow/setup.md              # addon install, one-time game settings
 - [ ] `A` interacts (assumed binding command `INTERACTTARGET`).
 - [ ] `/dump select(4, GetBuildInfo())` matches the toc Interface line.
 - [ ] Soft targeting and the Interact key exist in Forever.
+- [ ] `Z` mounts at 40 (`/run C_MountJournal.SummonByID(0)`; assumes the
+      trainer's mount lands in the mount journal).
 - [ ] Spell names in `layout.toml` match your talents (the addon lists
       any it couldn't place).
 - [ ] Caps / Enter while holding a movement key doesn't stutter movement.
