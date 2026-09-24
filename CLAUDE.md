@@ -37,7 +37,11 @@ What follows from that, as reported by early-beta sources (verify in game):
 - Existing addons are fine, but the owner verifies each one before it goes
   in. Suggest, don't assume.
 - Plays an **Orc Frost Mage**. Orc's only active racial is Blood Fury (a
-  damage cooldown); the rest are passive. Doesn't need to learn the rotation by heart, but
+  damage cooldown, caster version confirmed in Forever); the rest are
+  passive. It's used every fight, so it sits on a combat key (`.`).
+
+Rule of thumb for placing abilities: pressed every fight -> a combat key;
+situational or rare -> leader; out of combat -> world. Doesn't need to learn the rotation by heart, but
   wants to choose each cast rather than rely on the Single-Button Assistant.
   Plan: normal bars plus Blizzard's Assisted Highlight (glows the suggested
   button), if Forever has it.
@@ -174,7 +178,7 @@ loot window opens.
 
 - **Leader (Right Alt, one-shot 1000 ms, emits Ctrl+key):** one key, then
   straight back. J health potion, K mana potion (macros; update item names
-  as you find better potions), L Blood Fury (Orc racial; on bar 2 button 8
+  as you find better potions), L Frost Ward (situational; on bar 2 button 8
   so its cooldown shows). Later: long cooldowns.
 - **UI (Tab, Ctrl+Alt+key):** U bags, I character, O spellbook, P talents,
   L quest log, M map, K vendor (sell junk + repair), `'` type into a text
@@ -281,8 +285,7 @@ Needs a kanata restart (new layers) and `/reload`.
 - [ ] World: J Frost Armor, K Arcane Intellect, H hearthstone, N/M zoom.
 - [ ] Leader: Right Alt then J uses a healing potion; a stray Right Alt
       times out after 1 s; Right Alt then E just moves.
-- [ ] Leader: Right Alt then L casts Blood Fury (check the spell name and
-      whether Forever's version helps a caster).
+- [ ] `.` casts Blood Fury; Right Alt then L casts Frost Ward (once learned).
 - [ ] Talk to a quest NPC (A): options print numbered in chat; 1–9 picks.
 - [ ] G accepts a quest, completes it, takes the only reward; with several
       rewards it asks for a number.
