@@ -1,0 +1,146 @@
+# WoW keyboard-only modal input
+
+Play World of Warcraft (retail, Windows) with **zero mouse input**, using a
+Vim-style modal layer system that minimizes both finger reach and held keys.
+This file is the handoff from a design conversation in claude.ai; treat it as
+the current source of truth and update it as decisions change.
+
+## Owner preferences
+
+- Rust for any tooling we write; Lua only where WoW requires it (addons).
+- Functional and extensible designs, but a manageable codebase beats domain
+  purity. Prefer small, boring, obvious code.
+- Edits in Neovim. Keep files plain-text and diff-friendly.
+- New to WoW. Explain game-specific assumptions when they matter.
+
+## Architecture (decided)
+
+Hybrid: the **OS remapper owns ergonomics**, the **game owns meaning**.
+
+- **kanata** (https://github.com/jtroo/kanata) does all layers and modes and
+  emits plain keys or modifier+key combos.
+- **WoW keybindings, bars and addons** decide what those combos do.
+- Neither side can see the other's state. A tiny custom addon bridges this with
+  a mode banner (see below).
+
+kanata variant on Windows:
+- `winIOv2` (LLHOOK + SendInput) is the default. It needs no install, so it's
+  portable to machines the owner doesn't control.
+- `wintercept` (Interception driver) is optional for the home PC only if
+  winIOv2 misbehaves. Known issue: it can disable keyboard/mouse until reboot
+  after sleep or heavy USB plug/unplug.
+- Replaces the owner's iCUE macros. Disable the iCUE remaps on the home
+  keyboard so the two don't stack.
+
+## Design principles (decided)
+
+1. **Combat mode is complete.** Everything a fight needs is reachable without
+   leaving it. No mode switches mid-fight.
+2. **Cost ladder:** base key < one-shot leader < mode switch < hold. Target
+   zero sustained holds.
+3. **Mode entries are absolute, never toggles.** Caps always means "go to
+   combat" (Vim's Esc). Mashing it is always safe, and desync self-heals.
+4. **Movement is identical in every mode** except chat.
+5. **Chat is Insert mode.** Enter opens chat and switches to passthrough;
+   Enter or Esc sends/cancels and returns to combat.
+6. **One keypress = one game action** (Blizzard's remapping rule). No timed
+   sequences or multi-action macros from kanata.
+
+## Combat mode layout (draft v1, ANSI QWERTY)
+
+Left hand (movement + utility):
+
+| Key | Action | Key | Action |
+|---|---|---|---|
+| E | forward | D | back |
+| S | strafe left | F | strafe right |
+| W | turn left | R | turn right |
+| Q | target (tab) | A | interact |
+| T | autorun | Z | mount |
+| Space | jump | G, X, C, V, B | free |
+
+Right hand (abilities):
+
+| Key | Slot | Key | Slot |
+|---|---|---|---|
+| J K L ; | rotation 1–4 | U I O P | rotation 5–8 |
+| H | interrupt | Y, N | defensive 1, 2 |
+| M , . | cooldown 1–3 | / | utility |
+| ' | free | | |
+
+Mode keys:
+
+| Key | Behavior |
+|---|---|
+| Caps | → combat (absolute) |
+| Tab | → UI mode |
+| Left Shift | → world mode |
+| Right Alt | leader (one-shot) |
+| Enter | → chat (passthrough) |
+
+Skyriding abilities land on the main bar automatically when mounted, so they
+use the combat keys with no extra work.
+
+## Other modes (draft)
+
+- **Leader (one-shot, Right Alt):** tap, then one key from a second right-hand
+  set, then auto-return to combat. Used for potions, racials, battle rez and
+  long cooldowns. Short timeout so a stray tap doesn't linger.
+- **UI (Tab):** J/K/H/L translate to the UI addon's navigation chords (likely
+  KeyboardUI's Ctrl+arrows), number row picks dialogue options, letters open
+  bags/character/spellbook/map. Movement still works.
+- **World (Shift):** flight pitch, hearthstone, toys, camera zoom and saved
+  views, professions.
+- **Chat (Enter):** full passthrough until Enter or Esc.
+
+## Mode banner addon (planned)
+
+Each mode-entry key also emits one unused chord (tentatively
+Ctrl+Alt+Shift+F9..F12; verify WoW accepts these). A tiny addon binds each
+chord to an on-screen mode label, like Vim's `-- INSERT --`. Because the addon
+also sees combat state, it should flash a warning when combat starts while the
+mode isn't combat.
+
+## Addons to evaluate
+
+Midnight changed the addon API, so confirm each works on current retail.
+
+- KeyboardUI: keyboard navigation of bags, NPC dialogs, quest log, options.
+  Last seen listing dated 2022, so verify it's maintained.
+- DialogueUI: quest and gossip dialogs by key.
+- Leatrix Plus: auto quest accept/turn-in, sell junk, repair.
+- Bartender4 or Dominos: action bar layout and paging.
+- KeyUI: on-screen keyboard view of bindings for tuning layers.
+- ConsolePort: only relevant if we ever go the virtual-gamepad route.
+
+Useful in-game settings: Interact key, soft targeting, auto-loot, camera
+following style "Always", and `/cast [@player] Spell` macros for
+ground-targeted spells.
+
+## Proposed repo layout
+
+```
+wow-keys/
+  CLAUDE.md
+  kanata/wow.kbd          # the layers; first deliverable
+  addon/ModeBanner/       # .toc, .lua, Bindings.xml
+  layoutgen/              # later: Rust crate, one layout -> kanata + WoW bindings + addon
+```
+
+`layoutgen` is phase 2. Build the kanata config by hand first, play with it,
+and only generate once the layout stabilizes.
+
+## Open questions
+
+- Class and spec, which sets how many ability slots combat mode really needs.
+- Whether the owner accepts kanata mouse-movement keys as a last-resort UI
+  fallback (keyboard input, but it drives a pointer).
+- Leader timeout value and whether a second leader is ever needed.
+- Exact key set for UI mode, which depends on which UI addon works in current
+  retail.
+
+## Next steps
+
+1. Write `kanata/wow.kbd` with combat, leader, UI, world and chat layers.
+2. Matching WoW keybinding checklist.
+3. ModeBanner addon.
