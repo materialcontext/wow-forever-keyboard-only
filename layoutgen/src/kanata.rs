@@ -9,7 +9,7 @@ pub fn render(layout: &Layout) -> String {
 
     let mut grids = vec![("defsrc".to_string(), grid(|k| k.to_string()))];
     for mode in &layout.modes {
-        let cells = grid(|k| cell(mode, k));
+        let cells = grid(|k| cell(layout, mode, k));
         grids.push((format!("deflayer {}", mode.name), cells));
     }
     let widths = column_widths(&grids);
@@ -61,9 +61,14 @@ fn column_widths(grids: &[(String, Vec<Vec<String>>)]) -> Vec<Vec<usize>> {
         .collect()
 }
 
-fn cell(mode: &Mode, key: &str) -> String {
+/// What a key does in a mode. Keys a mode doesn't map behave as in the home
+/// (first) mode, so movement and mode keys work everywhere; passthrough
+/// modes send them as typed instead.
+fn cell(layout: &Layout, mode: &Mode, key: &str) -> String {
+    let home = &layout.modes[0];
     match mode.keys.get(key) {
-        None => "_".into(),
+        None if mode.passthrough || std::ptr::eq(mode, home) => "_".into(),
+        None => cell(layout, home, key),
         Some(Action::Switch(s)) => format!("@{}", switch_alias(mode, s)),
         // Game actions: plain key in unmodified modes, chord otherwise.
         Some(_) if mode.mods.is_empty() => "_".into(),
@@ -81,29 +86,37 @@ fn switch_alias(from: &Mode, s: &Switch) -> String {
 /// Banner chords plus one alias per distinct mode switch.
 fn aliases(layout: &Layout) -> BTreeMap<String, String> {
     let mut out = BTreeMap::new();
+    let mut targets = BTreeMap::new();
     for mode in &layout.modes {
-        out.insert(
-            format!("bn-{}", mode.name),
-            Chord::banner(&mode.banner).kanata(),
-        );
+        targets.insert(mode.name.as_str(), mode);
+        if let Some(banner) = &mode.banner {
+            out.insert(format!("bn-{}", mode.name), Chord::banner(banner).kanata());
+        }
     }
     for from in &layout.modes {
         for action in from.keys.values() {
             let Action::Switch(s) = action else { continue };
-            // A passthrough mode has a text box open: send first (closing it),
-            // then the banner. Otherwise banner first, so it never lands in
-            // the box that `send` opens. `macro` taps in order, so Enter
-            // never picks up the banner's modifiers.
-            let banner = format!("@bn-{}", s.mode);
-            let taps = match (&s.send, from.passthrough) {
-                (None, _) => banner,
-                (Some(k), true) => format!("{k} {banner}"),
-                (Some(k), false) => format!("{banner} {k}"),
+            let target = targets[s.mode.as_str()];
+            let action = match (target.oneshot, &target.banner) {
+                // The next key reads this layer, then kanata drops back.
+                (Some(ms), _) => format!("(one-shot {ms} (layer-while-held {}))", s.mode),
+                (None, Some(_)) => {
+                    // A passthrough mode has a text box open: send first
+                    // (closing it), then the banner. Otherwise banner first,
+                    // so it never lands in the box that `send` opens. `macro`
+                    // taps in order, so Enter never picks up the banner's
+                    // modifiers.
+                    let banner = format!("@bn-{}", s.mode);
+                    let taps = match (&s.send, from.passthrough) {
+                        (None, _) => banner,
+                        (Some(k), true) => format!("{k} {banner}"),
+                        (Some(k), false) => format!("{banner} {k}"),
+                    };
+                    format!("(multi (layer-switch {}) (macro {taps}))", s.mode)
+                }
+                (None, None) => unreachable!("validated: non-one-shot modes have a banner"),
             };
-            out.insert(
-                switch_alias(from, s),
-                format!("(multi (layer-switch {}) (macro {taps}))", s.mode),
-            );
+            out.insert(switch_alias(from, s), action);
         }
     }
     out

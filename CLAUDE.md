@@ -86,7 +86,8 @@ Left hand (movement + utility):
 | W | turn left | R | turn right |
 | Q | target (tab) | A | interact |
 | T | autorun | Z | mount (level 40) |
-| G, B | Frost Armor, Arcane Intellect (until world mode) | | |
+| G | confirm (accept/complete quest, popup, loot all) | B | free |
+| 1–9 | pick dialog option N (gossip, quests, rewards, loot) | | |
 | X, C, V | extra abilities (Frost: Nova, Cone, Blink) | Space | jump |
 | Esc | passthrough (close / clear target / menu) | | |
 
@@ -116,8 +117,8 @@ keeps focus and movement keys type into it. Banner chords are sent with
 `macro` so they never land in an open chat box or add modifiers to Enter.
 
 Known desync: text boxes that open without Enter (mail, AH search, DELETE
-confirm). Esc closes them; UI mode will get a passthrough key for typing
-into them.
+confirm). Esc closes them; in UI mode `'` switches to chat (passthrough)
+without sending Enter, so you can type into them.
 
 Why kanata owns the layers: WoW's combat lockdown blocks addons from
 changing keybindings mid-fight, so an addon can't swap bindings per mode.
@@ -147,29 +148,45 @@ The WowKeys addon (one addon, not a separate ModeBanner):
 
 Non-combat modes get `mods` (e.g. `["ctrl", "alt"]`): kanata emits
 modifier+key and the addon binds that chord, so modes never collide.
-Keys a mode leaves unmapped fall through to combat, which keeps movement
-identical everywhere. The generator rejects two keys fighting over one WoW
-chord.
+Keys a mode leaves unmapped behave as in home (combat): the generator
+copies home's cell, so movement and mode keys work everywhere. Passthrough
+modes (chat) send unmapped keys as typed. The generator rejects two keys
+fighting over one WoW chord, and one macro name with two bodies.
+
+Action kinds in `layout.toml`: WoW binding command; spell or macro on a bar
+button; spell or macro bound directly (`SPELL x` / `MACRO x`, no bar slot,
+used outside combat mode); mode switch; `wowkeys:<command>` (addon
+commands: `confirm`, `vendor`, `choose1`..`choose9`). One-shot modes
+(`oneshot = ms`) use kanata `one-shot` over `layer-while-held` and have no
+banner.
+
+`Commands.lua` implements the addon commands. It reads which dialog is open
+from Blizzard's frames (GossipFrame, QuestFrame*Panel, LootFrame,
+StaticPopup1, MerchantFrame) at keypress time rather than tracking events,
+and prints numbered options when a gossip, quest greeting, reward choice or
+loot window opens.
 
 `lua5.1 addon/tests/dryrun.lua` runs the addon against stubbed WoW APIs
 (the level-5 scenario from test 1). Run it after changing `WowKeys.lua`.
 
-## Other modes (draft)
+## Other modes
 
-- **Leader (one-shot, Right Alt):** tap, then one key from a second right-hand
-  set, then auto-return to combat. Used for potions, racials, battle rez and
-  long cooldowns. Short timeout so a stray tap doesn't linger.
-- **UI (Tab):** J/K/H/L translate to the UI addon's navigation chords (likely
-  KeyboardUI's Ctrl+arrows), number row picks dialogue options, letters open
-  bags/character/spellbook/map. Movement still works.
-- **World (Shift):** hearthstone, toys, camera zoom and saved
-  views, professions.
+- **Leader (Right Alt, one-shot 1000 ms, emits Ctrl+key):** one key, then
+  straight back. J health potion, K mana potion (macros; update item names
+  as you find better potions). Later: racial, long cooldowns.
+- **UI (Tab, Ctrl+Alt+key):** U bags, I character, O spellbook, P talents,
+  L quest log, M map, K vendor (sell junk + repair), `'` type into a text
+  box. Esc closes windows. Navigating *inside* windows (bags, talents) still
+  needs a UI addon or our own commands.
+- **World (Left Shift, Ctrl+Alt+Shift+key):** J Frost Armor, K Arcane
+  Intellect, L Conjure Water, ; Conjure Food, U drink, I eat (macros; update
+  conjured item names per rank), H hearthstone, N/M camera zoom in/out.
 - **Chat (Enter):** full passthrough until Enter or Esc.
 
 ## Mode banner
 
-Each mode-entry key also emits Ctrl+Alt+Shift+<banner> (F9 combat, F12
-chat so far). WowKeys shows the mode label, like Vim's `-- INSERT --`.
+Each mode-entry key also emits Ctrl+Alt+Shift+<banner> (F9 combat, F10 UI,
+F11 world, F12 chat; leader has none). WowKeys shows the mode label, like Vim's `-- INSERT --`.
 
 ## Addons to evaluate
 
@@ -199,6 +216,7 @@ layout.toml               # the layout; edit this
 layoutgen/                # Rust: layout.toml -> the generated files below
 kanata/wow.kbd            # GENERATED
 addon/WowKeys/Layout.lua  # GENERATED
+addon/WowKeys/Commands.lua # dialog/loot/popup/vendor commands (wowkeys:*)
 addon/WowKeys/WowKeys.lua # applies Layout.lua, mode banner
 addon/tests/dryrun.lua    # offline test of the addon with stubbed WoW APIs
 wow/setup.md              # addon install, one-time game settings
@@ -209,9 +227,11 @@ wow/setup.md              # addon install, one-time game settings
 
 - Whether the owner accepts kanata mouse-movement keys as a last-resort UI
   fallback (keyboard input, but it drives a pointer).
-- Leader timeout value and whether a second leader is ever needed.
-- Exact key set for UI mode, which depends on which UI addon works in current
-  Forever.
+- Leader timeout (1000 ms for now) and whether a second leader is needed.
+- Racial for the leader layer (depends on race).
+- Navigating inside windows (bags, talents, spellbook): a verified UI addon,
+  or more of our own commands.
+- Group loot rolls (need/greed/pass) by key.
 
 ## Test 1 results (level 5, beta)
 
@@ -236,7 +256,7 @@ Not available: F13–F24 (keyboard can't send them).
 - [ ] Does the client know `AutoPushSpellToActionBar`? (It prints if not.)
 - [ ] Learning a spell (Fire Blast at 6) puts it on its key with no
       `/wowkeys bars`.
-- [ ] G casts Frost Armor, B casts Arcane Intellect (bar 2 must be shown).
+- [ ] Bar 2 is shown (it holds the , . / X C V Z buttons).
 - [ ] Punctuation keys `,` `.` `/` once their spells are learned
       (Polymorph first).
 - [ ] Loot rolls and full-bag loot windows still need keyboard navigation:
@@ -250,8 +270,26 @@ Later:
 - [ ] Assisted Highlight exists in Forever.
 - [ ] `/cast [@target,exists][@player] Blizzard` lands on the target.
 
+## To verify in game (test 3: modes and dialogs)
+
+Needs a kanata restart (new layers) and `/reload`.
+- [ ] Tab shows `-- UI --`, Left Shift `-- WORLD --`, Caps back to COMBAT.
+- [ ] Movement keys still work in UI and world mode.
+- [ ] UI: U bags, I character, O spellbook, P talents, L quest log, M map.
+- [ ] UI: K at a vendor sells junk and repairs.
+- [ ] World: J Frost Armor, K Arcane Intellect, H hearthstone, N/M zoom.
+- [ ] Leader: Right Alt then J uses a healing potion; a stray Right Alt
+      times out after 1 s; Right Alt then E just moves.
+- [ ] Talk to a quest NPC (A): options print numbered in chat; 1–9 picks.
+- [ ] G accepts a quest, completes it, takes the only reward; with several
+      rewards it asks for a number.
+- [ ] G accepts a group invite / resurrection popup.
+- [ ] Mixed-up bindings after the change? (Old keys from test 2 on G/B.)
+- [ ] Ctrl+Alt / Ctrl+Alt+Shift chords don't trigger anything in Windows
+      (language switch, overlays).
+
 ## Next steps
 
-1. Test 2: `/reload` with the new build, check the list above.
-2. Add UI, world and leader modes to `layout.toml` (using `mods`).
-3. Maybe: in-game settings as CVars in `layout.toml`, applied by WowKeys.
+1. Tests 2 and 3 in game.
+2. Loot rolls, bag navigation, talents: pick a UI addon or extend Commands.
+3. Racial and long cooldowns on the leader layer.

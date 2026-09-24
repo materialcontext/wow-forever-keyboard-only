@@ -4,4 +4,5 @@
 ## SavedVariablesPerCharacter: WowKeysDB
 
 Layout.lua
+Commands.lua
 WowKeys.lua

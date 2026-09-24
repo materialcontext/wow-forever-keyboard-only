@@ -38,6 +38,18 @@ for _, mode in ipairs(L.modes) do
   end)
 end
 
+-- Addon commands --------------------------------------------------------
+
+-- One hidden button per command in Commands.lua; bindings "click" it.
+local function commandButtonName(name)
+  return "WowKeysCmd_" .. name
+end
+
+for name, fn in pairs(WowKeysCommands) do
+  local button = CreateFrame("Button", commandButtonName(name), owner)
+  button:SetScript("OnClick", fn)
+end
+
 -- Settings ----------------------------------------------------------------
 
 local getCVar = C_CVar and C_CVar.GetCVar or GetCVar
@@ -53,15 +65,55 @@ local function applyCVars()
   end
 end
 
+-- Macros ------------------------------------------------------------------
+
+local function applyMacros()
+  for _, m in ipairs(L.macros) do
+    local name, body = m[1], m[2]
+    local index = GetMacroIndexByName(name)
+    if index == 0 then
+      local ok = pcall(CreateMacro, name, "INV_MISC_QUESTIONMARK", body, true)
+      if not ok then
+        print("WowKeys: couldn't create macro " .. name .. " (macro slots full?)")
+      end
+    else
+      EditMacro(index, name, nil, body)
+    end
+  end
+end
+
 -- Bindings ----------------------------------------------------------------
+
+-- Commands in Layout.lua: a WoW binding command, "SPELL <name>",
+-- "MACRO <name>", or "wowkeys:<command>".
+local function bind(key, command)
+  local addonCommand = command:match("^wowkeys:(.+)$")
+  local spell = command:match("^SPELL (.+)$")
+  local macro = command:match("^MACRO (.+)$")
+  if addonCommand then
+    SetBindingClick(key, commandButtonName(addonCommand))
+  elseif spell then
+    SetBindingSpell(key, spell)
+  elseif macro then
+    SetBindingMacro(key, macro)
+  else
+    SetBinding(key, command)
+  end
+end
+
+local function isPlainCommand(command)
+  return not (command:find("^wowkeys:") or command:find("^SPELL ") or command:find("^MACRO "))
+end
 
 local function applyBindings()
   -- Unbind other keys from the commands we own (e.g. `1` from
   -- ACTIONBUTTON1), so button labels show our key, not the old one.
   local ours = {}
   for _, b in ipairs(L.bindings) do
-    ours[b[2]] = ours[b[2]] or {}
-    ours[b[2]][b[1]] = true
+    if isPlainCommand(b[2]) then
+      ours[b[2]] = ours[b[2]] or {}
+      ours[b[2]][b[1]] = true
+    end
   end
   for command, keys in pairs(ours) do
     for _, key in ipairs({ GetBindingKey(command) }) do
@@ -72,10 +124,12 @@ local function applyBindings()
   end
 
   for _, b in ipairs(L.bindings) do
-    SetBinding(b[1], b[2])
+    bind(b[1], b[2])
   end
   for _, mode in ipairs(L.modes) do
-    SetBindingClick(mode.key, modeButtonName(mode))
+    if mode.key then -- one-shot modes have no banner
+      SetBindingClick(mode.key, modeButtonName(mode))
+    end
   end
   SaveBindings(GetCurrentBindingSet())
 end
@@ -89,12 +143,6 @@ local function pickup(b)
   if b.spell then
     pickupSpell(b.spell)
   else
-    local index = GetMacroIndexByName(b.macro)
-    if index == 0 then
-      CreateMacro(b.macro, "INV_MISC_QUESTIONMARK", b.body, true)
-    else
-      EditMacro(index, b.macro, nil, b.body)
-    end
     PickupMacro(b.macro)
   end
 end
@@ -136,14 +184,15 @@ end
 
 -- Wiring ------------------------------------------------------------------
 
--- Bindings, bars and settings can't change in combat; queue until it ends.
+-- Bindings, bars and settings can't change in combat; queue until it ends,
+-- in order (macros must exist before bindings use them).
 local pending = {}
 
 local function outOfCombat(fn)
-  if InCombatLockdown() then
-    pending[fn] = true
-  else
+  if not InCombatLockdown() then
     fn()
+  elseif not tContains(pending, fn) then
+    table.insert(pending, fn)
   end
 end
 
@@ -162,6 +211,7 @@ owner:SetScript("OnEvent", function(_, event, isInitialLogin, isReload)
     if isInitialLogin or isReload then
       WowKeysDB = WowKeysDB or {}
       outOfCombat(applyCVars)
+      outOfCombat(applyMacros) -- before bindings and bars that use them
       outOfCombat(applyBindings)
       if WowKeysDB.revision ~= L.revision then
         outOfCombat(applyBarsVerbose)
@@ -173,7 +223,7 @@ owner:SetScript("OnEvent", function(_, event, isInitialLogin, isReload)
       PlaySound(SOUNDKIT.RAID_WARNING)
     end
   elseif event == "PLAYER_REGEN_ENABLED" then
-    for fn in pairs(pending) do
+    for _, fn in ipairs(pending) do
       fn()
     end
     pending = {}

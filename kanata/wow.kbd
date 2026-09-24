@@ -9,35 +9,68 @@
 (defalias
   bn-chat A-C-S-f12
   bn-combat A-C-S-f9
+  bn-ui A-C-S-f10
+  bn-world A-C-S-f11
   chat-to-combat-esc (multi (layer-switch combat) (macro esc @bn-combat))
   chat-to-combat-ret (multi (layer-switch combat) (macro ret @bn-combat))
   combat-to-chat-ret (multi (layer-switch chat) (macro @bn-chat ret))
   combat-to-combat (multi (layer-switch combat) (macro @bn-combat))
+  combat-to-leader (one-shot 1000 (layer-while-held leader))
+  combat-to-ui (multi (layer-switch ui) (macro @bn-ui))
+  combat-to-world (multi (layer-switch world) (macro @bn-world))
+  ui-to-chat (multi (layer-switch chat) (macro @bn-chat))
 )
 
 (defsrc
   esc
   grv 1 2 3 4 5 6 7 8 9 0 - = bspc
-  tab q w e r t y u i o p [ ] \
-  caps                a s d f g h j k l ; ' ret
-  lsft z x c v b n m , . / rsft
-  lctl lmet lalt spc ralt rmet rctl
+  tab           q w e r t y u       i       o     p     [ ] \
+  caps                a s d f g h       j       k       l       ;       '           ret
+  lsft             z x c v b n       m       , . / rsft
+  lctl lmet lalt spc ralt              rmet rctl
 )
 
 (deflayer combat
   _
   _   _ _ _ _ _ _ _ _ _ _ _ _ _
+  @combat-to-ui _ _ _ _ _ _ _       _       _     _     _ _ _
+  @combat-to-combat   _ _ _ _ _ _       _       _       _       _       _           @combat-to-chat-ret
+  @combat-to-world _ _ _ _ _ _       _       _ _ _ _
+  _    _    _    _   @combat-to-leader _    _
+)
+
+(deflayer ui
+  _
   _   _ _ _ _ _ _ _ _ _ _ _ _ _
-  @combat-to-combat   _ _ _ _ _ _ _ _ _ _ _ @combat-to-chat-ret
-  _    _ _ _ _ _ _ _ _ _ _ _
-  _    _    _    _   _    _    _
+  @combat-to-ui _ _ _ _ _ _ A-C-u   A-C-i   A-C-o A-C-p _ _ _
+  @combat-to-combat   _ _ _ _ _ _       _       A-C-k   A-C-l   _       @ui-to-chat @combat-to-chat-ret
+  @combat-to-world _ _ _ _ _ _       A-C-m   _ _ _ _
+  _    _    _    _   @combat-to-leader _    _
+)
+
+(deflayer world
+  _
+  _   _ _ _ _ _ _ _ _ _ _ _ _ _
+  @combat-to-ui _ _ _ _ _ _ A-C-S-u A-C-S-i _     _     _ _ _
+  @combat-to-combat   _ _ _ _ _ A-C-S-h A-C-S-j A-C-S-k A-C-S-l A-C-S-; _           @combat-to-chat-ret
+  @combat-to-world _ _ _ _ _ A-C-S-n A-C-S-m _ _ _ _
+  _    _    _    _   @combat-to-leader _    _
+)
+
+(deflayer leader
+  _
+  _   _ _ _ _ _ _ _ _ _ _ _ _ _
+  @combat-to-ui _ _ _ _ _ _ _       _       _     _     _ _ _
+  @combat-to-combat   _ _ _ _ _ _       C-j     C-k     _       _       _           @combat-to-chat-ret
+  @combat-to-world _ _ _ _ _ _       _       _ _ _ _
+  _    _    _    _   @combat-to-leader _    _
 )
 
 (deflayer chat
   @chat-to-combat-esc
   _   _ _ _ _ _ _ _ _ _ _ _ _ _
-  _   _ _ _ _ _ _ _ _ _ _ _ _ _
-  @chat-to-combat-esc _ _ _ _ _ _ _ _ _ _ _ @chat-to-combat-ret
-  _    _ _ _ _ _ _ _ _ _ _ _
-  _    _    _    _   _    _    _
+  _             _ _ _ _ _ _ _       _       _     _     _ _ _
+  @chat-to-combat-esc _ _ _ _ _ _       _       _       _       _       _           @chat-to-combat-ret
+  _                _ _ _ _ _ _       _       _ _ _ _
+  _    _    _    _   _                 _    _
 )
