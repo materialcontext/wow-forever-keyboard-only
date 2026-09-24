@@ -7,10 +7,12 @@ one-time parts.
 ## Install the addon (once)
 
 Link the repo's addon folder into WoW so every regenerate is picked up by a
-`/reload`, with no copying. In an admin-free Command Prompt:
+`/reload`, with no copying. In PowerShell (no admin needed for a junction):
 
-```
-mklink /J "C:\Program Files (x86)\World of Warcraft\_retail_\Interface\AddOns\WowKeys" "<repo>\addon\WowKeys"
+```powershell
+New-Item -ItemType Junction `
+  -Path "C:\Program Files (x86)\World of Warcraft\_retail_\Interface\AddOns\WowKeys" `
+  -Target "C:\path\to\wow-forever-keyboard-only\addon\WowKeys"
 ```
 
 Adjust both paths. If the addon list says "out of date", run
