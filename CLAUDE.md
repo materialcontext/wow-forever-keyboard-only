@@ -36,7 +36,8 @@ What follows from that, as reported by early-beta sources (verify in game):
 - New to WoW. Explain game-specific assumptions when they matter.
 - Existing addons are fine, but the owner verifies each one before it goes
   in. Suggest, don't assume.
-- Plays **Frost Mage**. Doesn't need to learn the rotation by heart, but
+- Plays an **Orc Frost Mage**. Orc's only active racial is Blood Fury (a
+  damage cooldown); the rest are passive. Doesn't need to learn the rotation by heart, but
   wants to choose each cast rather than rely on the Single-Button Assistant.
   Plan: normal bars plus Blizzard's Assisted Highlight (glows the suggested
   button), if Forever has it.
@@ -173,7 +174,8 @@ loot window opens.
 
 - **Leader (Right Alt, one-shot 1000 ms, emits Ctrl+key):** one key, then
   straight back. J health potion, K mana potion (macros; update item names
-  as you find better potions). Later: racial, long cooldowns.
+  as you find better potions), L Blood Fury (Orc racial; on bar 2 button 8
+  so its cooldown shows). Later: long cooldowns.
 - **UI (Tab, Ctrl+Alt+key):** U bags, I character, O spellbook, P talents,
   L quest log, M map, K vendor (sell junk + repair), `'` type into a text
   box. Esc closes windows. Navigating *inside* windows (bags, talents) still
@@ -228,7 +230,6 @@ wow/setup.md              # addon install, one-time game settings
 - Whether the owner accepts kanata mouse-movement keys as a last-resort UI
   fallback (keyboard input, but it drives a pointer).
 - Leader timeout (1000 ms for now) and whether a second leader is needed.
-- Racial for the leader layer (depends on race).
 - Navigating inside windows (bags, talents, spellbook): a verified UI addon,
   or more of our own commands.
 - Group loot rolls (need/greed/pass) by key.
@@ -280,6 +281,8 @@ Needs a kanata restart (new layers) and `/reload`.
 - [ ] World: J Frost Armor, K Arcane Intellect, H hearthstone, N/M zoom.
 - [ ] Leader: Right Alt then J uses a healing potion; a stray Right Alt
       times out after 1 s; Right Alt then E just moves.
+- [ ] Leader: Right Alt then L casts Blood Fury (check the spell name and
+      whether Forever's version helps a caster).
 - [ ] Talk to a quest NPC (A): options print numbered in chat; 1–9 picks.
 - [ ] G accepts a quest, completes it, takes the only reward; with several
       rewards it asks for a number.
@@ -292,4 +295,4 @@ Needs a kanata restart (new layers) and `/reload`.
 
 1. Tests 2 and 3 in game.
 2. Loot rolls, bag navigation, talents: pick a UI addon or extend Commands.
-3. Racial and long cooldowns on the leader layer.
+3. Long cooldowns on the leader layer.

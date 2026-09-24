@@ -61,7 +61,7 @@
   _
   _   _ _ _ _ _ _ _ _ _ _ _ _ _
   @combat-to-ui _ _ _ _ _ _ _       _       _     _     _ _ _
-  @combat-to-combat   _ _ _ _ _ _       C-j     C-k     _       _       _           @combat-to-chat-ret
+  @combat-to-combat   _ _ _ _ _ _       C-j     C-k     C-l     _       _           @combat-to-chat-ret
   @combat-to-world _ _ _ _ _ _       _       _ _ _ _
   _    _    _    _   @combat-to-leader _    _
 )

@@ -167,6 +167,8 @@ mods = ["ctrl"]
 # Potion names change as you find better ones.
 j = { macro = "HealthPot", body = "#showtooltip\n/use Minor Healing Potion" }
 k = { macro = "ManaPot", body = "#showtooltip\n/use Minor Mana Potion" }
+# Orc racial. On a bar so you can see its cooldown; the leader key presses it.
+l = { bar = 2, button = 8, spell = "Blood Fury" }
 
 [[mode]]
 name = "chat"
