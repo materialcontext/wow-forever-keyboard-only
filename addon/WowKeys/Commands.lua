@@ -64,16 +64,40 @@ local function lootEntries()
   return list
 end
 
+-- Spell trainers: only what you can learn right now, in list order. The
+-- list shifts after each purchase, so it's printed again.
+local printEntries
+
+local function trainerEntries()
+  local list = {}
+  for i = 1, GetNumTrainerServices() do
+    local name, rank, category = GetTrainerServiceInfo(i)
+    if category == "available" then
+      local label = name .. ((rank and rank ~= "") and (" (" .. rank .. ")") or "")
+      table.insert(list, { label, function()
+        BuyTrainerService(i)
+        C_Timer.After(0.5, printEntries)
+      end })
+    end
+  end
+  return list
+end
+
 local function currentEntries()
   if shown("LootFrame") then return lootEntries() end
+  if shown("ClassTrainerFrame") then return trainerEntries() end
   if shown("QuestFrameRewardPanel") then return rewardEntries() end
   if shown("QuestFrameGreetingPanel") then return greetingEntries() end
   if shown("GossipFrame") then return gossipEntries() end
 end
 
-local function printEntries()
+function printEntries()
   local entries = currentEntries()
-  if not entries or #entries < 2 then return end
+  if not entries then return end
+  if #entries == 0 and shown("ClassTrainerFrame") then
+    say("nothing to learn here right now")
+    return
+  end
   for i, e in ipairs(entries) do
     print(("  |cffffd200%d|r  %s"):format(i, e[1]))
   end
@@ -82,7 +106,7 @@ end
 local function choose(n)
   local entries = currentEntries()
   if not entries then
-    say("no dialog open")
+    say("nothing to pick from (1-9 work in NPC dialogs, quests, trainers and loot)")
   elseif not entries[n] then
     say(("only %d option(s)"):format(#entries))
   else
@@ -113,6 +137,10 @@ local function confirm()
     if n > 1 then say(("pick a reward with 1-%d"):format(n)) else GetQuestReward(n) end
   elseif shown("LootFrame") then
     for i = GetNumLootItems(), 1, -1 do LootSlot(i) end
+  elseif shown("ClassTrainerFrame") then
+    -- One spell per press; press again for the next.
+    local entries = trainerEntries()
+    if entries[1] then entries[1][2]() else say("nothing to learn here right now") end
   else
     local entries = currentEntries()
     if entries and #entries == 1 then
@@ -142,7 +170,7 @@ end
 -- Wiring -------------------------------------------------------------------
 
 local events = CreateFrame("Frame")
-for _, e in ipairs({ "GOSSIP_SHOW", "QUEST_GREETING", "QUEST_COMPLETE", "LOOT_OPENED" }) do
+for _, e in ipairs({ "GOSSIP_SHOW", "QUEST_GREETING", "QUEST_COMPLETE", "LOOT_OPENED", "TRAINER_SHOW" }) do
   events:RegisterEvent(e)
 end
 -- Let the frames show first, then list what the numbers pick.

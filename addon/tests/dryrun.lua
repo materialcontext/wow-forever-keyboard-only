@@ -66,7 +66,7 @@ SlashCmdList = {}
 -- Dialog frames and APIs used by Commands.lua.
 local open = {}
 local function frame(name) _G[name] = { IsShown = function() return open[name] end } end
-for _, n in ipairs({ "GossipFrame", "QuestFrameDetailPanel", "QuestFrameProgressPanel",
+for _, n in ipairs({ "ClassTrainerFrame", "GossipFrame", "QuestFrameDetailPanel", "QuestFrameProgressPanel",
   "QuestFrameRewardPanel", "QuestFrameGreetingPanel", "LootFrame", "MerchantFrame" }) do
   frame(n)
 end
@@ -96,6 +96,11 @@ LootSlot = record("LootSlot")
 C_MerchantFrame = { SellAllJunkItems = record("SellAllJunkItems") }
 function CanMerchantRepair() return true end
 RepairAllItems = record("RepairAllItems")
+local services = { { "Frost Nova", "", "available" }, { "Fireball", "Rank 2", "used" },
+  { "Frost Armor", "Rank 2", "available" }, { "Blizzard", "", "unavailable" } }
+function GetNumTrainerServices() return #services end
+function GetTrainerServiceInfo(i) return unpack(services[i]) end
+BuyTrainerService = record("BuyTrainerService")
 StaticPopup1 = { IsShown = function() return open.StaticPopup1 end,
   button1 = { Click = record("PopupAccept") } }
 local function called(name, arg)
@@ -183,6 +188,23 @@ open.StaticPopup1 = nil
 cmd("confirm")
 check(called("LootSlot", 1) and called("LootSlot", 2), "G loots everything")
 open.LootFrame = nil
+
+-- Trainer: numbers pick among spells you can learn now; G learns the first.
+open.ClassTrainerFrame = true
+printed = {}
+for _, fn in ipairs(timers) do fn() end
+timers = {}
+cmd("choose2")
+check(called("BuyTrainerService", 3), "2 learns the second available spell (list row 3)")
+check(#timers == 1, "list printed again after learning")
+timers[1](); timers = {}
+check(said("Frost Nova") and said("Frost Armor %(Rank 2%)") and not said("Fireball"), "only learnable spells listed")
+calls = {}
+cmd("confirm")
+check(called("BuyTrainerService", 1), "G learns the first available spell")
+open.ClassTrainerFrame = nil
+cmd("choose1")
+check(said("nothing to pick from"), "explains where numbers work")
 
 cmd("vendor")
 check(said("talk to a vendor first"), "vendor needs a vendor")

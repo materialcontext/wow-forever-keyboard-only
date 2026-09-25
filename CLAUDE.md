@@ -174,9 +174,9 @@ banner.
 
 `Commands.lua` implements the addon commands. It reads which dialog is open
 from Blizzard's frames (GossipFrame, QuestFrame*Panel, LootFrame,
-StaticPopup1, MerchantFrame) at keypress time rather than tracking events,
-and prints numbered options when a gossip, quest greeting, reward choice or
-loot window opens.
+ClassTrainerFrame, StaticPopup1, MerchantFrame) at keypress time rather
+than tracking events, and prints numbered options when a gossip, quest
+greeting, reward choice, trainer or loot window opens.
 
 `lua5.1 addon/tests/dryrun.lua` runs the addon against stubbed WoW APIs
 (the level-5 scenario from test 1). Run it after changing `WowKeys.lua`.
@@ -214,7 +214,7 @@ it goes in.
 
 | Addon | Job | Keyboard impact |
 |---|---|---|
-| Leatrix Plus | auto quest accept/turn-in, sell junk, repair, QoL | **Owns vendor chores** (decided); UI K vendor key removed. Quest automation overlaps G; still to decide. |
+| Leatrix Plus | auto quest accept/turn-in, sell junk, repair, QoL | **Owns quest accept/turn-in and vendor chores** (decided). UI K removed; G and 1–9 cover what it doesn't (gossip, rewards, popups, loot, trainers). |
 | Bagnon | combined bag window | UI U should open it (it takes over the bag toggle). Navigating inside it is still unsolved. |
 | Plater | enemy nameplates | Q/B cycling and leader / depend on nameplates. Plater manages nameplate CVars; if it fights our `nameplateShowEnemies`, drop ours from `[cvars]`. Midnight limits nameplate addons in combat. |
 | DBM | boss timers and warnings | Display only. Midnight limits boss mods hardest and the modern client has built-in boss warnings; check what the Forever build can still do. |
@@ -300,19 +300,38 @@ Changed after it:
 Confirmed after those changes (#4): Alt+Tab family passes through, the
 strafe/turn swap, nameplates hidden at login.
 
-## To verify in game (test 2)
+## Test 4 results
 
-- [ ] Hotkey labels show J, K, L… instead of 1, 2, 3….
-- [ ] Login prints what it took off the bars; no spell shows up twice.
-- [ ] `A` on a corpse loots everything.
-- [ ] Does the client know `AutoPushSpellToActionBar`? (It prints if not.)
-- [ ] Learning a spell (Fire Blast at 6) puts it on its key with no
-      `/wowkeys bars`.
+Works: Q reaches further and wider with `targetNearestDistance = 50` and
+`TargetNearestUseNew = 0` (keep both), B cycles back, hotkey labels show
+J/K/L, login clears duplicate spells, `AutoPushSpellToActionBar` exists (no
+warning), A loots corpses, `.` Blood Fury, leader F/T/C focus
+(`FOCUSTARGET` / `TARGETFOCUS` are right), leader J potion, leader timeout
+and fall-through, learned spells land on their key, UI U/I/O/P/L/M (Bagnon
+opens), world J/K/H/N/M, all addons load, Plater coexists with Q/B.
+
+Decided: **Leatrix Plus owns quest accept/turn-in and vendor chores.** G
+and 1–9 still handle what Leatrix doesn't: gossip options, reward choices,
+popups, loot, trainers.
+
+Found: numbers in a spell trainer window said "no dialog open". Fixed:
+1–9 learn the Nth spell you can learn now (list reprints after each), G
+learns the first one, one spell per press.
+
+## Still to verify
+
+- [ ] Trainer: 1–9 and G learn spells; the list reprints after each.
 - [ ] Bar 2 is shown (it holds the , . / X C V Z buttons).
-- [ ] Punctuation keys `,` `.` `/` once their spells are learned
-      (Polymorph first).
-- [ ] Loot rolls and full-bag loot windows still need keyboard navigation:
-      note when they come up.
+- [ ] `,` Polymorphs the focus when set, the target otherwise (level 8).
+- [ ] Punctuation keys `,` `.` `/` once their spells are learned.
+- [ ] Talk to an NPC with gossip options (A): options print numbered in
+      chat; 1–9 picks.
+- [ ] G takes the only reward; with several rewards it asks for a number.
+- [ ] G accepts a group invite / resurrection popup.
+- [ ] Ctrl+Alt / Ctrl+Alt+Shift chords don't trigger anything in Windows.
+- [ ] `/wowkeys find auctionator` (and `dbm`, `atlas`, `bagnon`): paste
+      the output here.
+- [ ] Loot rolls and full-bag loot windows: note what you'd want to press.
 
 Later:
 - [ ] `A` interacts with objects too (assumed `INTERACTTARGET`).
@@ -322,44 +341,8 @@ Later:
 - [ ] Assisted Highlight exists in Forever.
 - [ ] `/cast [@target,exists][@player] Blizzard` lands on the target.
 
-## To verify in game (test 3: modes and dialogs)
-
-Needs a kanata restart (new layers) and `/reload`.
-- [ ] Tab shows `-- UI --`, Left Shift `-- WORLD --`, Caps back to COMBAT.
-- [ ] Movement keys still work in UI and world mode.
-- [ ] UI: U bags, I character, O spellbook, P talents, L quest log, M map.
-- [ ] World: J Frost Armor, K Arcane Intellect, H hearthstone, N/M zoom.
-- [ ] Leader: Right Alt then J uses a healing potion; a stray Right Alt
-      times out after 1 s; Right Alt then E just moves.
-- [ ] `.` casts Blood Fury; Right Alt then L casts Frost Ward (once learned).
-- [ ] Q picks up enemies in a wider arc and at longer range now; B cycles
-      back. If worse, try `/console TargetNearestUseNew 1` and report.
-- [x] Alt+Tab, Alt+Shift+Tab and Win+Tab switch windows; Tab alone still
-      enters UI mode.
-- [x] Nameplates start hidden; leader / shows them.
-- [x] W/R strafe, S/F turn after the swap.
-- [ ] Leader F sets focus (focus frame appears), T targets it, C clears it.
-- [ ] Leader / toggles enemy nameplates (assumed binding `NAMEPLATES`).
-- [ ] `,` Polymorphs the focus when set, the target otherwise (level 8).
-- [ ] Talk to a quest NPC (A): options print numbered in chat; 1–9 picks.
-- [ ] G accepts a quest, completes it, takes the only reward; with several
-      rewards it asks for a number.
-- [ ] G accepts a group invite / resurrection popup.
-- [ ] Mixed-up bindings after the change? (Old keys from test 2 on G/B.)
-- [ ] Ctrl+Alt / Ctrl+Alt+Shift chords don't trigger anything in Windows
-      (language switch, overlays).
-
-## To verify in game (addons)
-
-- [ ] Each pick has a Forever build and loads (no "out of date" or Lua errors).
-- [ ] Leatrix Plus: decide who owns quest accept/turn-in (vendor: Leatrix).
-- [ ] Bagnon opens with UI U.
-- [ ] Plater: Q/B still cycle; leader / still toggles; login CVar doesn't fight it.
-- [ ] `/wowkeys find auctionator` (and `dbm`, `atlas`, `bagnon`) lists
-      their binding commands; paste the output here.
-
 ## Next steps
 
-1. Tests 2 and 3 in game, with the addons installed.
+1. Finish "Still to verify" in game.
 2. Loot rolls, bag navigation, talents: pick a UI addon or extend Commands.
 3. Long cooldowns on the leader layer.
