@@ -322,8 +322,9 @@ learns the first one, one spell per press.
 
 - [ ] Trainer: 1–9 and G learn spells; the list reprints after each.
 - [ ] Bar 2 is shown (it holds the , . / X C V Z buttons).
-- [ ] `,` Polymorphs the focus when set, the target otherwise (level 8).
-- [ ] Punctuation keys `,` `.` `/` once their spells are learned.
+- [x] `,` Polymorphs the focus when set, the target otherwise (level 8).
+- [x] Punctuation keys `,` `.` `/` once their spells are learned (WoW's
+      names for them are the literal characters, as assumed).
 - [ ] Talk to an NPC with gossip options (A): options print numbered in
       chat; 1–9 picks.
 - [ ] G takes the only reward; with several rewards it asks for a number.
