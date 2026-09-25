@@ -7,6 +7,9 @@ use std::collections::{BTreeMap, HashMap};
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Layout {
+    /// Game settings the addon applies on login (name -> value).
+    #[serde(default)]
+    pub cvars: BTreeMap<String, String>,
     #[serde(rename = "mode")]
     pub modes: Vec<Mode>,
 }
@@ -16,8 +19,11 @@ pub struct Layout {
 pub struct Mode {
     pub name: String,
     pub label: String,
-    /// Sent as Ctrl+Alt+Shift+<banner> on entering the mode.
-    pub banner: String,
+    /// Sent as Ctrl+Alt+Shift+<banner> on entering the mode. One-shot
+    /// modes have none: they end after one key anyway.
+    pub banner: Option<String>,
+    /// One-shot mode: active for the next key only, or until this many ms.
+    pub oneshot: Option<u32>,
     /// Unmapped keys type text.
     #[serde(default)]
     pub passthrough: bool,
@@ -52,11 +58,13 @@ pub struct Switch {
     pub send: Option<String>,
 }
 
+/// A spell or macro, either placed on an action button (bar + button) or
+/// bound to the key directly. A bare bar + button is a slot you fill by hand.
 #[derive(Debug, Deserialize, Clone, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct Button {
-    pub bar: u8,
-    pub button: u8,
+    pub bar: Option<u8>,
+    pub button: Option<u8>,
     pub spell: Option<String>,
     #[serde(rename = "macro")]
     pub macro_name: Option<String>,
@@ -115,10 +123,28 @@ impl Chord {
     }
 }
 
+/// Commands the WowKeys addon implements itself, as `wowkeys:<name>`.
+pub const ADDON_COMMANDS: &[&str] = &[
+    "confirm", "vendor", "choose1", "choose2", "choose3", "choose4", "choose5", "choose6",
+    "choose7", "choose8", "choose9",
+];
+
 impl Button {
-    /// WoW binding command and action slot id for this bar/button.
-    pub fn target(&self) -> (String, u16) {
-        let (command, base) = match self.bar {
+    /// The WoW binding command for this key: the action button if placed,
+    /// otherwise the spell or macro itself.
+    pub fn command(&self) -> String {
+        match (self.slot(), &self.spell, &self.macro_name) {
+            (Some((command, _)), _, _) => command,
+            (None, Some(spell), _) => format!("SPELL {spell}"),
+            (None, _, Some(name)) => format!("MACRO {name}"),
+            _ => unreachable!("validated button"),
+        }
+    }
+
+    /// Binding command and action slot id, if placed on a bar.
+    pub fn slot(&self) -> Option<(String, u16)> {
+        let (bar, button) = (self.bar?, self.button?);
+        let (command, base) = match bar {
             1 => ("ACTIONBUTTON", 0),
             2 => ("MULTIACTIONBAR1BUTTON", 60),
             3 => ("MULTIACTIONBAR2BUTTON", 48),
@@ -129,10 +155,7 @@ impl Button {
             8 => ("MULTIACTIONBAR7BUTTON", 168),
             _ => unreachable!("validated bar"),
         };
-        (
-            format!("{command}{}", self.button),
-            base + u16::from(self.button),
-        )
+        Some((format!("{command}{button}"), base + u16::from(button)))
     }
 }
 
@@ -166,19 +189,34 @@ fn validate(layout: &Layout) -> Vec<String> {
         errors.push("layout needs at least one [[mode]]".into());
     }
 
-    let mut names = HashMap::new();
+    let mut names: HashMap<&str, &Mode> = HashMap::new();
     let mut banners = HashMap::new();
     for mode in &layout.modes {
-        if names.insert(mode.name.as_str(), ()).is_some() {
+        if names.insert(mode.name.as_str(), mode).is_some() {
             errors.push(format!("mode `{}` is defined twice", mode.name));
         }
-        if !keys::is_function_key(&mode.banner) {
+        match (&mode.banner, mode.oneshot) {
+            (None, None) => errors.push(format!("mode `{}` needs a banner", mode.name)),
+            (Some(_), Some(_)) => errors.push(format!(
+                "mode `{}`: one-shot modes have no banner",
+                mode.name
+            )),
+            _ => {}
+        }
+        if mode.oneshot.is_some() && mode.passthrough {
+            errors.push(format!(
+                "mode `{}`: one-shot can't be passthrough",
+                mode.name
+            ));
+        }
+        let Some(banner) = &mode.banner else { continue };
+        if !keys::is_function_key(banner) {
             errors.push(format!("mode `{}`: banner must be f1..f24", mode.name));
         }
-        if let Some(other) = banners.insert(mode.banner.as_str(), mode.name.as_str()) {
+        if let Some(other) = banners.insert(banner.as_str(), mode.name.as_str()) {
             errors.push(format!(
-                "modes `{other}` and `{}` share banner {}",
-                mode.name, mode.banner
+                "modes `{other}` and `{}` share banner {banner}",
+                mode.name
             ));
         }
     }
@@ -187,6 +225,8 @@ fn validate(layout: &Layout) -> Vec<String> {
     let mut wow_bindings: HashMap<String, (String, String)> = HashMap::new();
     // Action slot -> button, to catch two different things placed in one slot.
     let mut slots: HashMap<u16, (&Button, String)> = HashMap::new();
+    // Macro name -> body, since WoW macros are looked up by name.
+    let mut macros: HashMap<&str, (Option<&str>, String)> = HashMap::new();
 
     for mode in &layout.modes {
         for (key, action) in &mode.keys {
@@ -197,8 +237,12 @@ fn validate(layout: &Layout) -> Vec<String> {
             }
             let command = match action {
                 Action::Switch(s) => {
-                    if !names.contains_key(s.mode.as_str()) {
-                        errors.push(format!("{at}: no mode named `{}`", s.mode));
+                    match names.get(s.mode.as_str()) {
+                        None => errors.push(format!("{at}: no mode named `{}`", s.mode)),
+                        Some(target) if target.oneshot.is_some() && s.send.is_some() => {
+                            errors.push(format!("{at}: can't send a key into a one-shot mode"))
+                        }
+                        _ => {}
                     }
                     if let Some(send) = &s.send
                         && !keys::is_key(send)
@@ -207,25 +251,45 @@ fn validate(layout: &Layout) -> Vec<String> {
                     }
                     continue;
                 }
-                Action::Command(c) => c.clone(),
+                Action::Command(c) => {
+                    if let Some(name) = c.strip_prefix("wowkeys:")
+                        && !ADDON_COMMANDS.contains(&name)
+                    {
+                        errors.push(format!(
+                            "{at}: unknown addon command `{name}` (have: {})",
+                            ADDON_COMMANDS.join(", ")
+                        ));
+                    }
+                    c.clone()
+                }
                 Action::Button(b) => {
                     if let Err(e) = check_button(b) {
                         errors.push(format!("{at}: {e}"));
                         continue;
                     }
-                    let (command, slot) = b.target();
-                    if b.spell.is_some() || b.macro_name.is_some() {
+                    if let Some(name) = &b.macro_name {
+                        match macros.get(name.as_str()) {
+                            Some((body, other_at)) if *body != b.body.as_deref() => errors.push(
+                                format!("{at}: macro `{name}` has a different body at {other_at}"),
+                            ),
+                            _ => {
+                                macros.insert(name, (b.body.as_deref(), at.clone()));
+                            }
+                        }
+                    }
+                    if let Some((_, slot)) = b.slot()
+                        && (b.spell.is_some() || b.macro_name.is_some())
+                    {
                         match slots.get(&slot) {
                             Some((other, other_at)) if *other != b => errors.push(format!(
-                                "{at}: bar {} button {} already holds something else at {other_at}",
-                                b.bar, b.button
+                                "{at}: that bar button already holds something else at {other_at}"
                             )),
                             _ => {
                                 slots.insert(slot, (b, at.clone()));
                             }
                         }
                     }
-                    command
+                    b.command()
                 }
             };
             if mode.passthrough {
@@ -251,11 +315,18 @@ fn validate(layout: &Layout) -> Vec<String> {
 }
 
 fn check_button(b: &Button) -> Result<(), String> {
-    if !(1..=8).contains(&b.bar) {
-        return Err(format!("bar must be 1..8, got {}", b.bar));
-    }
-    if !(1..=12).contains(&b.button) {
-        return Err(format!("button must be 1..12, got {}", b.button));
+    match (b.bar, b.button) {
+        (Some(bar), _) if !(1..=8).contains(&bar) => {
+            return Err(format!("bar must be 1..8, got {bar}"));
+        }
+        (_, Some(button)) if !(1..=12).contains(&button) => {
+            return Err(format!("button must be 1..12, got {button}"));
+        }
+        (Some(_), None) | (None, Some(_)) => return Err("give both bar and button".into()),
+        (None, None) if b.spell.is_none() && b.macro_name.is_none() => {
+            return Err("needs a spell, a macro, or a bar + button".into());
+        }
+        _ => {}
     }
     match (&b.spell, &b.macro_name, &b.body) {
         (Some(_), Some(_), _) => Err("pick spell or macro, not both".into()),
@@ -293,14 +364,27 @@ mod tests {
     #[test]
     fn slot_ids() {
         let b = |bar, button| Button {
-            bar,
-            button,
+            bar: Some(bar),
+            button: Some(button),
             spell: None,
             macro_name: None,
             body: None,
         };
-        assert_eq!(b(1, 1).target(), ("ACTIONBUTTON1".into(), 1));
-        assert_eq!(b(2, 3).target(), ("MULTIACTIONBAR1BUTTON3".into(), 63));
+        assert_eq!(b(1, 1).slot(), Some(("ACTIONBUTTON1".into(), 1)));
+        assert_eq!(b(2, 3).slot(), Some(("MULTIACTIONBAR1BUTTON3".into(), 63)));
+        assert_eq!(b(2, 3).command(), "MULTIACTIONBAR1BUTTON3");
+    }
+
+    #[test]
+    fn unplaced_buttons_bind_directly() {
+        let b = Button {
+            bar: None,
+            button: None,
+            spell: Some("Frost Armor".into()),
+            macro_name: None,
+            body: None,
+        };
+        assert_eq!(b.command(), "SPELL Frost Armor");
     }
 
     #[test]
@@ -336,8 +420,46 @@ mod tests {
             caps = { mode = "nope" }
             nokey = "JUMP"
             j = { bar = 9, button = 1 }
+            k = { bar = 1 }
+            l = "wowkeys:dance"
             "#,
         );
-        assert_eq!(e.len(), 3, "{e:?}");
+        assert_eq!(e.len(), 5, "{e:?}");
+    }
+
+    #[test]
+    fn oneshot_modes() {
+        let e = errors(
+            r#"
+            [[mode]]
+            name = "a"
+            label = "A"
+            banner = "f9"
+            [mode.keys]
+            ralt = { mode = "leader", send = "ret" }
+            [[mode]]
+            name = "leader"
+            label = "LEADER"
+            banner = "f10"
+            oneshot = 1000
+            "#,
+        );
+        assert_eq!(e.len(), 2, "{e:?}");
+    }
+
+    #[test]
+    fn macro_names_are_unique() {
+        let e = errors(
+            r#"
+            [[mode]]
+            name = "a"
+            label = "A"
+            banner = "f9"
+            [mode.keys]
+            j = { macro = "M", body = "/sit" }
+            k = { macro = "M", body = "/dance" }
+            "#,
+        );
+        assert!(e[0].contains("different body"), "{e:?}");
     }
 }

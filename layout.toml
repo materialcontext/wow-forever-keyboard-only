@@ -17,6 +17,11 @@
 #   { bar = 1, button = 8, macro = "Name", body = "..." }
 #                                              same, with a macro it creates
 #   { bar = 2, button = 7 }                    action button you fill by hand
+#   { spell = "Frost Armor" }                  bound straight to the key, no
+#   { macro = "Name", body = "..." }           bar slot (fine outside combat;
+#                                              bars show cooldowns and glows)
+#   "wowkeys:confirm"                          a WowKeys addon command:
+#                                              confirm, vendor, choose1..9
 #   { mode = "chat", send = "ret" }            switch mode, optionally sending
 #                                              a key (Enter opens chat)
 #
@@ -28,9 +33,20 @@
 #   passthrough  keys you don't map type text (chat)
 #   mods         modifiers kanata adds to this mode's bound keys, so they
 #                don't collide with combat, e.g. ["ctrl", "alt"]
+#   oneshot      ms; the mode lasts for one key, then drops back (leader).
+#                No banner.
 #
 # The first mode is home: kanata starts there, and the banner warns if
-# combat starts anywhere else.
+# combat starts anywhere else. Keys another mode doesn't map act as they do
+# in home (movement, mode keys), except in passthrough modes, where they
+# type.
+
+# Game settings, applied by the addon on every login.
+[cvars]
+autoLootDefault = "1"            # loot corpses on interact, no loot window
+AutoPushSpellToActionBar = "0"   # don't drop new spells on the bars; the
+                                 # addon places them on their keys instead
+nameplateShowEnemies = "1"       # Q/B cycle through enemies with nameplates
 
 [[mode]]
 name = "combat"
@@ -41,6 +57,24 @@ banner = "f9"
 # Mode keys
 caps = { mode = "combat" }
 ret = { mode = "chat", send = "ret" }
+tab = { mode = "ui" }
+lsft = { mode = "world" }
+ralt = { mode = "leader" }
+
+# NPC dialogs, loot and popups, handled by the addon. Talk to an NPC with
+# A, then pick an option by number (the addon prints them numbered) and
+# accept / complete / turn in with G. G also accepts popups (group invites,
+# resurrection) and loots everything from an open loot window.
+"1" = "wowkeys:choose1"
+"2" = "wowkeys:choose2"
+"3" = "wowkeys:choose3"
+"4" = "wowkeys:choose4"
+"5" = "wowkeys:choose5"
+"6" = "wowkeys:choose6"
+"7" = "wowkeys:choose7"
+"8" = "wowkeys:choose8"
+"9" = "wowkeys:choose9"
+g = "wowkeys:confirm"
 
 # Movement (left hand)
 e = "MOVEFORWARD"
@@ -51,7 +85,8 @@ w = "TURNLEFT"
 r = "TURNRIGHT"
 spc = "JUMP"
 t = "TOGGLEAUTORUN"
-q = "TARGETNEARESTENEMY"
+q = "TARGETNEARESTENEMY"     # press again to cycle to the next enemy
+b = "TARGETPREVIOUSENEMY"    # cycle back
 a = "INTERACTTARGET"
 
 # Frost Mage, WoW: Forever. Beta caps at 30; spells or talents you don't
@@ -71,8 +106,10 @@ h = { bar = 1, button = 9, spell = "Counterspell" }
 y = { bar = 1, button = 10, spell = "Mana Shield" }
 n = { bar = 1, button = 11, spell = "Ice Block" }
 m = { bar = 1, button = 12, spell = "Evocation" }
-"," = { bar = 2, button = 1, spell = "Polymorph" }
-"." = { bar = 2, button = 2, spell = "Frost Ward" }
+# Polymorph your focus if you have one, else your target: set a focus on
+# the add, keep killing your target, sheep the add without switching.
+"," = { bar = 2, button = 1, macro = "Poly", body = "#showtooltip Polymorph\n/cast [@focus,harm,nodead][] Polymorph" }
+"." = { bar = 2, button = 2, spell = "Blood Fury" }   # Orc racial, every fight
 "/" = { bar = 2, button = 3, spell = "Remove Lesser Curse" }
 
 # Extras (left hand)
@@ -82,7 +119,64 @@ v = { bar = 2, button = 6, spell = "Blink" }
 # Mount: random favorite from the mount journal. Does nothing until you
 # have one (level 40).
 z = { bar = 2, button = 7, macro = "Mount", body = "/run C_MountJournal.SummonByID(0)" }
-# g, b: free.
+
+# Windows and vendors. Tab, then a key; Caps to leave. Esc closes windows.
+[[mode]]
+name = "ui"
+label = "UI"
+banner = "f10"
+mods = ["ctrl", "alt"]
+
+[mode.keys]
+u = "OPENALLBAGS"
+i = "TOGGLECHARACTER0"
+o = "TOGGLESPELLBOOK"
+p = "TOGGLETALENTS"
+l = "TOGGLEQUESTLOG"
+m = "TOGGLEWORLDMAP"
+k = "wowkeys:vendor"      # at a vendor: sell junk, repair
+# Type into a text box that opened by itself (mail, search): Enter or Esc
+# ends it, like chat.
+"'" = { mode = "chat" }
+
+# Out-of-combat chores. Left Shift, then a key; Caps to leave.
+[[mode]]
+name = "world"
+label = "WORLD"
+banner = "f11"
+mods = ["alt", "ctrl", "shift"]
+
+[mode.keys]
+j = { spell = "Frost Armor" }       # Ice Armor replaces it at 30
+k = { spell = "Arcane Intellect" }
+l = { spell = "Conjure Water" }
+";" = { spell = "Conjure Food" }
+# Conjured item names change with each rank; update when you learn one.
+u = { macro = "Drink", body = "#showtooltip\n/use Conjured Water" }
+i = { macro = "Eat", body = "#showtooltip\n/use Conjured Muffin" }
+h = { macro = "Hearth", body = "#showtooltip\n/use Hearthstone" }
+n = "CAMERAZOOMIN"
+m = "CAMERAZOOMOUT"
+
+# Leader: Right Alt, then one key, then straight back. For things you need
+# in a fight but rarely.
+[[mode]]
+name = "leader"
+label = "LEADER"
+oneshot = 1000
+mods = ["ctrl"]
+
+[mode.keys]
+# Potion names change as you find better ones.
+j = { macro = "HealthPot", body = "#showtooltip\n/use Minor Healing Potion" }
+k = { macro = "ManaPot", body = "#showtooltip\n/use Minor Mana Potion" }
+# Situational: only against frost damage. On a bar so its cooldown shows.
+l = { bar = 2, button = 8, spell = "Frost Ward" }
+# Focus: a second remembered target, for CC or watching an add.
+f = "FOCUSTARGET"                               # current target becomes focus
+t = "TARGETFOCUS"                               # target your focus
+c = { macro = "ClearFocus", body = "/clearfocus" }
+"/" = "NAMEPLATES" # toggle enemy nameplates; back on at login
 
 [[mode]]
 name = "chat"
