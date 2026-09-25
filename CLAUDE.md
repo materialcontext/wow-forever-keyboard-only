@@ -297,6 +297,9 @@ Changed after it:
   nameplates off the newer targeting may be pickier still.
 - Leatrix Plus owns vendor chores; UI K removed.
 
+Confirmed after those changes (#4): Alt+Tab family passes through, the
+strafe/turn swap, nameplates hidden at login.
+
 ## To verify in game (test 2)
 
 - [ ] Hotkey labels show J, K, L… instead of 1, 2, 3….
@@ -331,9 +334,10 @@ Needs a kanata restart (new layers) and `/reload`.
 - [ ] `.` casts Blood Fury; Right Alt then L casts Frost Ward (once learned).
 - [ ] Q picks up enemies in a wider arc and at longer range now; B cycles
       back. If worse, try `/console TargetNearestUseNew 1` and report.
-- [ ] Alt+Tab, Alt+Shift+Tab and Win+Tab switch windows; Tab alone still
+- [x] Alt+Tab, Alt+Shift+Tab and Win+Tab switch windows; Tab alone still
       enters UI mode.
-- [ ] Nameplates start hidden; leader / shows them.
+- [x] Nameplates start hidden; leader / shows them.
+- [x] W/R strafe, S/F turn after the swap.
 - [ ] Leader F sets focus (focus frame appears), T targets it, C clears it.
 - [ ] Leader / toggles enemy nameplates (assumed binding `NAMEPLATES`).
 - [ ] `,` Polymorphs the focus when set, the target otherwise (level 8).
