@@ -7,6 +7,10 @@ use std::collections::{BTreeMap, HashMap};
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct Layout {
+    /// While any of these physical keys is held, every key sends its plain
+    /// self, so OS shortcuts (Alt+Tab, Win+Tab, Ctrl+Shift+Esc) still work.
+    #[serde(default)]
+    pub os_hold: Vec<String>,
     /// Game settings the addon applies on login (name -> value).
     #[serde(default)]
     pub cvars: BTreeMap<String, String>,
@@ -187,6 +191,11 @@ fn validate(layout: &Layout) -> Vec<String> {
     let mut errors = Vec::new();
     if layout.modes.is_empty() {
         errors.push("layout needs at least one [[mode]]".into());
+    }
+    for key in &layout.os_hold {
+        if !keys::is_key(key) {
+            errors.push(format!("os_hold: unknown key `{key}`"));
+        }
     }
 
     let mut names: HashMap<&str, &Mode> = HashMap::new();

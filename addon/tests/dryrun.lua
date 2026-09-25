@@ -125,7 +125,7 @@ check(bindings["ALT-CTRL-SHIFT-J"] == "SPELL Frost Armor", "world J casts Frost 
 check(bindings["CTRL-J"] == "MACRO HealthPot", "leader J drinks a potion")
 check(bindings["ALT-CTRL-U"] == "OPENALLBAGS", "UI U opens bags")
 check(macros.HealthPot and macros.Hearth and macros.Blizzard, "macros created")
-check(bindings.E == "MOVEFORWARD" and bindings.W == "TURNLEFT", "movement")
+check(bindings.E == "MOVEFORWARD" and bindings.W == "STRAFELEFT" and bindings.S == "TURNLEFT", "movement")
 check(bindings.UP == nil, "old UP unbound from MOVEFORWARD")
 check(bindings["ALT-CTRL-SHIFT-F12"] == "CLICK WowKeysMode_chat", "banner chord")
 check(cvars.autoLootDefault == "1", "auto loot on")
