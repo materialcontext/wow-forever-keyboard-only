@@ -64,6 +64,11 @@ kanata variant on Windows:
   winIOv2 misbehaves. Known issue: it can disable keyboard/mouse until reboot
   after sleep or heavy USB plug/unplug.
 - One machine. kanata is installed and running there.
+- **OS shortcuts pass through:** while Left Alt, Left Ctrl or Win is held
+  (`os_hold` in `layout.toml`), every remapped key sends its plain self, so
+  Alt+Tab, Alt+Shift+Tab, Win+Tab and Ctrl+Shift+Esc work (test 3: Tab as
+  the UI-mode key broke Alt+Tab). The generator wraps each remapped cell
+  in a kanata `fork` alias (`os-<key>-...`).
 - Replaces the owner's iCUE macros. Disable the iCUE remaps on the home
   keyboard so the two don't stack.
 
@@ -88,8 +93,8 @@ Left hand (movement + utility):
 | Key | Action | Key | Action |
 |---|---|---|---|
 | E | forward | D | back |
-| S | strafe left | F | strafe right |
-| W | turn left | R | turn right |
+| S | turn left | F | turn right |
+| W | strafe left | R | strafe right |
 | Q | next enemy (repeat to cycle) | B | previous enemy |
 | A | interact | Esc | also clears the target |
 | T | autorun | Z | mount (level 40) |
@@ -144,7 +149,7 @@ The WowKeys addon (one addon, not a separate ModeBanner):
   ACTIONBUTTON1). Real bindings, not override bindings: with overrides the
   button hotkey labels kept showing the old keys (test 1);
 - applies `[cvars]` from the layout on login (auto loot, no auto-push of
-  new spells onto bars);
+  new spells onto bars, enemy nameplates off, tab-target range/behavior);
 - places spells and creates macros on bars when the layout's buttons change
   (revision hash), when you learn a spell, or on `/wowkeys bars`. Managed
   slots whose spell isn't learned yet are cleared of other spells (WoW's
@@ -186,8 +191,8 @@ loot window opens.
   `,` is a Polymorph macro that sheeps the focus if you have one, else the
   target.
 - **UI (Tab, Ctrl+Alt+key):** U bags, I character, O spellbook, P talents,
-  L quest log, M map, K vendor (sell junk + repair), `'` type into a text
-  box. Esc closes windows. Navigating *inside* windows (bags, talents) still
+  L quest log, M map, `'` type into a text box. Vendor chores belong to
+  Leatrix Plus (the `wowkeys:vendor` command still exists if ever needed). Esc closes windows. Navigating *inside* windows (bags, talents) still
   needs a UI addon or our own commands.
 - **World (Left Shift, Ctrl+Alt+Shift+key):** J Frost Armor, K Arcane
   Intellect, L Conjure Water, ; Conjure Food, U drink, I eat (macros; update
@@ -209,7 +214,7 @@ it goes in.
 
 | Addon | Job | Keyboard impact |
 |---|---|---|
-| Leatrix Plus | auto quest accept/turn-in, sell junk, repair, QoL | Overlaps G (confirm) and UI K (vendor). Leatrix automates; ours stay as the manual fallback. Pick one owner per job so they don't both fire. |
+| Leatrix Plus | auto quest accept/turn-in, sell junk, repair, QoL | **Owns vendor chores** (decided); UI K vendor key removed. Quest automation overlaps G; still to decide. |
 | Bagnon | combined bag window | UI U should open it (it takes over the bag toggle). Navigating inside it is still unsolved. |
 | Plater | enemy nameplates | Q/B cycling and leader / depend on nameplates. Plater manages nameplate CVars; if it fights our `nameplateShowEnemies`, drop ours from `[cvars]`. Midnight limits nameplate addons in combat. |
 | DBM | boss timers and warnings | Display only. Midnight limits boss mods hardest and the modern client has built-in boss warnings; check what the Forever build can still do. |
@@ -277,6 +282,21 @@ Found and fixed in test 2's build:
 
 Not available: F13–F24 (keyboard can't send them).
 
+## Test 3 partial results
+
+Works: all mode keys, movement in every mode, Q cycles enemies, leader /
+toggles nameplates.
+
+Changed after it:
+- Strafe and turn swapped (W/R strafe, S/F turn): the owner found turning
+  on the home row more intuitive.
+- Alt+Tab broke (Tab is the UI key) -> `os_hold` passthrough.
+- Enemy nameplates off by default (`nameplateShowEnemies = 0`).
+- Q was very picky (narrow cone, short range) -> `targetNearestDistance =
+  50` and `TargetNearestUseNew = 0` (older targeting). Unverified; with
+  nameplates off the newer targeting may be pickier still.
+- Leatrix Plus owns vendor chores; UI K removed.
+
 ## To verify in game (test 2)
 
 - [ ] Hotkey labels show J, K, L… instead of 1, 2, 3….
@@ -305,12 +325,15 @@ Needs a kanata restart (new layers) and `/reload`.
 - [ ] Tab shows `-- UI --`, Left Shift `-- WORLD --`, Caps back to COMBAT.
 - [ ] Movement keys still work in UI and world mode.
 - [ ] UI: U bags, I character, O spellbook, P talents, L quest log, M map.
-- [ ] UI: K at a vendor sells junk and repairs.
 - [ ] World: J Frost Armor, K Arcane Intellect, H hearthstone, N/M zoom.
 - [ ] Leader: Right Alt then J uses a healing potion; a stray Right Alt
       times out after 1 s; Right Alt then E just moves.
 - [ ] `.` casts Blood Fury; Right Alt then L casts Frost Ward (once learned).
-- [ ] Q cycles forward through enemies, B cycles back; enemy nameplates on.
+- [ ] Q picks up enemies in a wider arc and at longer range now; B cycles
+      back. If worse, try `/console TargetNearestUseNew 1` and report.
+- [ ] Alt+Tab, Alt+Shift+Tab and Win+Tab switch windows; Tab alone still
+      enters UI mode.
+- [ ] Nameplates start hidden; leader / shows them.
 - [ ] Leader F sets focus (focus frame appears), T targets it, C clears it.
 - [ ] Leader / toggles enemy nameplates (assumed binding `NAMEPLATES`).
 - [ ] `,` Polymorphs the focus when set, the target otherwise (level 8).
@@ -325,7 +348,7 @@ Needs a kanata restart (new layers) and `/reload`.
 ## To verify in game (addons)
 
 - [ ] Each pick has a Forever build and loads (no "out of date" or Lua errors).
-- [ ] Leatrix Plus: decide who owns quest accept/turn-in and vendor chores.
+- [ ] Leatrix Plus: decide who owns quest accept/turn-in (vendor: Leatrix).
 - [ ] Bagnon opens with UI U.
 - [ ] Plater: Q/B still cycle; leader / still toggles; login CVar doesn't fight it.
 - [ ] `/wowkeys find auctionator` (and `dbm`, `atlas`, `bagnon`) lists

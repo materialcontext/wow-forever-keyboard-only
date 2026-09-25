@@ -19,58 +19,89 @@
   combat-to-ui (multi (layer-switch ui) (macro @bn-ui))
   combat-to-world (multi (layer-switch world) (macro @bn-world))
   ui-to-chat (multi (layer-switch chat) (macro @bn-chat))
+  os-A-C-S-h (fork A-C-S-h h (lalt lctl lmet))
+  os-A-C-S-i (fork A-C-S-i i (lalt lctl lmet))
+  os-A-C-S-j (fork A-C-S-j j (lalt lctl lmet))
+  os-A-C-S-k (fork A-C-S-k k (lalt lctl lmet))
+  os-A-C-S-l (fork A-C-S-l l (lalt lctl lmet))
+  os-A-C-S-m (fork A-C-S-m m (lalt lctl lmet))
+  os-A-C-S-n (fork A-C-S-n n (lalt lctl lmet))
+  os-A-C-S-scln (fork A-C-S-; ; (lalt lctl lmet))
+  os-A-C-S-u (fork A-C-S-u u (lalt lctl lmet))
+  os-A-C-i (fork A-C-i i (lalt lctl lmet))
+  os-A-C-l (fork A-C-l l (lalt lctl lmet))
+  os-A-C-m (fork A-C-m m (lalt lctl lmet))
+  os-A-C-o (fork A-C-o o (lalt lctl lmet))
+  os-A-C-p (fork A-C-p p (lalt lctl lmet))
+  os-A-C-u (fork A-C-u u (lalt lctl lmet))
+  os-C-c (fork C-c c (lalt lctl lmet))
+  os-C-f (fork C-f f (lalt lctl lmet))
+  os-C-j (fork C-j j (lalt lctl lmet))
+  os-C-k (fork C-k k (lalt lctl lmet))
+  os-C-l (fork C-l l (lalt lctl lmet))
+  os-C-slsh (fork C-/ / (lalt lctl lmet))
+  os-C-t (fork C-t t (lalt lctl lmet))
+  os-apos-ui-to-chat (fork @ui-to-chat ' (lalt lctl lmet))
+  os-caps-chat-to-combat-esc (fork @chat-to-combat-esc caps (lalt lctl lmet))
+  os-caps-combat-to-combat (fork @combat-to-combat caps (lalt lctl lmet))
+  os-esc-chat-to-combat-esc (fork @chat-to-combat-esc esc (lalt lctl lmet))
+  os-lsft-combat-to-world (fork @combat-to-world lsft (lalt lctl lmet))
+  os-ralt-combat-to-leader (fork @combat-to-leader ralt (lalt lctl lmet))
+  os-ret-chat-to-combat-ret (fork @chat-to-combat-ret ret (lalt lctl lmet))
+  os-ret-combat-to-chat-ret (fork @combat-to-chat-ret ret (lalt lctl lmet))
+  os-tab-combat-to-ui (fork @combat-to-ui tab (lalt lctl lmet))
 )
 
 (defsrc
   esc
   grv 1 2 3 4 5 6 7 8 9 0 - = bspc
-  tab           q w e r t   y u       i       o     p     [ ] \
-  caps                a s d f   g h       j       k       l       ;       '           ret
-  lsft             z x c   v b n       m       , . /   rsft
-  lctl lmet lalt spc ralt              rmet rctl
+  tab                  q w e r t       y u           i           o         p         [ ] \
+  caps                        a s d f       g h           j           k           l           ;              '                   ret
+  lsft                     z x c       v b n           m           , . /          rsft
+  lctl lmet lalt spc ralt                      rmet rctl
 )
 
 (deflayer combat
   _
   _   _ _ _ _ _ _ _ _ _ _ _ _ _
-  @combat-to-ui _ _ _ _ _   _ _       _       _     _     _ _ _
-  @combat-to-combat   _ _ _ _   _ _       _       _       _       _       _           @combat-to-chat-ret
-  @combat-to-world _ _ _   _ _ _       _       _ _ _   _
-  _    _    _    _   @combat-to-leader _    _
+  @os-tab-combat-to-ui _ _ _ _ _       _ _           _           _         _         _ _ _
+  @os-caps-combat-to-combat   _ _ _ _       _ _           _           _           _           _              _                   @os-ret-combat-to-chat-ret
+  @os-lsft-combat-to-world _ _ _       _ _ _           _           _ _ _          _
+  _    _    _    _   @os-ralt-combat-to-leader _    _
 )
 
 (deflayer ui
   _
   _   _ _ _ _ _ _ _ _ _ _ _ _ _
-  @combat-to-ui _ _ _ _ _   _ A-C-u   A-C-i   A-C-o A-C-p _ _ _
-  @combat-to-combat   _ _ _ _   _ _       _       A-C-k   A-C-l   _       @ui-to-chat @combat-to-chat-ret
-  @combat-to-world _ _ _   _ _ _       A-C-m   _ _ _   _
-  _    _    _    _   @combat-to-leader _    _
+  @os-tab-combat-to-ui _ _ _ _ _       _ @os-A-C-u   @os-A-C-i   @os-A-C-o @os-A-C-p _ _ _
+  @os-caps-combat-to-combat   _ _ _ _       _ _           _           _           @os-A-C-l   _              @os-apos-ui-to-chat @os-ret-combat-to-chat-ret
+  @os-lsft-combat-to-world _ _ _       _ _ _           @os-A-C-m   _ _ _          _
+  _    _    _    _   @os-ralt-combat-to-leader _    _
 )
 
 (deflayer world
   _
   _   _ _ _ _ _ _ _ _ _ _ _ _ _
-  @combat-to-ui _ _ _ _ _   _ A-C-S-u A-C-S-i _     _     _ _ _
-  @combat-to-combat   _ _ _ _   _ A-C-S-h A-C-S-j A-C-S-k A-C-S-l A-C-S-; _           @combat-to-chat-ret
-  @combat-to-world _ _ _   _ _ A-C-S-n A-C-S-m _ _ _   _
-  _    _    _    _   @combat-to-leader _    _
+  @os-tab-combat-to-ui _ _ _ _ _       _ @os-A-C-S-u @os-A-C-S-i _         _         _ _ _
+  @os-caps-combat-to-combat   _ _ _ _       _ @os-A-C-S-h @os-A-C-S-j @os-A-C-S-k @os-A-C-S-l @os-A-C-S-scln _                   @os-ret-combat-to-chat-ret
+  @os-lsft-combat-to-world _ _ _       _ _ @os-A-C-S-n @os-A-C-S-m _ _ _          _
+  _    _    _    _   @os-ralt-combat-to-leader _    _
 )
 
 (deflayer leader
   _
   _   _ _ _ _ _ _ _ _ _ _ _ _ _
-  @combat-to-ui _ _ _ _ C-t _ _       _       _     _     _ _ _
-  @combat-to-combat   _ _ _ C-f _ _       C-j     C-k     C-l     _       _           @combat-to-chat-ret
-  @combat-to-world _ _ C-c _ _ _       _       _ _ C-/ _
-  _    _    _    _   @combat-to-leader _    _
+  @os-tab-combat-to-ui _ _ _ _ @os-C-t _ _           _           _         _         _ _ _
+  @os-caps-combat-to-combat   _ _ _ @os-C-f _ _           @os-C-j     @os-C-k     @os-C-l     _              _                   @os-ret-combat-to-chat-ret
+  @os-lsft-combat-to-world _ _ @os-C-c _ _ _           _           _ _ @os-C-slsh _
+  _    _    _    _   @os-ralt-combat-to-leader _    _
 )
 
 (deflayer chat
-  @chat-to-combat-esc
+  @os-esc-chat-to-combat-esc
   _   _ _ _ _ _ _ _ _ _ _ _ _ _
-  _             _ _ _ _ _   _ _       _       _     _     _ _ _
-  @chat-to-combat-esc _ _ _ _   _ _       _       _       _       _       _           @chat-to-combat-ret
-  _                _ _ _   _ _ _       _       _ _ _   _
-  _    _    _    _   _                 _    _
+  _                    _ _ _ _ _       _ _           _           _         _         _ _ _
+  @os-caps-chat-to-combat-esc _ _ _ _       _ _           _           _           _           _              _                   @os-ret-chat-to-combat-ret
+  _                        _ _ _       _ _ _           _           _ _ _          _
+  _    _    _    _   _                         _    _
 )

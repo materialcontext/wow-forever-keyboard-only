@@ -41,6 +41,23 @@ pub fn wow_name(key: &str) -> Option<String> {
     Some(named.to_string())
 }
 
+/// A name for the key that is safe inside a kanata alias name.
+pub fn alias_safe(key: &str) -> &str {
+    match key {
+        ";" => "scln",
+        "'" => "apos",
+        "," => "comm",
+        "." => "dot",
+        "/" => "slsh",
+        "-" => "min",
+        "=" => "eql",
+        "[" => "lbrc",
+        "]" => "rbrc",
+        "\\" => "bksl",
+        k => k,
+    }
+}
+
 /// f1..f24: not on the grid, but valid for banner chords.
 pub fn is_function_key(key: &str) -> bool {
     key.strip_prefix('f')

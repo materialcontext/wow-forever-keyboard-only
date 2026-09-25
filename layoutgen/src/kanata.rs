@@ -1,23 +1,35 @@
 //! Layout -> kanata config.
 
-use crate::keys::GRID;
+use crate::keys::{self, GRID};
 use crate::layout::{Action, Chord, Layout, Mode, Switch};
 use std::collections::BTreeMap;
 
 pub fn render(layout: &Layout) -> String {
-    let aliases = aliases(layout);
+    let (banners, switches) = aliases(layout);
+    let mut os_forks = BTreeMap::new();
 
     let mut grids = vec![("defsrc".to_string(), grid(|k| k.to_string()))];
     for mode in &layout.modes {
-        let cells = grid(|k| cell(layout, mode, k));
+        let cells = grid(|k| cell(layout, mode, k))
+            .into_iter()
+            .zip(GRID)
+            .map(|(row, keys)| {
+                row.into_iter()
+                    .zip(keys.iter())
+                    .map(|(c, k)| os_passthrough(layout, k, c, &mut os_forks))
+                    .collect()
+            })
+            .collect();
         grids.push((format!("deflayer {}", mode.name), cells));
     }
     let widths = column_widths(&grids);
 
     let mut out = String::from(HEADER);
     out.push_str("(defcfg\n  process-unmapped-keys yes\n)\n\n");
+    // kanata resolves aliases in declaration order: banners, then the
+    // switches that use them, then the OS forks that wrap both.
     out.push_str("(defalias\n");
-    for (name, action) in &aliases {
+    for (name, action) in banners.iter().chain(&switches).chain(&os_forks) {
         out.push_str(&format!("  {name} {action}\n"));
     }
     out.push_str(")\n");
@@ -76,6 +88,28 @@ fn cell(layout: &Layout, mode: &Mode, key: &str) -> String {
     }
 }
 
+/// Wraps a remapped key so it sends itself while an `os_hold` key is down
+/// (Alt+Tab and friends), as an `os-` alias to keep the layers readable.
+fn os_passthrough(layout: &Layout, key: &str, cell: String, aliases: &mut Aliases) -> String {
+    if cell == "_" || layout.os_hold.is_empty() {
+        return cell;
+    }
+    let name = match cell.strip_prefix('@') {
+        // Several keys can share one switch alias (chat's Esc and Caps), and
+        // each must fall back to itself, so the key is part of the name.
+        Some(alias) => format!("os-{}-{alias}", keys::alias_safe(key)),
+        // A chord like `A-C-;`: name it by its modifiers and a safe key name.
+        None => format!(
+            "os-{}{}",
+            &cell[..cell.len() - key.len()],
+            keys::alias_safe(key)
+        ),
+    };
+    let fork = format!("(fork {cell} {key} ({}))", layout.os_hold.join(" "));
+    aliases.insert(name.clone(), fork);
+    format!("@{name}")
+}
+
 fn switch_alias(from: &Mode, s: &Switch) -> String {
     match &s.send {
         Some(send) => format!("{}-to-{}-{send}", from.name, s.mode),
@@ -83,14 +117,17 @@ fn switch_alias(from: &Mode, s: &Switch) -> String {
     }
 }
 
-/// Banner chords plus one alias per distinct mode switch.
-fn aliases(layout: &Layout) -> BTreeMap<String, String> {
+type Aliases = BTreeMap<String, String>;
+
+/// Banner chords, and one alias per distinct mode switch.
+fn aliases(layout: &Layout) -> (Aliases, Aliases) {
+    let mut banners = BTreeMap::new();
     let mut out = BTreeMap::new();
     let mut targets = BTreeMap::new();
     for mode in &layout.modes {
         targets.insert(mode.name.as_str(), mode);
         if let Some(banner) = &mode.banner {
-            out.insert(format!("bn-{}", mode.name), Chord::banner(banner).kanata());
+            banners.insert(format!("bn-{}", mode.name), Chord::banner(banner).kanata());
         }
     }
     for from in &layout.modes {
@@ -119,5 +156,39 @@ fn aliases(layout: &Layout) -> BTreeMap<String, String> {
             out.insert(switch_alias(from, s), action);
         }
     }
-    out
+    (banners, out)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::layout;
+
+    #[test]
+    fn os_hold_keys_fall_back_to_themselves() {
+        let layout = layout::parse(
+            r#"
+            os_hold = ["lalt"]
+            [[mode]]
+            name = "home"
+            label = "HOME"
+            banner = "f9"
+            [mode.keys]
+            ret = { mode = "chat", send = "ret" }
+            [[mode]]
+            name = "chat"
+            label = "CHAT"
+            banner = "f12"
+            passthrough = true
+            [mode.keys]
+            esc = { mode = "home", send = "esc" }
+            caps = { mode = "home", send = "esc" }
+            "#,
+        )
+        .unwrap();
+        let out = render(&layout);
+        assert!(out.contains("os-esc-chat-to-home-esc (fork @chat-to-home-esc esc (lalt))"));
+        assert!(out.contains("os-caps-chat-to-home-esc (fork @chat-to-home-esc caps (lalt))"));
+        assert!(out.contains("os-ret-home-to-chat-ret (fork @home-to-chat-ret ret (lalt))"));
+    }
 }

@@ -41,12 +41,21 @@
 # in home (movement, mode keys), except in passthrough modes, where they
 # type.
 
+# While any of these keys is held, every key does what it normally does in
+# Windows, so Alt+Tab, Alt+Shift+Tab, Win+Tab and Ctrl+Shift+Esc work.
+os_hold = ["lalt", "lctl", "lmet"]
+
 # Game settings, applied by the addon on every login.
 [cvars]
 autoLootDefault = "1"            # loot corpses on interact, no loot window
 AutoPushSpellToActionBar = "0"   # don't drop new spells on the bars; the
                                  # addon places them on their keys instead
-nameplateShowEnemies = "1"       # Q/B cycle through enemies with nameplates
+nameplateShowEnemies = "0"       # off by default; leader / toggles them
+# Tab targeting (Q/B). Test live with /console <name> <value> before
+# changing these.
+targetNearestDistance = "50"     # max search range in yards (default ~41)
+TargetNearestUseNew = "0"        # older targeting: less tied to a narrow
+                                 # cone in front; set "1" to go back
 
 [[mode]]
 name = "combat"
@@ -79,10 +88,10 @@ g = "wowkeys:confirm"
 # Movement (left hand)
 e = "MOVEFORWARD"
 d = "MOVEBACKWARD"
-s = "STRAFELEFT"
-f = "STRAFERIGHT"
-w = "TURNLEFT"
-r = "TURNRIGHT"
+s = "TURNLEFT"
+f = "TURNRIGHT"
+w = "STRAFELEFT"
+r = "STRAFERIGHT"
 spc = "JUMP"
 t = "TOGGLEAUTORUN"
 q = "TARGETNEARESTENEMY"     # press again to cycle to the next enemy
@@ -134,7 +143,6 @@ o = "TOGGLESPELLBOOK"
 p = "TOGGLETALENTS"
 l = "TOGGLEQUESTLOG"
 m = "TOGGLEWORLDMAP"
-k = "wowkeys:vendor"      # at a vendor: sell junk, repair
 # Type into a text box that opened by itself (mail, search): Enter or Esc
 # ends it, like chat.
 "'" = { mode = "chat" }
@@ -176,7 +184,7 @@ l = { bar = 2, button = 8, spell = "Frost Ward" }
 f = "FOCUSTARGET"                               # current target becomes focus
 t = "TARGETFOCUS"                               # target your focus
 c = { macro = "ClearFocus", body = "/clearfocus" }
-"/" = "NAMEPLATES" # toggle enemy nameplates; back on at login
+"/" = "NAMEPLATES" # toggle enemy nameplates; off again at login
 
 [[mode]]
 name = "chat"
