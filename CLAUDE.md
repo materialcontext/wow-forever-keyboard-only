@@ -252,6 +252,18 @@ subject to change; verify in game.
 via the controller flow before the probe. (`/wowkeys pad` wrongly listed
 numpad keys; fixed. `/wowkeys slots` now scans 1–1000.)
 
+**Second probe (same day): the controller bars are ordinary action slots
+above 180.** After binding via the controller, `/wowkeys slots` showed
+spells/items at 182, 183, 185, 186 and a full run 193–200 (Conjure Food,
+Conjure Water, Arcane Intellect, Frost Armor ×2, Fire Blast, Fireball,
+Frostbolt; likely auto-filled). Still no controller entries in standard
+bindings (the Gamepad UI routes buttons itself). So the addon **can**
+place `layout.toml` content into controller bars with `PlaceAction`; what's
+missing is the slot → (arrangement, layer, input) map.
+`/wowkeys padbuttons` lists frames showing slots > 180 with their frame
+paths, to read that map off the Gamepad UI. WowKeys only manages slots
+1–12 and 61–69, so it never touches controller slots.
+
 **Transfer plan** (owner wants to play on controller if possible): our
 layout's spells and macros become controller bar content. The addon
 already places spells/macros in action slots, so `layout.toml` could gain

@@ -239,6 +239,21 @@ SlashCmdList.WOWKEYS("slots")
 check(said("  1  spell  Frostbolt"), "slots lists a spell slot by id")
 check(said("filled action slot"), "slots prints a count")
 
+-- /wowkeys padbuttons lists frames pointing at slots above 180.
+local fakeFrames = {
+  { action = 197, GetDebugName = function() return "GamePadHUD.LT.Button1" end },
+  { action = 5 },
+  { GetAttribute = function(_, k) return k == "action" and 182 or nil end, GetName = function() return "PadBtn182" end },
+}
+function EnumerateFrames(after)
+  if not after then return fakeFrames[1] end
+  for i, f in ipairs(fakeFrames) do if f == after then return fakeFrames[i + 1] end end
+end
+printed = {}
+SlashCmdList.WOWKEYS("padbuttons")
+check(said("182  PadBtn182") and said("197  GamePadHUD.LT.Button1"), "padbuttons lists controller buttons by slot")
+check(said("2 button%(s%) on slots above 180"), "padbuttons skips keyboard slots")
+
 -- Chat banner, then combat starts: warning sound.
 frames.WowKeysMode_chat.scripts.OnClick()
 check(banner == "-- CHAT --", "banner")

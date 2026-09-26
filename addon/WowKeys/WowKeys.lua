@@ -305,6 +305,29 @@ local function listSlots()
   print(("WowKeys: %d filled action slot(s)"):format(shown))
 end
 
+-- Lists every frame that shows an action slot above 180 (the controller
+-- bars), with its frame path, to learn which slot is which controller
+-- input (e.g. "...LTLayer.Button3").
+local function listPadButtons()
+  local rows = {}
+  local frame = EnumerateFrames()
+  while frame do
+    local ok, slot = pcall(function()
+      return frame.action or (frame.GetAttribute and frame:GetAttribute("action"))
+    end)
+    if ok and type(slot) == "number" and slot > 180 then
+      local name = (frame.GetDebugName and frame:GetDebugName()) or frame:GetName() or "?"
+      table.insert(rows, { slot, name })
+    end
+    frame = EnumerateFrames(frame)
+  end
+  table.sort(rows, function(a, b) return a[1] < b[1] end)
+  for _, r in ipairs(rows) do
+    print(("  %3d  %s"):format(r[1], r[2]))
+  end
+  print(("WowKeys: %d button(s) on slots above 180"):format(#rows))
+end
+
 SlashCmdList.WOWKEYS = function(arg)
   local text = arg:match("^find%s+(.+)$")
   if arg == "bars" then
@@ -313,6 +336,8 @@ SlashCmdList.WOWKEYS = function(arg)
     padBindings()
   elseif arg == "slots" then
     listSlots()
+  elseif arg == "padbuttons" then
+    listPadButtons()
   elseif text then
     findBindings(text)
   else
@@ -321,5 +346,6 @@ SlashCmdList.WOWKEYS = function(arg)
     print("  /wowkeys find <text>  list binding commands to use in layout.toml")
     print("  /wowkeys pad          list controller bindings and settings")
     print("  /wowkeys slots        list filled action slots by id")
+    print("  /wowkeys padbuttons   list controller-bar buttons and their slots")
   end
 end
