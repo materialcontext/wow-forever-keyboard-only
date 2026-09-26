@@ -41,18 +41,31 @@ pub const PAD_INPUTS: &[&str] = &[
     "left", "up", "right", "down", "west", "north", "east", "south",
 ];
 
-/// Action slot for a controller layer and input on bar arrangement 1.
-/// Slots are 180 + layer offset + button index. Mapped in game: the Top bar
-/// (no trigger, D-pad only) is 181-184, LT 185-192, RT 193-200, LT+RT
-/// 201-208; buttons 1-4 are D-pad left/up/right/down, 5-8 the face buttons
+/// Action slot for a controller layer and input. The layer name may end in
+/// the bar arrangement (1-3, default 1): `lt` = `lt1`, `rt2`, `none3`.
+/// Slots are 180 + 28 per arrangement + layer offset + button index. Mapped
+/// in game: arrangement 1's Top bar (no trigger, D-pad only) is 181-184,
+/// LT 185-192, RT 193-200, LT+RT 201-208; arrangement 2 is the same at
+/// 209-236. Buttons 1-4 are D-pad left/up/right/down, 5-8 the face buttons
 /// west/north/east/south (Square/Triangle/Circle/Cross, Xbox X/Y/B/A).
 pub fn pad_slot(layer: &str, input: &str) -> Result<u16, String> {
-    let offset = match layer {
+    let (base, arrangement) = match layer.char_indices().last() {
+        Some((i, c)) if c.is_ascii_digit() => (&layer[..i], c.to_digit(10).unwrap_or(0) as u16),
+        _ => (layer, 1),
+    };
+    if !(1..=3).contains(&arrangement) {
+        return Err(format!("`{layer}`: bar arrangements are 1, 2 and 3"));
+    }
+    let offset = match base {
         "none" => 0,
         "lt" => 4,
         "rt" => 12,
         "ltrt" => 20,
-        _ => return Err(format!("unknown layer `{layer}` (none, lt, rt, ltrt)")),
+        _ => {
+            return Err(format!(
+                "unknown layer `{layer}` (none, lt, rt, ltrt, optionally ending in 1-3)"
+            ));
+        }
     };
     let index = match input {
         "left" => 1,
@@ -69,12 +82,12 @@ pub fn pad_slot(layer: &str, input: &str) -> Result<u16, String> {
             ));
         }
     };
-    if layer == "none" && index > 4 {
+    if base == "none" && index > 4 {
         return Err(
             "face buttons without a trigger are fixed (jump, interact, menu, cancel)".into(),
         );
     }
-    Ok(180 + offset + index)
+    Ok(180 + 28 * (arrangement - 1) + offset + index)
 }
 
 #[derive(Debug, Deserialize)]
@@ -605,6 +618,13 @@ mod tests {
         assert_eq!(pad_slot("lt", "up"), Ok(186));
         assert_eq!(pad_slot("ltrt", "down"), Ok(204));
         assert!(pad_slot("none", "south").is_err());
+        // Arrangement 2, mapped in game: Top.1 = 209, Left.2 = 214, Bottom.8 = 236.
+        assert_eq!(pad_slot("none2", "left"), Ok(209));
+        assert_eq!(pad_slot("lt2", "up"), Ok(214));
+        assert_eq!(pad_slot("ltrt2", "south"), Ok(236));
+        assert_eq!(pad_slot("lt1", "up"), pad_slot("lt", "up"));
+        assert!(pad_slot("rt4", "up").is_err());
+        assert!(pad_slot("none2", "north").is_err());
     }
 
     #[test]

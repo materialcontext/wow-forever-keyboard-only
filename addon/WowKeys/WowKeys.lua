@@ -16,8 +16,25 @@ local current = home
 local banner = owner:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
 banner:SetPoint("TOP", UIParent, "TOP", 0, -12)
 
+-- Which controller bar arrangement is on screen (1-3), read from the slot
+-- the Gamepad UI's first bar button shows: 181, 209 or 237. Nil when the
+-- Gamepad UI isn't showing.
+local PAD_FIRST_BUTTON = "GamepadMainActionBarFramePageUnitTopCenteredAnchorTopBarActionButton1"
+
+local function padArrangement()
+  local button = _G[PAD_FIRST_BUTTON]
+  if not (button and button:IsVisible()) then return nil end
+  local slot = button.action or (button.GetAttribute and button:GetAttribute("action"))
+  if type(slot) ~= "number" or slot < 181 then return nil end
+  return math.floor((slot - 181) / 28) + 1
+end
+
+local shownArrangement
+
 local function showMode()
-  banner:SetText("-- " .. current.label .. " --")
+  shownArrangement = padArrangement()
+  local suffix = shownArrangement and (" · BAR " .. shownArrangement) or ""
+  banner:SetText("-- " .. current.label .. suffix .. " --")
   if InCombatLockdown() and current ~= home then
     banner:SetTextColor(1, 0.2, 0.2)
   else
@@ -235,6 +252,12 @@ owner:SetScript("OnEvent", function(_, event, isInitialLogin, isReload)
 end)
 
 showMode()
+
+-- The Gamepad UI has no event we know of for arrangement changes, so check
+-- a few times a second and redraw only when it changes.
+C_Timer.NewTicker(0.25, function()
+  if padArrangement() ~= shownArrangement then showMode() end
+end)
 
 SLASH_WOWKEYS1 = "/wowkeys"
 -- Lists binding commands matching some text, so addon bindings (Auctionator,

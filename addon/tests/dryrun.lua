@@ -29,7 +29,9 @@ end
 UIParent, SOUNDKIT = {}, { RAID_WARNING = 1 }
 function PlaySound() sounds = sounds + 1 end
 function InCombatLockdown() return combat end
-C_Timer = { After = function(_, fn) table.insert(timers, fn) end }
+local tickers = {}
+C_Timer = { After = function(_, fn) table.insert(timers, fn) end,
+  NewTicker = function(_, fn) table.insert(tickers, fn) end }
 C_CVar = {
   GetCVar = function(n) return cvars[n] end,
   SetCVar = function(n, v) cvars[n] = v end,
@@ -258,6 +260,19 @@ printed = {}
 SlashCmdList.WOWKEYS("padbuttons")
 check(said("182  Top.2") and said("197  Right.5  %(900, 120%)"), "padbuttons shows short names and positions")
 check(said("2 button%(s%) on slots above 180"), "padbuttons skips keyboard slots and edit-frame duplicates")
+
+-- Controller arrangement shows in the banner, and updates when it changes.
+frames.WowKeysMode_combat.scripts.OnClick()
+check(banner == "-- COMBAT --", "no arrangement shown without the Gamepad UI")
+local padButton = { action = 209, IsVisible = function() return true end }
+_G.GamepadMainActionBarFramePageUnitTopCenteredAnchorTopBarActionButton1 = padButton
+for _, fn in ipairs(tickers) do fn() end
+check(banner == "-- COMBAT · BAR 2 --", "banner shows arrangement 2")
+padButton.action = 181
+for _, fn in ipairs(tickers) do fn() end
+check(banner == "-- COMBAT · BAR 1 --", "banner follows arrangement changes")
+_G.GamepadMainActionBarFramePageUnitTopCenteredAnchorTopBarActionButton1 = nil
+for _, fn in ipairs(tickers) do fn() end
 
 -- Chat banner, then combat starts: warning sound.
 frames.WowKeysMode_chat.scripts.OnClick()

@@ -220,7 +220,8 @@ south = "b"    # bank
 # Controller (Forever's Gamepad UI, bar arrangement 1). The addon fills
 # these bars the same way it fills the keyboard bars; bind nothing by hand.
 #   Layers: none (no trigger), lt, rt, ltrt (both). Triggers latch via
-#   Steam Input (see wow/setup.md).
+#   Steam Input (see wow/setup.md). End a layer in 2 or 3 for the other
+#   bar arrangements (LB+RB cycles them): [controller.lt2], [controller.none3].
 #   Inputs: up, right, down, left (D-pad); north, east, south, west (face:
 #   Triangle/Y, Circle/B, Cross/A, Square/X). Without a trigger only the
 #   D-pad is free; the face buttons are jump, interact, menu, cancel.

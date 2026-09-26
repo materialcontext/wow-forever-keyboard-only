@@ -304,8 +304,15 @@ possible later if the HUD highlight isn't enough.
 arrangement 1 (181–208) and the addon places them like keyboard buttons.
 `{ macro = "Poly" }` may name a macro defined in a mode. Without a trigger
 only the D-pad is allowed (face buttons are fixed). Arrangements 2/3 are
-not mapped yet (slots unknown; would hold mana potion, focus macros,
-nameplates).
+**mapped: arrangement 2 = 209–236** (same shape, confirmed by padbuttons);
+arrangement 3 assumed 237–264 (stride 28; confirm with one padbuttons
+line). Layers take an arrangement suffix: `lt2`, `none3`. No content on 2/3
+yet: the owner agrees the layout first (candidates: mana potion, focus
+macros, nameplate toggle). The owner found arrangements cycle via the
+bumper shortcut menu, which is clumsy and a toggle; checking for a direct
+"go to arrangement N" binding (`/wowkeys find page|arrang|gamepad`). The
+banner shows `· BAR n` while the Gamepad UI is visible (WowKeys reads the
+slot on the first controller button every 0.25 s).
 
 **Controller UI layer (decided, built):** quick menu access without the
 radial menu. Steam Input action layer latched by **Create** (PlayStation;
