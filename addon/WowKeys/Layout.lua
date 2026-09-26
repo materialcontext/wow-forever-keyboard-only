@@ -55,6 +55,7 @@ WowKeysLayout = {
     { "ALT-CTRL-O", "TOGGLESPELLBOOK" },
     { "ALT-CTRL-P", "TOGGLETALENTS" },
     { "ALT-CTRL-L", "TOGGLEQUESTLOG" },
+    { "ALT-CTRL-B", "BAGNON_BANK_TOGGLE" },
     { "ALT-CTRL-M", "TOGGLEWORLDMAP" },
     { "ALT-CTRL-SHIFT-U", "MACRO Drink" },
     { "ALT-CTRL-SHIFT-I", "MACRO Eat" },

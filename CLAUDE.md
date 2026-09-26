@@ -191,7 +191,7 @@ greeting, reward choice, trainer or loot window opens.
   `,` is a Polymorph macro that sheeps the focus if you have one, else the
   target.
 - **UI (Tab, Ctrl+Alt+key):** U bags, I character, O spellbook, P talents,
-  L quest log, M map, `'` type into a text box. Vendor chores belong to
+  L quest log, M map, B bank (Bagnon), `'` type into a text box. Vendor chores belong to
   Leatrix Plus (the `wowkeys:vendor` command still exists if ever needed). Esc closes windows. Navigating *inside* windows (bags, talents) still
   needs a UI addon or our own commands.
 - **World (Left Shift, Ctrl+Alt+Shift+key):** J Frost Armor, K Arcane
@@ -216,7 +216,7 @@ it goes in.
 |---|---|---|
 | Leatrix Plus | auto quest accept/turn-in, sell junk, repair, QoL | **Owns quest accept/turn-in and vendor chores** (decided). UI K removed; G and 1–9 cover what it doesn't (gossip, rewards, popups, loot, trainers). No keys bound (see "Addon binding names" below). To skip its automation for one NPC, hold **Right** Shift while pressing A (Left Shift is the world-mode key and never sends Shift). |
 | Leatrix Maps | world map improvements (reveal, coordinates, zone levels, scale) | UI M still opens the map (it enhances Blizzard's). No keys bound. Map zoom/pan are mouse-only in WoW; with reveal and coordinates on, reading the map needs neither. |
-| Bagnon | combined bag window | UI U should open it (it takes over the bag toggle). Navigating inside it is still unsolved. |
+| Bagnon | combined bag window | UI U opens it (it takes over the bag toggle); UI B opens the bank (`BAGNON_BANK_TOGGLE`). Navigating inside it is still unsolved. |
 | Plater | enemy nameplates | Q/B cycling and leader / depend on nameplates. Plater manages nameplate CVars; if it fights our `nameplateShowEnemies`, drop ours from `[cvars]`. Midnight limits nameplate addons in combat. |
 | DBM | boss timers and warnings | Display only. Midnight limits boss mods hardest and the modern client has built-in boss warnings; check what the Forever build can still do. |
 | Auctionator | auction house search and selling | Hardest for keyboard-only play (lists, picking a bag item to sell). Its own keybindings (believed: post / cancel undercut) can go on UI-mode keys once named. |
@@ -228,7 +228,8 @@ below, but don't bind them until the owner and Claude have agreed on the
 layout for them** (owner's call, test 4). Then put the command into
 `layout.toml`, `cargo run`, `/reload`. Don't guess command names.
 
-**Addon binding names found (not bound):**
+**Addon binding names found** (only `BAGNON_BANK_TOGGLE` is bound; the
+owner decided the rest aren't needed):
 - Leatrix Plus: `LEATRIX_PLUS_GLOBAL_TOGGLE` (panel),
   `LEATRIX_PLUS_GLOBAL_WEBLINK` (web link for the hovered item; mouse-only),
   `LEATRIX_PLUS_GLOBAL_RARE` (announce rare),
@@ -277,6 +278,10 @@ wow/setup.md              # addon install, one-time game settings
 ## Open questions
 
 
+- **Bonus project, very low priority:** keyboard access to addon settings
+  panels (Leatrix Plus `/ltp`, Leatrix Maps `/ltm`, AtlasLoot). They're
+  set-once panels, so the owner uses the mouse for them for now; a known
+  exception to "zero mouse". Bindings to open them are recorded above.
 - Whether the owner accepts kanata mouse-movement keys as a last-resort UI
   fallback (keyboard input, but it drives a pointer).
 - Leader timeout (1000 ms for now) and whether a second leader is needed.
@@ -348,6 +353,7 @@ learns the first one, one spell per press.
 - [x] G accepts a resurrection popup (so StaticPopup1's button works).
 - [ ] G accepts a group invite.
 - [ ] Ctrl+Alt / Ctrl+Alt+Shift chords don't trigger anything in Windows.
+- [ ] UI B opens the bank window at a banker (Bagnon).
 - [x] `/wowkeys find leatrix` works in game (names recorded under Addons).
 - [x] `/wowkeys find` for bagnon, dbm, auctionator (names recorded under
       Addons).
