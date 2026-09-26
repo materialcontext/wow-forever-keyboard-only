@@ -342,7 +342,8 @@ etc.). `/wowkeys pagetest` makes `WowKeysPageNext` (SecureActionButton,
 (LeftButton) / Ctrl+F7 (RightButton) as override bindings until /reload.
 If it pages without the "blocked" warning (in and out of combat), it goes
 into `layout.toml` as the binding command `CLICK WowKeysPageNext:LeftButton`.
-**Result: Ctrl+F8 pages the arrangements, no warning** (owner, 2026-09-26).
+**Result: Ctrl+F8 pages the arrangements, no warning** (owner, 2026-09-26;
+later confirmed in combat via the touchpad).
 Ctrl+F7 (right-click) goes **backwards** (owner): `CLICK WowKeysPage:RightButton`
 = previous arrangement. Steam sends one key per input, so the touchpad
 uses plain **F8** (right half, next) and **F7** (left half, previous);
@@ -574,11 +575,11 @@ learns the first one, one spell per press.
 - [ ] `/wowkeys find auction`, `post`, `cancel` (Auctionator under other
       names?).
 - [ ] Loot rolls and full-bag loot windows: note what you'd want to press.
-- [ ] Controller: after `/reload`, arrangement 1 shows layout v2 (see
+- [x] Controller: after `/reload`, arrangement 1 shows layout v2 (see
       Native controller) and arrangement 2 the out-of-combat bars.
-- [ ] Controller: touchpad left half cycles arrangements (also in
-      combat); RT is a plain hold, LT still latches.
-- [ ] Controller: the keyboard bars are unchanged.
+- [x] Controller: touchpad pages arrangements (also in combat); RT is a
+      plain hold, LT still latches; stale Poly macro cleared.
+- [x] Controller: the keyboard bars are unchanged.
 - [ ] Controller UI layer: set up per `wow/steam-layers.md`; Create shows
       `-- UI --`, D-pad/face open the windows, Create again shows COMBAT.
 
