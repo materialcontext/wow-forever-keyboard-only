@@ -290,16 +290,13 @@ bar = no trigger (D-pad only), Left bar = LT, Bottom bar = LT+RT. So slot
 offsets none 0 (4 slots), LT 4, RT 12, LT+RT 20. WowKeys only manages slots
 1–12 and 61–69, so it never touches controller slots.
 
-**Trigger latching (decided, revised):** LT latches (tap on, tap off; the
-combat home layer), **RT is a plain hold** (the owner took it off latch so
-a one-off from LT+RT is one chord, not three taps). Originally both
-latched. WoW can't do that (the Gamepad UI reads the
-physical trigger state), so Steam Input's per-trigger "Toggle" does it;
-setup in `wow/setup.md` (**confirmed working in game**). Chosen over Steam action-layer switching because
-Blizzard's HUD keeps highlighting the latched layer. Caveat: latched
-triggers switch frame focus inside windows, so release them first. A
-WowKeys banner for latched layers (via the gamepad button state) is
-possible later if the HUD highlight isn't enough.
+**Trigger latching (decided, revised twice): no latching; both triggers
+are plain holds.** History: both latched, then LT latched + RT held, then
+the owner dropped latching with layout v3 (a latched LT covered Blizzard's
+native Square attack/interact, and holds fit the priority scheme). If
+latching is ever wanted again: WoW can't latch (the Gamepad UI reads the
+physical trigger), but Steam Input's per-trigger "Toggle" does (confirmed
+working in game).
 
 **Built: `[controller.<layer>]` in `layout.toml`** (layers `none`, `lt`,
 `rt`, `ltrt`; inputs `up`/`right`/`down`/`left`, `north`/`east`/`south`/
@@ -355,21 +352,26 @@ RB tap targeting works while LT is latched. **Built:** `WowKeysPage`
 → one chord → one WoW command; the generator checks the chord against the
 mode chords, WowKeys binds it, the Steam sheet lists it.
 
-**Controller layout v2 (decided 2026-09-26, two thumbs):** the left thumb
-moves, so the D-pad holds spells with a cast bar (moving cancels those
-anyway); the right thumb presses face buttons while moving, so instants
-go there. Arrangement 1 = combat, 2 = out of combat, 3 = spare.
-LT (latched home): D-pad Frostbolt/Fireball/Poly/Attack, face
-Ice Lance ✕, Frost Nova □, Fire Blast △, Blink ○. LT+hold RT: D-pad
-Blizzard/Blood Fury/Arcane Explosion/Mana Shield, face Cone ✕,
-Counterspell □, Ice Block △, health potion ○. RT alone (rare in combat):
-Evocation, Arcane Missiles, mana potion, Cold Snap, Frost Ward, Remove Lesser Curse. No
-trigger D-pad: set / target / clear focus. Arrangement 2: none D-pad
-drink/eat/hearth/mount, LT D-pad armor/intellect/water/food.
-Attack (macro: `/cast [equipped:Wands] !Shoot`, else `/startattack`) is
-on LT+D-pad Down because latched LT covers Square, Blizzard's native
-attack/interact button (owner found no way to attack in LT). Interact
-(looting) still needs LT unlatched. The
+**Controller layout v3 (decided 2026-09-26, owner's priority scheme):**
+no latching. Every arrangement ranks its layers the same way: no trigger
+= all the time (D-pad only; face buttons stay Blizzard's), RT = often
+(above all in combat), LT = less often, LT+RT = rarely. Within a layer,
+face buttons = instants used on the move (right thumb), D-pad = casts
+while standing (left thumb; moving cancels a cast bar anyway).
+Arrangement 1 = combat, 2 = out of combat, 3 = spare.
+- 1, no trigger D-pad: Frostbolt ↑, Fireball →, Poly ←, Attack ↓ (macro:
+  `/cast [equipped:Wands] !Shoot`, else `/startattack`; Blizzard's Square
+  may only melee).
+- 1, RT: face Ice Lance ✕, Frost Nova □, Fire Blast △, Blink ○; D-pad
+  Blizzard ↑, Blood Fury →, Arcane Explosion ←, Mana Shield ↓.
+- 1, LT: face Cone of Cold ✕, Counterspell □, Ice Block △, health potion
+  ○; D-pad Evocation ↑, Arcane Missiles →, set focus ←, clear focus ↓.
+- 1, LT+RT: mana potion ✕, Cold Snap □, Frost Ward △, Remove Lesser Curse
+  ○; target focus ↑.
+- 2, no trigger D-pad: drink ↑, eat →, Conjure Water ↓, Conjure Food ←.
+  2, RT D-pad: Frost Armor ↑, Arcane Intellect →, hearth ↓, mount ←.
+(v2 had LT latched as the combat home layer; latched LT hid Blizzard's
+attack button, and the owner found no way to attack.) The
 banner shows `· BAR n` while the Gamepad UI is visible (WowKeys reads the
 slot on the first controller button every 0.25 s).
 

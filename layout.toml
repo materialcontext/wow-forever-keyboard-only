@@ -280,54 +280,59 @@ does = "map"
 #   D-pad is free; the face buttons are jump, interact, menu, cancel.
 #   Macros defined in a mode above can be named without repeating the body.
 #
-# Two thumbs: the left one moves, so the D-pad is only for spells with a
-# cast bar (moving cancels those anyway); the right one presses face
-# buttons while you move, so instants go there. LT latches (tap on, tap
-# off: the combat home layer); RT is held for a moment (see wow/setup.md).
-# Arrangement 1 is combat, 2 out of combat, 3 spare; the touchpad cycles.
+# Two thumbs: the left one moves, so the D-pad holds what you cast standing
+# still (moving cancels a cast bar anyway); the right one presses face
+# buttons while you move, so instants go there. Both triggers are plain
+# holds. Every arrangement ranks its layers the same way:
+#   no trigger  all the time (D-pad only; the face buttons stay Blizzard's:
+#               jump, attack/interact, menu, cancel)
+#   RT          often, above all in combat
+#   LT          less often
+#   LT+RT       rarely
+# Arrangement 1 is combat, 2 out of combat, 3 spare; the touchpad pages.
 
-[controller.none]    # before the pull: focus for Polymorph
-up = { macro = "SetFocus", body = "/focus" }
-right = { macro = "TargetFocus", body = "/target focus" }
-down = { macro = "ClearFocus" }
-
-[controller.lt]      # combat home: latch LT when the fight starts
+[controller.none]    # all the time: the main casts
 up = { spell = "Frostbolt" }
 right = { spell = "Fireball" }
 left = { macro = "Poly" }
-# LT takes over Square, Blizzard's attack button: wand if equipped, else melee.
+# Wand if equipped, else melee (Blizzard's Square may only melee).
 down = { macro = "Attack", body = "#showtooltip\n/cast [equipped:Wands] !Shoot\n/startattack [noequipped:Wands]" }
+
+[controller.rt]      # often: instants on the move, then standing casts
 south = { spell = "Ice Lance" }
 west = { spell = "Frost Nova" }
 north = { spell = "Fire Blast" }
 east = { spell = "Blink" }
-
-[controller.ltrt]    # LT latched + hold RT: the rest of the fight
 up = { macro = "Blizzard" }
 right = { spell = "Blood Fury" }
 left = { spell = "Arcane Explosion" }
 down = { spell = "Mana Shield" }
+
+[controller.lt]      # less often
 south = { spell = "Cone of Cold" }
 west = { spell = "Counterspell" }
 north = { spell = "Ice Block" }
 east = { macro = "HealthPot" }
-
-[controller.rt]      # hold RT alone: rare in combat
 up = { spell = "Evocation" }
 right = { spell = "Arcane Missiles" }
+left = { macro = "SetFocus", body = "/focus" }
+down = { macro = "ClearFocus" }
+
+[controller.ltrt]    # rarely
 south = { macro = "ManaPot" }
 west = { spell = "Cold Snap" }
 north = { spell = "Frost Ward" }
 east = { spell = "Remove Lesser Curse" }
+up = { macro = "TargetFocus", body = "/target focus" }
 
-[controller.none2]   # out of combat
+[controller.none2]   # out of combat, all the time
 up = { macro = "Drink" }
 right = { macro = "Eat" }
-down = { macro = "Hearth" }
-left = { macro = "Mount" }
-
-[controller.lt2]
-up = { spell = "Frost Armor" }       # Ice Armor replaces it at 30
-right = { spell = "Arcane Intellect" }
 down = { spell = "Conjure Water" }
 left = { spell = "Conjure Food" }
+
+[controller.rt2]     # out of combat, often
+up = { spell = "Frost Armor" }       # Ice Armor replaces it at 30
+right = { spell = "Arcane Intellect" }
+down = { macro = "Hearth" }
+left = { macro = "Mount" }
