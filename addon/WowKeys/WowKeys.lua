@@ -269,7 +269,10 @@ local function padBindings()
   for i = 1, GetNumBindings() do
     local command, _, key1, key2 = GetBinding(i)
     for _, key in ipairs({ key1, key2 }) do
-      if command and key and key:find("PAD", 1, true) then
+      -- The key itself (after any modifiers) must start with PAD, so numpad
+      -- keys like NUMPAD5 don't count as controller buttons.
+      local base = key and key:match("[^-]+$")
+      if command and base and base:find("^PAD") then
         shown = shown + 1
         print(("  %s  ->  %s"):format(key, command))
       end
@@ -285,10 +288,11 @@ local function padBindings()
 end
 
 -- Lists every filled action slot with its id, to learn which slots the
--- controller's bars (12 bars of 8) use. Slot ids go up to 180.
+-- controller's bars (12 bars of 8) use. The classic range is 1-180; scan
+-- well past it in case the controller bars live higher.
 local function listSlots()
   local shown = 0
-  for slot = 1, 180 do
+  for slot = 1, 1000 do
     local kind, id = GetActionInfo(slot)
     if kind then
       shown = shown + 1

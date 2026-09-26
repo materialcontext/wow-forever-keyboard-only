@@ -244,6 +244,14 @@ subject to change; verify in game.
   …) and triggers can act as modifiers (`GamePadEmulateShift`/`Ctrl`/`Alt`).
   Whether Forever's Gamepad UI uses these standard bindings is unknown.
 
+**First in-game probe (2026-09-26):** with the gamepad on
+(`GamePadEnable = 1`, `GamePadEmulateShift = PADLTRIGGER`,
+`GamePadEmulateCtrl = PADLSHOULDER`, `GamePadEmulateAlt = none`), there are
+**no controller buttons in the standard bindings**, and action slots
+1–180 hold only the keyboard layout. Open: whether a spell had been bound
+via the controller flow before the probe. (`/wowkeys pad` wrongly listed
+numpad keys; fixed. `/wowkeys slots` now scans 1–1000.)
+
 **Transfer plan** (owner wants to play on controller if possible): our
 layout's spells and macros become controller bar content. The addon
 already places spells/macros in action slots, so `layout.toml` could gain
