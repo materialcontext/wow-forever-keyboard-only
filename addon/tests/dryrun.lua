@@ -261,6 +261,17 @@ SlashCmdList.WOWKEYS("padbuttons")
 check(said("182  Top.2") and said("197  Right.5  %(900, 120%)"), "padbuttons shows short names and positions")
 check(said("2 button%(s%) on slots above 180"), "padbuttons skips keyboard slots and edit-frame duplicates")
 
+-- /wowkeys frames lists named frames matching some text.
+fakeFrames = {
+  { GetName = function() return "GamepadShortcutNextPageButton" end, GetObjectType = function() return "Button" end,
+    IsShown = function() return false end },
+  { GetName = function() return "PlayerFrame" end },
+  { GetName = function() return nil end },
+}
+printed = {}
+SlashCmdList.WOWKEYS("frames page")
+check(said("GamepadShortcutNextPageButton.*Button, hidden") and said("1 frame%(s%) match"), "frames finds named frames")
+
 -- Controller arrangement shows in the banner, and updates when it changes.
 frames.WowKeysMode_combat.scripts.OnClick()
 check(banner == "-- COMBAT --", "no arrangement shown without the Gamepad UI")

@@ -370,8 +370,30 @@ local function listPadButtons()
   print(("WowKeys: %d button(s) on slots above 180"):format(shown))
 end
 
+-- Lists named frames whose name contains some text, with their type and
+-- whether they're shown, to find Blizzard buttons a CLICK binding can press
+-- (e.g. the Gamepad UI's next/previous arrangement controls).
+local function findFrames(text)
+  text = text:lower()
+  local rows = {}
+  local frame = EnumerateFrames()
+  while frame do
+    local ok, name = pcall(frame.GetName, frame)
+    if ok and name and name:lower():find(text, 1, true) then
+      local kind = frame.GetObjectType and frame:GetObjectType() or "?"
+      local shown = frame.IsShown and frame:IsShown() and "shown" or "hidden"
+      table.insert(rows, ("  %s  |cff999999%s, %s|r"):format(name, kind, shown))
+    end
+    frame = EnumerateFrames(frame)
+  end
+  table.sort(rows)
+  for i = 1, math.min(#rows, 60) do print(rows[i]) end
+  print(("WowKeys: %d frame(s) match \"%s\"%s"):format(#rows, text, #rows > 60 and " (first 60 shown)" or ""))
+end
+
 SlashCmdList.WOWKEYS = function(arg)
   local text = arg:match("^find%s+(.+)$")
+  local frameText = arg:match("^frames%s+(.+)$")
   if arg == "bars" then
     outOfCombat(applyBarsVerbose)
   elseif arg == "pad" then
@@ -380,6 +402,8 @@ SlashCmdList.WOWKEYS = function(arg)
     listSlots()
   elseif arg == "padbuttons" then
     listPadButtons()
+  elseif frameText then
+    findFrames(frameText)
   elseif text then
     findBindings(text)
   else
@@ -389,5 +413,6 @@ SlashCmdList.WOWKEYS = function(arg)
     print("  /wowkeys pad          list controller bindings and settings")
     print("  /wowkeys slots        list filled action slots by id")
     print("  /wowkeys padbuttons   list controller-bar buttons and their slots")
+    print("  /wowkeys frames <text> list named frames (find buttons to click)")
   end
 end

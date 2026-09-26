@@ -309,8 +309,13 @@ arrangement 3 assumed 237–264 (stride 28; confirm with one padbuttons
 line). Layers take an arrangement suffix: `lt2`, `none3`. No content on 2/3
 yet: the owner agrees the layout first (candidates: mana potion, focus
 macros, nameplate toggle). The owner found arrangements cycle via the
-bumper shortcut menu, which is clumsy and a toggle; checking for a direct
-"go to arrangement N" binding (`/wowkeys find page|arrang|gamepad`). The
+bumper shortcut menu, which is clumsy and a toggle. **No direct binding
+exists:** `find arrang`/`gamepad` match nothing, and `ACTIONPAGE1`–`6`
+(Shift+1…6) page the keyboard main bar but not the controller
+arrangements (tested). Options: a Steam button pressing LB+RB+D-pad Right
+(one-press cycle), or, if the shortcut menu's next/previous page controls
+are named buttons, CLICK bindings to them (`/wowkeys frames <text>` finds
+named frames). The
 banner shows `· BAR n` while the Gamepad UI is visible (WowKeys reads the
 slot on the first controller button every 0.25 s).
 
