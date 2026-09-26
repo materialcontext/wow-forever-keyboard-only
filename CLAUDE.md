@@ -320,7 +320,12 @@ s seconds, because the shortcut menu closes when chat opens). Holding the
 menu shows `GamepadMainActionBarFramePageUnitPageTracker`,
 `…PageUnitShortcutsActionBar` and `GamepadReticle`, no named buttons;
 `/wowkeys inspect <name>` lists a frame's fields, functions and children
-to find the paging logic. The
+to find the paging logic. **Found:** `GamepadMainActionBarFramePageUnit`
+has `GetCurrentPage`, `SetCurrentPage`, `ClickChangePageButton` and
+`pageableActionBarsIndexOrder`. `/wowkeys page [n]` probes whether an
+addon may call them (out of combat and in combat; watch for "action
+blocked" or taint errors). If it works, arrangement switching becomes
+absolute: `wowkeys:page1`..`page3` commands on keys, sent by Steam. The
 banner shows `· BAR n` while the Gamepad UI is visible (WowKeys reads the
 slot on the first controller button every 0.25 s).
 

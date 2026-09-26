@@ -298,6 +298,25 @@ printed = {}
 SlashCmdList.WOWKEYS("inspect Frame")
 check(said("2 frame%(s%) match"), "inspect asks to pick when several frames match")
 
+-- /wowkeys page probes the Gamepad UI's page functions.
+local pageNow = 1
+GamepadMainActionBarFramePageUnit = {
+  GetCurrentPage = function() return pageNow end,
+  SetCurrentPage = function(_, n) pageNow = n end,
+  pageableActionBarsIndexOrder = { { GetName = function() return "PageBar1" end } },
+}
+printed = {}
+SlashCmdList.WOWKEYS("page")
+check(said("GetCurrentPage %-> 1") and said("page order 1: PageBar1"), "page shows the current page")
+printed = {}
+SlashCmdList.WOWKEYS("page 2")
+check(said("SetCurrentPage%(2%) ran") and said("GetCurrentPage %-> 2"), "page n switches")
+GamepadMainActionBarFramePageUnit.SetCurrentPage = function() error("blocked") end
+printed = {}
+SlashCmdList.WOWKEYS("page 3")
+check(said("SetCurrentPage%(3%) failed: .*blocked"), "page reports a blocked switch")
+GamepadMainActionBarFramePageUnit = nil
+
 -- Controller arrangement shows in the banner, and updates when it changes.
 frames.WowKeysMode_combat.scripts.OnClick()
 check(banner == "-- COMBAT --", "no arrangement shown without the Gamepad UI")

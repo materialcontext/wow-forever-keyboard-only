@@ -482,11 +482,39 @@ local function inspectFrame(text)
   printList("children", children)
 end
 
+-- Probes the Gamepad UI's own page (arrangement) functions: with no
+-- argument prints the current page and the pageable bars, with a number
+-- asks the page unit to switch there. Checks whether an addon may page.
+local function probePage(n)
+  local unit = GamepadMainActionBarFramePageUnit
+  if not (unit and unit.GetCurrentPage) then
+    print("WowKeys: no Gamepad UI page unit (is the Gamepad UI on?)")
+    return
+  end
+  local function report()
+    local ok, page = pcall(unit.GetCurrentPage, unit)
+    print(("WowKeys: GetCurrentPage -> %s; bars show arrangement %s"):format(
+      ok and tostring(page) or ("error: " .. tostring(page)), tostring(padArrangement())))
+  end
+  if not n then
+    report()
+    for k, v in pairs(unit.pageableActionBarsIndexOrder or {}) do
+      local name = type(v) == "table" and v.GetName and v:GetName() or tostring(v)
+      print(("  page order %s: %s"):format(tostring(k), tostring(name)))
+    end
+    return
+  end
+  local ok, err = pcall(unit.SetCurrentPage, unit, n)
+  print(("WowKeys: SetCurrentPage(%d) %s"):format(n, ok and "ran" or ("failed: " .. tostring(err))))
+  report()
+end
+
 SlashCmdList.WOWKEYS = function(arg)
   local text = arg:match("^find%s+(.+)$")
   local frameText = arg:match("^frames%s+(.+)$")
   local newWait = arg:match("^newframes%s*(%d*)$")
   local inspectText = arg:match("^inspect%s+(.+)$")
+  local pageArg = arg:match("^page%s*(%d*)$")
   if arg == "bars" then
     outOfCombat(applyBarsVerbose)
   elseif arg == "pad" then
@@ -495,6 +523,8 @@ SlashCmdList.WOWKEYS = function(arg)
     listSlots()
   elseif arg == "padbuttons" then
     listPadButtons()
+  elseif pageArg then
+    probePage(tonumber(pageArg))
   elseif inspectText then
     inspectFrame(inspectText)
   elseif newWait then
@@ -513,5 +543,6 @@ SlashCmdList.WOWKEYS = function(arg)
     print("  /wowkeys frames <text> list named frames (find buttons to click)")
     print("  /wowkeys newframes [s] list frames that appear within s seconds (default 5)")
     print("  /wowkeys inspect <name> list a frame's fields, functions and children")
+    print("  /wowkeys page [n]     show the controller page, or switch to page n")
   end
 end
