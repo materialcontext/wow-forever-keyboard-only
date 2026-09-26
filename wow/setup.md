@@ -78,8 +78,8 @@ character sheet, the triggers switch focus between open frames.
 The left half of the touchpad cycles bar arrangements (it sends the
 combo in `wow/steam-layers.md`); the right half keeps opening the radial
 menu. In the controller layout → Touchpad (center pad): set its style to
-**Directional Pad** (or a two-button split if Steam offers one) with
-**Requires Click** on. Left: the combo from the sheet. Right: the
-**Options** button. Up/Down: leave empty for now. Steam's names here vary
+**Directional Pad** (or a split if Steam offers one) with **Requires
+Click** on. Left: **F8** (next arrangement). Up: **F7** (previous). Right:
+the **Options** button. Down: leave empty for now. Steam's names here vary
 between versions; the goal is only left click → combo, right click →
 Options.

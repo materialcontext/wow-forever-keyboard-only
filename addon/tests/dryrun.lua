@@ -155,7 +155,8 @@ check(actions[182][1] == "macro" and actions[185][1] == "macro", "controller: fo
 check(actions[189] == nil and said("took off the bars.*Poly"), "old layout's macro cleared from an unlearned spell's slot")
 check(actions[197][2] == "MyOwn", "the player's own macro left alone")
 check(actions[214][2] == 168 and actions[215][2] == 1459, "controller: buffs on arrangement 2")
-check(bindings["CTRL-F8"] == "CLICK WowKeysPage:LeftButton", "touchpad chord pages the controller bars")
+check(bindings["F8"] == "CLICK WowKeysPage:LeftButton" and bindings["F7"] == "CLICK WowKeysPage:RightButton",
+  "touchpad keys page the controller bars both ways")
 check(said("took off the bars.*Frostbolt"), "reports what it cleared")
 check(said("not learned yet: .*Ice Lance"), "reports unlearned spells")
 

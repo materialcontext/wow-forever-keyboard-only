@@ -73,7 +73,8 @@ WowKeysLayout = {
     { "CTRL-L", "MULTIACTIONBAR1BUTTON8" },
     { "CTRL-C", "MACRO ClearFocus" },
     { "CTRL-/", "NAMEPLATES" },
-    { "CTRL-F8", "CLICK WowKeysPage:LeftButton" },
+    { "F8", "CLICK WowKeysPage:LeftButton" },
+    { "F7", "CLICK WowKeysPage:RightButton" },
   },
   buttons = {
     { slot = 1, spell = "Frostbolt" },

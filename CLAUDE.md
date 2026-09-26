@@ -344,11 +344,12 @@ If it pages without the "blocked" warning (in and out of combat), it goes
 into `layout.toml` as the binding command `CLICK WowKeysPageNext:LeftButton`.
 **Result: Ctrl+F8 pages the arrangements, no warning** (owner, 2026-09-26).
 Ctrl+F7 (right-click) goes **backwards** (owner): `CLICK WowKeysPage:RightButton`
-= previous arrangement, not bound yet.
+= previous arrangement. Steam sends one key per input, so the touchpad
+uses plain **F8** (left half, next) and **F7** (top half, previous).
 RB tap targeting works while LT is latched. **Built:** `WowKeysPage`
 (set up out of combat by the ticker once the Gamepad UI exists) and a
-`[[steam_button]]` entry: touchpad left half → Ctrl+F8 →
-`CLICK WowKeysPage:LeftButton`. `[[steam_button]]` = one controller input
+`[[steam_button]]` entry: touchpad left half → F8 →
+`CLICK WowKeysPage:LeftButton` (top half → F7 → previous). `[[steam_button]]` = one controller input
 → one chord → one WoW command; the generator checks the chord against the
 mode chords, WowKeys binds it, the Steam sheet lists it.
 

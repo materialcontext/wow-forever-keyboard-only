@@ -12,7 +12,8 @@ Each input sends one combo.
 
 | Controller input | Send | Does |
 |---|---|---|
-| Touchpad, left half (click) | Ctrl + F8 | next bar arrangement (1 → 2 → 3 → 1) |
+| Touchpad, left half (click) | F8 | next bar arrangement (1 → 2 → 3 → 1) |
+| Touchpad, top half (click) | F7 | previous bar arrangement (1 → 3 → 2 → 1) |
 
 ## UI layer on Create (PlayStation) / View (Xbox)
 
