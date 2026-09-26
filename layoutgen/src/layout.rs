@@ -19,11 +19,11 @@ pub struct Layout {
     /// Forever's Gamepad UI bars: layer -> input -> spell or macro.
     #[serde(default)]
     pub controller: BTreeMap<String, BTreeMap<String, Button>>,
-    /// A Steam Input layer that makes controller inputs send a mode's key
-    /// combos (e.g. UI mode on the Create button).
+    /// A Steam Input action layer one controller button toggles; steam
+    /// buttons naming it live in it (e.g. UI windows on Create).
     pub steam_layer: Option<SteamLayer>,
-    /// Controller inputs Steam turns into one keyboard chord each, for
-    /// actions the Gamepad UI can't hold (e.g. next bar arrangement).
+    /// Controller inputs Steam turns into one key each, for actions the
+    /// Gamepad UI can't hold (e.g. next bar arrangement, open a window).
     #[serde(default, rename = "steam_button")]
     pub steam_buttons: Vec<SteamButton>,
 }
@@ -31,6 +31,8 @@ pub struct Layout {
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct SteamButton {
+    /// The Steam layer this input lives in; none = the base layout.
+    pub layer: Option<String>,
     /// The controller input, for the setup sheet.
     pub input: String,
     pub key: String,
@@ -51,19 +53,10 @@ impl SteamButton {
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct SteamLayer {
-    /// The mode whose key combos the layer sends; its banner shows while
-    /// the layer is latched.
-    pub mode: String,
-    /// The controller button that latches the layer (for the setup sheet).
+    pub name: String,
+    /// The controller button that toggles the layer (for the setup sheet).
     pub button: String,
-    /// Controller input (see `PAD_INPUTS`) -> key in that mode.
-    pub keys: BTreeMap<String, String>,
 }
-
-/// Controller inputs, D-pad then face buttons by position.
-pub const PAD_INPUTS: &[&str] = &[
-    "left", "up", "right", "down", "west", "north", "east", "south",
-];
 
 /// Action slot for a controller layer and input. The layer name may end in
 /// the bar arrangement (1-3, default 1): `lt` = `lt1`, `rt2`, `none3`.
@@ -204,7 +197,11 @@ impl Chord {
         .filter(|(m, _)| self.mods.contains(m))
         .map(|(_, name)| *name)
         .collect();
-        let key = keys::wow_name(&self.key).expect("validated key");
+        // Steam's key picker calls these "Keypad 8".
+        let key = match self.key.strip_prefix("kp") {
+            Some(n) if keys::is_numpad_digit(&self.key) => format!("Keypad {n}"),
+            _ => keys::wow_name(&self.key).expect("validated key"),
+        };
         parts.push(&key);
         parts.join(" + ")
     }
@@ -429,6 +426,11 @@ fn validate(layout: &Layout) -> Vec<String> {
     }
     for (i, b) in layout.steam_buttons.iter().enumerate() {
         let at = format!("steam_button {} ({})", i + 1, b.input);
+        if let Some(layer) = &b.layer
+            && layout.steam_layer.as_ref().is_none_or(|l| l.name != *layer)
+        {
+            errors.push(format!("{at}: no [steam_layer] named `{layer}`"));
+        }
         if let Err(e) = check_command(&b.command) {
             errors.push(format!("{at}: {e}"));
         }
@@ -443,37 +445,6 @@ fn validate(layout: &Layout) -> Vec<String> {
             )),
             _ => {
                 wow_bindings.insert(chord, (b.command.clone(), at));
-            }
-        }
-    }
-
-    if let Some(steam) = &layout.steam_layer {
-        match names.get(steam.mode.as_str()) {
-            None => errors.push(format!("steam_layer: no mode named `{}`", steam.mode)),
-            Some(mode) if mode.banner.is_none() || mode.passthrough => errors.push(format!(
-                "steam_layer: mode `{}` needs a banner and can't be passthrough",
-                steam.mode
-            )),
-            Some(mode) => {
-                for (input, key) in &steam.keys {
-                    let at = format!("steam_layer.keys.{input}");
-                    if !PAD_INPUTS.contains(&input.as_str()) {
-                        errors.push(format!(
-                            "{at}: unknown input (have: {})",
-                            PAD_INPUTS.join(", ")
-                        ));
-                    }
-                    match mode.keys.get(key) {
-                        Some(Action::Command(_)) | Some(Action::Button(_)) => {}
-                        Some(Action::Switch(_)) => {
-                            errors.push(format!("{at}: `{key}` switches modes; pick a game action"))
-                        }
-                        None => errors.push(format!(
-                            "{at}: mode `{}` has nothing on `{key}`",
-                            steam.mode
-                        )),
-                    }
-                }
             }
         }
     }
@@ -703,37 +674,6 @@ mod tests {
     }
 
     #[test]
-    fn steam_layer_is_checked() {
-        let e = errors(
-            r#"
-            [[mode]]
-            name = "a"
-            label = "A"
-            banner = "f9"
-            [mode.keys]
-            tab = { mode = "ui" }
-            [[mode]]
-            name = "ui"
-            label = "UI"
-            banner = "f10"
-            mods = ["ctrl", "alt"]
-            [mode.keys]
-            i = "TOGGLECHARACTER0"
-            tab = { mode = "a" }
-            [steam_layer]
-            mode = "ui"
-            button = "Create"
-            [steam_layer.keys]
-            up = "i"
-            down = "tab"
-            left = "z"
-            sideways = "i"
-            "#,
-        );
-        assert_eq!(e.len(), 3, "{e:?}");
-    }
-
-    #[test]
     fn steam_buttons_are_checked() {
         let e = errors(
             r#"
@@ -753,9 +693,16 @@ mod tests {
             key = "lsft"
             command = "wowkeys:dance"
             does = "dance"
+            [[steam_button]]
+            layer = "Nope"
+            input = "D-pad Up"
+            key = "kp8"
+            command = "TOGGLECHARACTER0"
+            does = "character"
             "#,
         );
-        assert_eq!(e.len(), 3, "{e:?}");
+        assert_eq!(e.len(), 4, "{e:?}");
+        assert!(e[3].contains("no [steam_layer] named `Nope`"), "{e:?}");
         assert!(e[0].contains("already bound to JUMP"), "{e:?}");
     }
 
@@ -766,6 +713,7 @@ mod tests {
             "Ctrl + Alt + I"
         );
         assert_eq!(Chord::banner("f10").human(), "Ctrl + Alt + Shift + F10");
+        assert_eq!(Chord::new(&[], "kp8").human(), "Keypad 8");
     }
 
     #[test]

@@ -2,43 +2,40 @@
 # Steam Input setup
 
 Set up once in Steam: Battle.net in your library → Manage → Controller
-layout. WowKeys already binds every combo below, so nothing changes in
-WoW. Where a row says Ctrl / Alt / Shift, send the key plus extra
-commands for those modifiers.
+layout. Each input below sends one key; WowKeys binds that key in WoW, so
+nothing else needs setting up there. Inputs not listed keep their normal
+controller behaviour.
 
-## Single buttons
+## Base layout
 
-Each input sends one combo.
-
-| Controller input | Send | Does |
+| Controller input | Key | Does |
 |---|---|---|
 | Touchpad, right half (click) | F8 | next bar arrangement (1 → 2 → 3 → 1) |
 | Touchpad, left half (click) | F7 | previous bar arrangement (1 → 3 → 2 → 1) |
 
 ## UI layer on Create (PlayStation) / View (Xbox)
 
-The controller's **Create (PlayStation) / View (Xbox)** button latches a Steam Input action layer
-in which the controller sends the keyboard UI-mode combos. Inputs not
-listed keep their normal controller behaviour (Circle/B still closes
-windows).
+**Create (PlayStation) / View (Xbox)** toggles a Steam action layer. While it's on, the inputs below
+open windows; everything else stays native, so inside a window the
+sticks move, Cross/A accepts, Circle/B cancels and the bumpers change
+tabs, as Blizzard's Gamepad UI intends.
 
-1. **Action Layers → add a layer** named `WowKeys UI`.
-2. **Base layer, Create (PlayStation) / View (Xbox):** command *Add Layer* `WowKeys UI`, plus an
-   extra command sending **Ctrl + Alt + Shift + F10** (shows `-- UI --`).
-3. **In the `WowKeys UI` layer, Create (PlayStation) / View (Xbox):** command *Remove Layer*
-   `WowKeys UI`, plus an extra command sending **Ctrl + Alt + Shift + F9** (shows
-   `-- COMBAT --`).
-4. **In the `WowKeys UI` layer**, bind each input below:
+1. **Action Layers → add a layer** named `UI`.
+2. **Base layout, Create (PlayStation) / View (Xbox):** *Add Layer* `UI`.
+3. **In the `UI` layer, Create (PlayStation) / View (Xbox):** *Remove Layer* `UI`.
+4. **In the `UI` layer**, bind each input below to its key.
+5. Optional, safer: if Steam lets you *add an extra command* to an input,
+   give each one below a second command *Remove Layer* `UI`. Then one
+   press opens the window and drops you back to your normal controller,
+   so the D-pad can't be left opening windows when a fight starts.
 
-| Controller input | Send | Does |
+| Controller input | Key | Does |
 |---|---|---|
-| D-pad Left | Ctrl + Alt + P | TOGGLETALENTS |
-| D-pad Up | Ctrl + Alt + I | TOGGLECHARACTER0 |
-| D-pad Right | Ctrl + Alt + O | TOGGLESPELLBOOK |
-| D-pad Down | Ctrl + Alt + U | OPENALLBAGS |
-| Square / X | Ctrl + Alt + M | TOGGLEWORLDMAP |
-| Triangle / Y | Ctrl + Alt + L | TOGGLEQUESTLOG |
-| Cross / A | Ctrl + Alt + B | BAGNON_BANK_TOGGLE |
+| D-pad Up | Keypad 8 | character |
+| D-pad Right | Keypad 6 | spellbook |
+| D-pad Down | Keypad 2 | bags |
+| D-pad Left | Keypad 4 | talents |
+| Triangle / Y | Keypad 9 | quest log |
+| Square / X | Keypad 7 | map |
 
-Release a latched trigger before using the layer: inside windows the
-triggers switch focus between frames.
+Keep Num Lock on, in case Steam sends the keypad keys as scan codes.

@@ -369,19 +369,22 @@ drink/eat/hearth/mount, LT D-pad armor/intellect/water/food. The
 banner shows `· BAR n` while the Gamepad UI is visible (WowKeys reads the
 slot on the first controller button every 0.25 s).
 
-**Controller UI layer (decided, built):** quick menu access without the
-radial menu. Steam Input action layer latched by **Create** (PlayStation;
-View on Xbox; Forever leaves it unused, Options opens the radial menu). In
-the layer the controller sends the keyboard UI-mode combos, which WowKeys
-already binds (keyboard bindings stay live with the Gamepad UI on,
-confirmed). `[steam_layer]` in `layout.toml` names the mode and maps
-controller inputs to that mode's keys; `cargo run` writes the Steam setup
-sheet `wow/steam-layers.md` (GENERATED). Entering/leaving also sends the
-mode's / home's banner combo, so the banner shows `-- UI --` while the
-layer is latched (kanata's keyboard mode doesn't change; the banner
-follows whichever device switched last). Circle/B is left native so it
-still closes windows. No separate world layer: buffs/conjure/food/hearth
-are already on the LT+RT controller bar.
+**Controller UI layer (decided, rebuilt for single keys):** quick window
+access without the radial menu. **Create** (View on Xbox) toggles a Steam
+action layer (Add Layer / Remove Layer, one command each). In it D-pad
+Up/Right/Down/Left open character/spellbook/bags/talents and Triangle /
+Square the quest log / map, each by sending one **numpad key** (8/6/2/4,
+9/7), which WowKeys binds (kanata passes the numpad through; no mode uses
+it). **Cross (accept), Circle (cancel), the sticks (move focus), bumpers
+and triggers stay native**, so Blizzard's Gamepad UI works inside windows
+(owner: sticks navigate, X accepts, Circle cancels). Bank opens by
+talking to a banker, so it's not in the layer. Steam sends one key per
+input (owner), so the first design (UI-mode Ctrl+Alt chords plus banner
+chords) couldn't work; the controller layer has no banner. Optional,
+safer: an extra *Remove Layer* command per input makes it one-shot.
+`[steam_layer]` names the layer and its button; `[[steam_button]]`
+entries with `layer = "UI"` live in it; `cargo run` writes the setup
+sheet `wow/steam-layers.md` (GENERATED).
 
 **Controller play doesn't need kanata:** Steam Input (LT latch, touchpad,
 Create layer, banner combos) talks to WoW directly and WowKeys binds the
@@ -468,7 +471,7 @@ addon/WowKeys/Commands.lua # dialog/loot/popup/vendor commands (wowkeys:*)
 addon/WowKeys/WowKeys.lua # applies Layout.lua, mode banner
 addon/tests/dryrun.lua    # offline test of the addon with stubbed WoW APIs
 wow/setup.md              # addon install, one-time game settings
-wow/steam-layers.md       # GENERATED: Steam Input setup for the controller UI layer
+wow/steam-layers.md       # GENERATED: Steam Input setup (touchpad paging, UI layer)
 ```
 
 ## Open questions
@@ -580,8 +583,9 @@ learns the first one, one spell per press.
 - [x] Controller: touchpad pages arrangements (also in combat); RT is a
       plain hold, LT still latches; stale Poly macro cleared.
 - [x] Controller: the keyboard bars are unchanged.
-- [ ] Controller UI layer: set up per `wow/steam-layers.md`; Create shows
-      `-- UI --`, D-pad/face open the windows, Create again shows COMBAT.
+- [ ] Controller UI layer: set up per `wow/steam-layers.md`; with it on,
+      D-pad/Triangle/Square open the windows, sticks/Cross/Circle work
+      inside them, Create again turns it off. Numpad keys reach WoW.
 
 Later:
 - [ ] `A` interacts with objects too (assumed `INTERACTTARGET`).

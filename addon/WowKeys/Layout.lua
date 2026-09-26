@@ -75,6 +75,12 @@ WowKeysLayout = {
     { "CTRL-/", "NAMEPLATES" },
     { "F8", "CLICK WowKeysPage:LeftButton" },
     { "F7", "CLICK WowKeysPage:RightButton" },
+    { "NUMPAD8", "TOGGLECHARACTER0" },
+    { "NUMPAD6", "TOGGLESPELLBOOK" },
+    { "NUMPAD2", "OPENALLBAGS" },
+    { "NUMPAD4", "TOGGLETALENTS" },
+    { "NUMPAD9", "TOGGLEQUESTLOG" },
+    { "NUMPAD7", "TOGGLEWORLDMAP" },
   },
   buttons = {
     { slot = 1, spell = "Frostbolt" },

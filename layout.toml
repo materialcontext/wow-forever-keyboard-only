@@ -199,29 +199,14 @@ ret = { mode = "combat", send = "ret" }
 esc = { mode = "combat", send = "esc" }
 caps = { mode = "combat", send = "esc" }
 
-# Controller UI layer (Steam Input): tapping Create latches a layer in which
-# the controller sends the UI-mode combos below; tap Create again to leave.
-# `cargo run` writes the Steam setup steps to wow/steam-layers.md.
-# Inputs as in [controller]; values are keys of the named mode. Circle/B is
-# left alone so it still closes windows.
-[steam_layer]
-mode = "ui"
-button = "Create (PlayStation) / View (Xbox)"
-
-[steam_layer.keys]
-up = "i"       # character
-right = "o"    # spellbook
-down = "u"     # bags
-left = "p"     # talents
-north = "l"    # quest log
-west = "m"     # map
-south = "b"    # bank
-
-# Single controller inputs Steam turns into one keyboard chord, for actions
-# the Gamepad UI can't hold. WowKeysPage is a secure button that clicks the
-# Gamepad UI's own change-page button (an addon may not page it directly).
-# LeftButton = next arrangement, RightButton = previous (tested).
-# Plain keys: Steam sends one key per input.
+# Steam Input: controller inputs that each send one key (Steam sends one
+# key per input), which WowKeys binds to a WoW command. `input` and `does`
+# are for the setup sheet `cargo run` writes to wow/steam-layers.md; a
+# `layer` puts the input in the [steam_layer].
+#
+# WowKeysPage is a secure button that clicks the Gamepad UI's own
+# change-page button (an addon may not page it directly). LeftButton =
+# next arrangement, RightButton = previous (tested).
 [[steam_button]]
 input = "Touchpad, right half (click)"
 key = "f8"
@@ -233,6 +218,58 @@ input = "Touchpad, left half (click)"
 key = "f7"
 command = "CLICK WowKeysPage:RightButton"
 does = "previous bar arrangement (1 → 3 → 2 → 1)"
+
+# UI layer: Create toggles it in Steam. D-pad and Triangle/Square open
+# windows; Cross (accept), Circle (cancel), sticks (move focus), bumpers
+# and triggers stay native so Blizzard's Gamepad UI works inside windows.
+# Numpad keys: kanata passes them through and no mode uses them. The
+# D-pad matches the numpad arrows (8 up, 6 right, 2 down, 4 left). Bank
+# opens by talking to a banker, so it isn't here.
+[steam_layer]
+name = "UI"
+button = "Create (PlayStation) / View (Xbox)"
+
+[[steam_button]]
+layer = "UI"
+input = "D-pad Up"
+key = "kp8"
+command = "TOGGLECHARACTER0"
+does = "character"
+
+[[steam_button]]
+layer = "UI"
+input = "D-pad Right"
+key = "kp6"
+command = "TOGGLESPELLBOOK"
+does = "spellbook"
+
+[[steam_button]]
+layer = "UI"
+input = "D-pad Down"
+key = "kp2"
+command = "OPENALLBAGS"
+does = "bags"
+
+[[steam_button]]
+layer = "UI"
+input = "D-pad Left"
+key = "kp4"
+command = "TOGGLETALENTS"
+does = "talents"
+
+[[steam_button]]
+layer = "UI"
+input = "Triangle / Y"
+key = "kp9"
+command = "TOGGLEQUESTLOG"
+does = "quest log"
+
+[[steam_button]]
+layer = "UI"
+input = "Square / X"
+key = "kp7"
+command = "TOGGLEWORLDMAP"
+does = "map"
 
 # Controller (Forever's Gamepad UI). The addon fills these bars the same
 # way it fills the keyboard bars; bind nothing by hand.

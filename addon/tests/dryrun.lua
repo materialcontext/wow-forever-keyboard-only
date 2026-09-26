@@ -157,6 +157,8 @@ check(actions[197][2] == "MyOwn", "the player's own macro left alone")
 check(actions[214][2] == 168 and actions[215][2] == 1459, "controller: buffs on arrangement 2")
 check(bindings["F8"] == "CLICK WowKeysPage:LeftButton" and bindings["F7"] == "CLICK WowKeysPage:RightButton",
   "touchpad keys page the controller bars both ways")
+check(bindings["NUMPAD8"] == "TOGGLECHARACTER0" and bindings["ALT-CTRL-I"] == "TOGGLECHARACTER0",
+  "controller UI layer key and keyboard UI key both open the character window")
 check(said("took off the bars.*Frostbolt"), "reports what it cleared")
 check(said("not learned yet: .*Ice Lance"), "reports unlearned spells")
 
