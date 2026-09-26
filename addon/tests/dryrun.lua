@@ -223,6 +223,14 @@ SlashCmdList.WOWKEYS("find auctionator")
 check(said("AUCTIONATOR_POST.*Post item") and said("2 binding%(s%) match"), "find lists matching bindings")
 check(not said("HEADER_AUCTIONATOR"), "find skips keybinding-menu headers")
 
+-- /wowkeys pad lists controller bindings and gamepad CVars.
+allBindings = { { "JUMP", "MOVEMENT", "SPACE", "PAD1" }, { "ACTIONBUTTON1", "ACTIONBAR", "J", "SHIFT-PAD2" } }
+cvars.GamePadEnable, cvars.GamePadEmulateShift = "1", "PADLTRIGGER"
+printed = {}
+SlashCmdList.WOWKEYS("pad")
+check(said("PAD1  %->  JUMP") and said("SHIFT%-PAD2  %->  ACTIONBUTTON1"), "pad lists pad bindings")
+check(said("2 controller binding") and said("GamePadEmulateShift = PADLTRIGGER"), "pad shows gamepad cvars")
+
 -- Chat banner, then combat starts: warning sound.
 frames.WowKeysMode_chat.scripts.OnClick()
 check(banner == "-- CHAT --", "banner")

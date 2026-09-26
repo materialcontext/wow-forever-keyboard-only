@@ -259,15 +259,43 @@ local function findBindings(text)
   print(("WowKeys: %d binding(s) match \"%s\"%s"):format(shown, text, shown > 40 and " (first 40 shown)" or ""))
 end
 
+-- Lists everything bound to a controller button, plus the controller
+-- settings, to learn how Forever's gamepad UI stores its bindings.
+local GAMEPAD_CVARS = { "GamePadEnable", "GamePadEmulateShift", "GamePadEmulateCtrl",
+  "GamePadEmulateAlt", "GamePadEmulateEsc" }
+
+local function padBindings()
+  local shown = 0
+  for i = 1, GetNumBindings() do
+    local command, _, key1, key2 = GetBinding(i)
+    for _, key in ipairs({ key1, key2 }) do
+      if command and key and key:find("PAD", 1, true) then
+        shown = shown + 1
+        print(("  %s  ->  %s"):format(key, command))
+      end
+    end
+  end
+  print(("WowKeys: %d controller binding(s)"):format(shown))
+  for _, name in ipairs(GAMEPAD_CVARS) do
+    local value = getCVar(name)
+    if value ~= nil then
+      print(("  %s = %s"):format(name, value))
+    end
+  end
+end
+
 SlashCmdList.WOWKEYS = function(arg)
   local text = arg:match("^find%s+(.+)$")
   if arg == "bars" then
     outOfCombat(applyBarsVerbose)
+  elseif arg == "pad" then
+    padBindings()
   elseif text then
     findBindings(text)
   else
     print("WowKeys: mode " .. current.label .. ", layout " .. L.revision)
     print("  /wowkeys bars         re-place spells and macros on the bars")
     print("  /wowkeys find <text>  list binding commands to use in layout.toml")
+    print("  /wowkeys pad          list controller bindings and settings")
   end
 end

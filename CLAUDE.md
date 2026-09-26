@@ -204,6 +204,39 @@ greeting, reward choice, trainer or loot window opens.
 Each mode-entry key also emits Ctrl+Alt+Shift+<banner> (F9 combat, F10 UI,
 F11 world, F12 chat; leader has none). WowKeys shows the mode label, like Vim's `-- INSERT --`.
 
+## Native controller (Forever "Gamepad UI (Alpha)")
+
+Researched 2026-09-26 from press/guide summaries (primary pages were
+unreachable from the dev sandbox); verify in game.
+
+- **Turn on:** Options → "Enable Gamepad UI (Alpha)". Xbox and PlayStation
+  pads.
+- **Menus:** Start/Menu opens a radial wheel. Its middle tab has Character,
+  Talents, Professions, Bags, Spellbook, Game Menu, Chat, Quests/Map.
+- **Inside windows:** D-pad moves focus between elements (no cursor),
+  triggers switch focus between open windows, bumpers change tabs, face
+  buttons do the common actions; Y opens a submenu for right-click-style
+  actions. This is the cursor-free window navigation we lack.
+- **Actions:** 8 positions (D-pad + face buttons) × 4 trigger layers
+  (none, LT, RT, LT+RT) = 32 bindings. Bound from the radial spellbook:
+  pick a spell, press X, press the combo (e.g. LT+RT+A). LB+RB opens
+  shortcut paging. A is fixed to Jump (players asking for full rebinding).
+- **Engine underneath** (since 9.0.1): pad buttons are ordinary binding
+  keys (`PAD1`–`PAD6`, `PADDUP`/`PADDDOWN`/`PADDLEFT`/`PADDRIGHT`,
+  `PADLSHOULDER`, `PADRSHOULDER`, `PADLTRIGGER`, `PADRTRIGGER`,
+  `PADLSTICK`, `PADRSTICK`, `PADFORWARD`, `PADBACK`), usable with
+  `SetBinding`. Triggers/bumpers act as modifiers via CVars
+  `GamePadEmulateShift` / `Ctrl` / `Alt` (classic defaults: Shift = LT,
+  Ctrl = LB), so a trigger layer is a modifier chord like `SHIFT-PAD1`:
+  the same shape as our modes' `mods`.
+- **Unknown:** whether the Forever Gamepad UI stores its bindings as those
+  standard bindings (then `layout.toml` could generate a controller
+  profile the addon applies) or in its own system; whether its window
+  navigation is reachable from keyboard bindings; how it coexists with
+  addons (Bagnon replaces the bag frame it may navigate).
+- `/wowkeys pad` lists every binding on a pad button plus the gamepad
+  CVars, to answer the first unknown in game.
+
 ## Addons
 
 Forever uses the modern API with Midnight's combat restrictions, so each
@@ -302,6 +335,9 @@ wow/setup.md              # addon install, one-time game settings
      focus), so protected actions like equipping work; show the focus's
      tooltip. Out of combat only. Start with bags, bank, character.
   Chat `/equip` and `/use` by name already work as a stopgap.
+  New option (see "Native controller"): use a real controller for window
+  navigation (hybrid), or play fully on controller with a profile
+  generated from `layout.toml`.
 - Group loot rolls (need/greed/pass) by key.
 
 ## Test 1 results (level 5, beta)
