@@ -198,3 +198,49 @@ passthrough = true
 ret = { mode = "combat", send = "ret" }
 esc = { mode = "combat", send = "esc" }
 caps = { mode = "combat", send = "esc" }
+
+# Controller (Forever's Gamepad UI, bar arrangement 1). The addon fills
+# these bars the same way it fills the keyboard bars; bind nothing by hand.
+#   Layers: none (no trigger), lt, rt, ltrt (both). Triggers latch via
+#   Steam Input (see wow/setup.md).
+#   Inputs: up, right, down, left (D-pad); north, east, south, west (face:
+#   Triangle/Y, Circle/B, Cross/A, Square/X). Without a trigger only the
+#   D-pad is free; the face buttons are jump, interact, menu, cancel.
+#   Macros defined in a mode above can be named without repeating the body.
+# Same placement rule as the keyboard: every fight -> easiest reach.
+
+[controller.none]    # the four you press most
+up = { spell = "Frostbolt" }
+right = { spell = "Ice Lance" }
+left = { spell = "Fire Blast" }
+down = { spell = "Frost Nova" }
+
+[controller.lt]      # rest of the rotation and control
+up = { spell = "Fireball" }
+right = { spell = "Arcane Missiles" }
+left = { spell = "Arcane Explosion" }
+down = { spell = "Cone of Cold" }
+north = { macro = "Blizzard" }
+east = { spell = "Counterspell" }
+south = { spell = "Blink" }
+west = { macro = "Poly" }
+
+[controller.rt]      # defensives and cooldowns
+up = { spell = "Mana Shield" }
+right = { spell = "Ice Block" }
+left = { spell = "Cold Snap" }
+down = { spell = "Evocation" }
+north = { spell = "Blood Fury" }
+east = { spell = "Frost Ward" }
+south = { macro = "HealthPot" }
+west = { spell = "Remove Lesser Curse" }
+
+[controller.ltrt]    # out of combat
+up = { spell = "Frost Armor" }
+right = { spell = "Arcane Intellect" }
+left = { spell = "Conjure Food" }
+down = { spell = "Conjure Water" }
+north = { macro = "Hearth" }
+east = { macro = "Mount" }
+south = { macro = "Drink" }
+west = { macro = "Eat" }

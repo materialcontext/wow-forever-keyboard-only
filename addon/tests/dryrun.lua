@@ -141,6 +141,9 @@ check(actions[6] == nil and actions[7] == nil, "duplicate Frostbolt/Fireball cle
 check(actions[3] == nil and actions[5] == nil, "stray spells cleared from managed slots")
 check(actions[10][1] == "item" and actions[12][1] == "item", "items left alone")
 check(actions[8][1] == "macro", "Blizzard macro")
+check(actions[182][2] == 116 and actions[181] == nil, "controller: Frostbolt on D-pad Up; unlearned Fire Blast slot empty")
+check(actions[189][1] == "macro" and actions[190][1] == "macro", "controller: Poly and Blizzard macros on LT face buttons")
+check(actions[202][2] == 168 and actions[203][2] == 1459, "controller: buffs on LT+RT")
 check(said("took off the bars.*Frostbolt"), "reports what it cleared")
 check(said("not learned yet: .*Ice Lance"), "reports unlearned spells")
 

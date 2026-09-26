@@ -273,6 +273,11 @@ positions to read the cross layout), and where arrangements 2/3 live
 (guess 209–236, 237–264; re-run after LB+RB+D-pad Right). Slot 397 is
 ExtraActionButton1 (Blizzard's special-action button), not ours.
 
+**Map confirmed** by padbuttons screen positions (WoW's y grows upward):
+each bar is two crosses, buttons 1–4 D-pad Left/Up/Right/Down, 5–8 face
+West/North/East/South. Implemented as `layout::pad_slot` with a test
+against the three known pairs below.
+
 **Known pairs (owner, PlayStation pad):** Fire Blast on RT+Triangle =
 slot 198, Fireball on RT+Circle = 199, Frostbolt on RT+Cross = 200. So the
 Right bar is the RT layer and buttons 5–8 run clockwise around the face
@@ -292,6 +297,15 @@ Blizzard's HUD keeps highlighting the latched layer. Caveat: latched
 triggers switch frame focus inside windows, so release them first. A
 WowKeys banner for latched layers (via the gamepad button state) is
 possible later if the HUD highlight isn't enough.
+
+**Built: `[controller.<layer>]` in `layout.toml`** (layers `none`, `lt`,
+`rt`, `ltrt`; inputs `up`/`right`/`down`/`left`, `north`/`east`/`south`/
+`west`) → spell or macro. The generator turns each into an action slot on
+arrangement 1 (181–208) and the addon places them like keyboard buttons.
+`{ macro = "Poly" }` may name a macro defined in a mode. Without a trigger
+only the D-pad is allowed (face buttons are fixed). Arrangements 2/3 are
+not mapped yet (slots unknown; would hold mana potion, focus macros,
+nameplates).
 
 **Transfer plan** (owner wants to play on controller if possible): our
 layout's spells and macros become controller bar content. The addon
@@ -478,6 +492,10 @@ learns the first one, one spell per press.
 - [ ] `/wowkeys find auction`, `post`, `cancel` (Auctionator under other
       names?).
 - [ ] Loot rolls and full-bag loot windows: note what you'd want to press.
+- [ ] Controller: after `/reload`, the four bars show the draft layout
+      (none: Frostbolt/Ice Lance/Fire Blast/Frost Nova on the D-pad; LT
+      rotation + control; RT defensives/cooldowns; LT+RT out of combat).
+- [ ] Controller: the keyboard bars are unchanged.
 
 Later:
 - [ ] `A` interacts with objects too (assumed `INTERACTTARGET`).

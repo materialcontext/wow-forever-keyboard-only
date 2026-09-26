@@ -1,6 +1,6 @@
 //! Layout -> addon/WowKeys/Layout.lua, the data the WowKeys addon applies.
 
-use crate::layout::{Action, Chord, Layout};
+use crate::layout::{Action, Chord, Layout, pad_slot};
 use std::collections::BTreeMap;
 
 pub fn render(layout: &Layout) -> String {
@@ -50,6 +50,21 @@ pub fn render(layout: &Layout) -> String {
                 lua_str(&mode.chord(key).wow()),
                 lua_str(&command)
             ));
+        }
+    }
+
+    for (layer, inputs) in &layout.controller {
+        for (input, b) in inputs {
+            let slot = pad_slot(layer, input).expect("validated controller slot");
+            if let (Some(name), Some(body)) = (&b.macro_name, &b.body) {
+                macros.insert(name.clone(), body.clone());
+            }
+            let what = match (&b.spell, &b.macro_name) {
+                (Some(spell), _) => format!("spell = {}", lua_str(spell)),
+                (_, Some(name)) => format!("macro = {}", lua_str(name)),
+                _ => continue,
+            };
+            buttons.push((slot, format!("    {{ slot = {slot}, {what} }},\n")));
         }
     }
 

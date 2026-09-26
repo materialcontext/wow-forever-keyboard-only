@@ -16,6 +16,45 @@ pub struct Layout {
     pub cvars: BTreeMap<String, String>,
     #[serde(rename = "mode")]
     pub modes: Vec<Mode>,
+    /// Forever's Gamepad UI bars: layer -> input -> spell or macro.
+    #[serde(default)]
+    pub controller: BTreeMap<String, BTreeMap<String, Button>>,
+}
+
+/// Action slot for a controller layer and input on bar arrangement 1.
+/// Slots are 180 + layer offset + button index. Mapped in game: the Top bar
+/// (no trigger, D-pad only) is 181-184, LT 185-192, RT 193-200, LT+RT
+/// 201-208; buttons 1-4 are D-pad left/up/right/down, 5-8 the face buttons
+/// west/north/east/south (Square/Triangle/Circle/Cross, Xbox X/Y/B/A).
+pub fn pad_slot(layer: &str, input: &str) -> Result<u16, String> {
+    let offset = match layer {
+        "none" => 0,
+        "lt" => 4,
+        "rt" => 12,
+        "ltrt" => 20,
+        _ => return Err(format!("unknown layer `{layer}` (none, lt, rt, ltrt)")),
+    };
+    let index = match input {
+        "left" => 1,
+        "up" => 2,
+        "right" => 3,
+        "down" => 4,
+        "west" => 5,
+        "north" => 6,
+        "east" => 7,
+        "south" => 8,
+        _ => {
+            return Err(format!(
+                "unknown input `{input}` (up, right, down, left, north, east, south, west)"
+            ));
+        }
+    };
+    if layer == "none" && index > 4 {
+        return Err(
+            "face buttons without a trigger are fixed (jump, interact, menu, cancel)".into(),
+        );
+    }
+    Ok(180 + offset + index)
 }
 
 #[derive(Debug, Deserialize)]
@@ -320,6 +359,39 @@ fn validate(layout: &Layout) -> Vec<String> {
             }
         }
     }
+    for (layer, inputs) in &layout.controller {
+        for (input, b) in inputs {
+            let at = format!("controller.{layer}.{input}");
+            if let Err(e) = pad_slot(layer, input) {
+                errors.push(format!("{at}: {e}"));
+            }
+            // `{ macro = "Poly" }` may refer to a macro defined in a mode.
+            let reference = b.macro_name.is_some() && b.body.is_none() && b.spell.is_none();
+            if b.bar.is_some() || b.button.is_some() {
+                errors.push(format!(
+                    "{at}: no bar/button here; the input picks the slot"
+                ));
+            } else if reference {
+                let name = b.macro_name.as_deref().unwrap_or_default();
+                if !macros.contains_key(name) {
+                    errors.push(format!("{at}: macro `{name}` isn't defined in any mode"));
+                }
+                continue;
+            } else if let Err(e) = check_button(b) {
+                errors.push(format!("{at}: {e}"));
+            }
+            if let Some(name) = &b.macro_name {
+                match macros.get(name.as_str()) {
+                    Some((body, other_at)) if *body != b.body.as_deref() => errors.push(format!(
+                        "{at}: macro `{name}` has a different body at {other_at}"
+                    )),
+                    _ => {
+                        macros.insert(name, (b.body.as_deref(), at.clone()));
+                    }
+                }
+            }
+        }
+    }
     errors
 }
 
@@ -454,6 +526,44 @@ mod tests {
             "#,
         );
         assert_eq!(e.len(), 2, "{e:?}");
+    }
+
+    #[test]
+    fn controller_slots_match_the_game() {
+        // Pairs confirmed in game (test with a PlayStation pad).
+        assert_eq!(pad_slot("rt", "north"), Ok(198)); // Fire Blast, RT+Triangle
+        assert_eq!(pad_slot("rt", "east"), Ok(199)); // Fireball, RT+Circle
+        assert_eq!(pad_slot("rt", "south"), Ok(200)); // Frostbolt, RT+Cross
+        assert_eq!(pad_slot("none", "left"), Ok(181));
+        assert_eq!(pad_slot("lt", "up"), Ok(186));
+        assert_eq!(pad_slot("ltrt", "down"), Ok(204));
+        assert!(pad_slot("none", "south").is_err());
+    }
+
+    #[test]
+    fn controller_entries_are_checked() {
+        let e = errors(
+            r#"
+            [[mode]]
+            name = "a"
+            label = "A"
+            banner = "f9"
+            [mode.keys]
+            j = { macro = "M", body = "/sit" }
+            [controller.none]
+            south = { spell = "Jump" }
+            [controller.rt]
+            up = { macro = "M", body = "/dance" }
+            down = { macro = "M" }
+            left = { macro = "Nope" }
+            sideways = { spell = "Blink" }
+            "#,
+        );
+        assert_eq!(e.len(), 4, "{e:?}");
+        assert!(
+            e.iter().any(|m| m.contains("`Nope` isn't defined")),
+            "{e:?}"
+        );
     }
 
     #[test]
