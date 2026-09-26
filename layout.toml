@@ -143,6 +143,7 @@ o = "TOGGLESPELLBOOK"
 p = "TOGGLETALENTS"
 l = "TOGGLEQUESTLOG"
 m = "TOGGLEWORLDMAP"
+b = "BAGNON_BANK_TOGGLE"  # bank (Bagnon), at a banker
 # Type into a text box that opened by itself (mail, search): Enter or Esc
 # ends it, like chat.
 "'" = { mode = "chat" }

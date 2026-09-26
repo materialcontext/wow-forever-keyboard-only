@@ -213,13 +213,29 @@ cmd("vendor")
 check(called("SellAllJunkItems") and called("RepairAllItems"), "vendor sells junk and repairs")
 
 -- /wowkeys find lists binding commands for layout.toml.
-local allBindings = { { "MOVEFORWARD", "HEADER", "E" }, { "AUCTIONATOR_POST", "ADDONS" }, { "AUCTIONATOR_CANCEL", "ADDONS" } }
+local allBindings = { { "MOVEFORWARD", "HEADER", "E" }, { "HEADER_AUCTIONATOR", "ADDONS" },
+  { "AUCTIONATOR_POST", "ADDONS" }, { "AUCTIONATOR_CANCEL", "ADDONS" } }
 function GetNumBindings() return #allBindings end
 function GetBinding(i) return unpack(allBindings[i]) end
 function GetBindingName(c) return ({ AUCTIONATOR_POST = "Post item" })[c] or c end
 printed = {}
 SlashCmdList.WOWKEYS("find auctionator")
 check(said("AUCTIONATOR_POST.*Post item") and said("2 binding%(s%) match"), "find lists matching bindings")
+check(not said("HEADER_AUCTIONATOR"), "find skips keybinding-menu headers")
+
+-- /wowkeys pad lists controller bindings and gamepad CVars.
+allBindings = { { "JUMP", "MOVEMENT", "SPACE", "PAD1" }, { "ACTIONBUTTON1", "ACTIONBAR", "J", "SHIFT-PAD2" } }
+cvars.GamePadEnable, cvars.GamePadEmulateShift = "1", "PADLTRIGGER"
+printed = {}
+SlashCmdList.WOWKEYS("pad")
+check(said("PAD1  %->  JUMP") and said("SHIFT%-PAD2  %->  ACTIONBUTTON1"), "pad lists pad bindings")
+check(said("2 controller binding") and said("GamePadEmulateShift = PADLTRIGGER"), "pad shows gamepad cvars")
+
+-- /wowkeys slots lists filled action slots by id.
+printed = {}
+SlashCmdList.WOWKEYS("slots")
+check(said("  1  spell  Frostbolt"), "slots lists a spell slot by id")
+check(said("filled action slot"), "slots prints a count")
 
 -- Chat banner, then combat starts: warning sound.
 frames.WowKeysMode_chat.scripts.OnClick()

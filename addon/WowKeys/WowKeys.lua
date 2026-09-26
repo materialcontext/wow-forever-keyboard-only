@@ -245,7 +245,10 @@ local function findBindings(text)
   for i = 1, GetNumBindings() do
     local command, _, key1, key2 = GetBinding(i)
     local name = command and GetBindingName(command) or ""
-    if command and (command:lower():find(text, 1, true) or name:lower():find(text, 1, true)) then
+    -- HEADER_* entries are section titles in the keybinding menu, not bindings.
+    local isHeader = command and command:find("^HEADER_")
+    if command and not isHeader
+      and (command:lower():find(text, 1, true) or name:lower():find(text, 1, true)) then
       shown = shown + 1
       if shown <= 40 then
         local keys = key1 and (" [" .. key1 .. (key2 and (", " .. key2) or "") .. "]") or ""
@@ -256,15 +259,63 @@ local function findBindings(text)
   print(("WowKeys: %d binding(s) match \"%s\"%s"):format(shown, text, shown > 40 and " (first 40 shown)" or ""))
 end
 
+-- Lists everything bound to a controller button, plus the controller
+-- settings, to learn how Forever's gamepad UI stores its bindings.
+local GAMEPAD_CVARS = { "GamePadEnable", "GamePadEmulateShift", "GamePadEmulateCtrl",
+  "GamePadEmulateAlt", "GamePadEmulateEsc" }
+
+local function padBindings()
+  local shown = 0
+  for i = 1, GetNumBindings() do
+    local command, _, key1, key2 = GetBinding(i)
+    for _, key in ipairs({ key1, key2 }) do
+      if command and key and key:find("PAD", 1, true) then
+        shown = shown + 1
+        print(("  %s  ->  %s"):format(key, command))
+      end
+    end
+  end
+  print(("WowKeys: %d controller binding(s)"):format(shown))
+  for _, name in ipairs(GAMEPAD_CVARS) do
+    local value = getCVar(name)
+    if value ~= nil then
+      print(("  %s = %s"):format(name, value))
+    end
+  end
+end
+
+-- Lists every filled action slot with its id, to learn which slots the
+-- controller's bars (12 bars of 8) use. Slot ids go up to 180.
+local function listSlots()
+  local shown = 0
+  for slot = 1, 180 do
+    local kind, id = GetActionInfo(slot)
+    if kind then
+      shown = shown + 1
+      local name = (kind == "spell" and spellName(id))
+        or (kind == "macro" and GetMacroInfo and GetMacroInfo(id))
+        or tostring(id)
+      print(("  %3d  %s  %s"):format(slot, kind, name or "?"))
+    end
+  end
+  print(("WowKeys: %d filled action slot(s)"):format(shown))
+end
+
 SlashCmdList.WOWKEYS = function(arg)
   local text = arg:match("^find%s+(.+)$")
   if arg == "bars" then
     outOfCombat(applyBarsVerbose)
+  elseif arg == "pad" then
+    padBindings()
+  elseif arg == "slots" then
+    listSlots()
   elseif text then
     findBindings(text)
   else
     print("WowKeys: mode " .. current.label .. ", layout " .. L.revision)
     print("  /wowkeys bars         re-place spells and macros on the bars")
     print("  /wowkeys find <text>  list binding commands to use in layout.toml")
+    print("  /wowkeys pad          list controller bindings and settings")
+    print("  /wowkeys slots        list filled action slots by id")
   end
 end
