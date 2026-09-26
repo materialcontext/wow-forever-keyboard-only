@@ -231,6 +231,12 @@ SlashCmdList.WOWKEYS("pad")
 check(said("PAD1  %->  JUMP") and said("SHIFT%-PAD2  %->  ACTIONBUTTON1"), "pad lists pad bindings")
 check(said("2 controller binding") and said("GamePadEmulateShift = PADLTRIGGER"), "pad shows gamepad cvars")
 
+-- /wowkeys slots lists filled action slots by id.
+printed = {}
+SlashCmdList.WOWKEYS("slots")
+check(said("  1  spell  Frostbolt"), "slots lists a spell slot by id")
+check(said("filled action slot"), "slots prints a count")
+
 -- Chat banner, then combat starts: warning sound.
 frames.WowKeysMode_chat.scripts.OnClick()
 check(banner == "-- CHAT --", "banner")

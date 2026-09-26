@@ -284,12 +284,31 @@ local function padBindings()
   end
 end
 
+-- Lists every filled action slot with its id, to learn which slots the
+-- controller's bars (12 bars of 8) use. Slot ids go up to 180.
+local function listSlots()
+  local shown = 0
+  for slot = 1, 180 do
+    local kind, id = GetActionInfo(slot)
+    if kind then
+      shown = shown + 1
+      local name = (kind == "spell" and spellName(id))
+        or (kind == "macro" and GetMacroInfo and GetMacroInfo(id))
+        or tostring(id)
+      print(("  %3d  %s  %s"):format(slot, kind, name or "?"))
+    end
+  end
+  print(("WowKeys: %d filled action slot(s)"):format(shown))
+end
+
 SlashCmdList.WOWKEYS = function(arg)
   local text = arg:match("^find%s+(.+)$")
   if arg == "bars" then
     outOfCombat(applyBarsVerbose)
   elseif arg == "pad" then
     padBindings()
+  elseif arg == "slots" then
+    listSlots()
   elseif text then
     findBindings(text)
   else
@@ -297,5 +316,6 @@ SlashCmdList.WOWKEYS = function(arg)
     print("  /wowkeys bars         re-place spells and macros on the bars")
     print("  /wowkeys find <text>  list binding commands to use in layout.toml")
     print("  /wowkeys pad          list controller bindings and settings")
+    print("  /wowkeys slots        list filled action slots by id")
   end
 end

@@ -206,36 +206,53 @@ F11 world, F12 chat; leader has none). WowKeys shows the mode label, like Vim's 
 
 ## Native controller (Forever "Gamepad UI (Alpha)")
 
-Researched 2026-09-26 from press/guide summaries (primary pages were
-unreachable from the dev sandbox); verify in game.
+From Forever HQ's and NerdsChalk's beta guides (owner pasted them
+2026-09-26; built from the BlizzCon demo and ConCon's video). Alpha:
+subject to change; verify in game.
 
-- **Turn on:** Options → "Enable Gamepad UI (Alpha)". Xbox and PlayStation
-  pads.
-- **Menus:** Start/Menu opens a radial wheel. Its middle tab has Character,
-  Talents, Professions, Bags, Spellbook, Game Menu, Chat, Quests/Map.
-- **Inside windows:** D-pad moves focus between elements (no cursor),
-  triggers switch focus between open windows, bumpers change tabs, face
-  buttons do the common actions; Y opens a submenu for right-click-style
-  actions. This is the cursor-free window navigation we lack.
-- **Actions:** 8 positions (D-pad + face buttons) × 4 trigger layers
-  (none, LT, RT, LT+RT) = 32 bindings. Bound from the radial spellbook:
-  pick a spell, press X, press the combo (e.g. LT+RT+A). LB+RB opens
-  shortcut paging. A is fixed to Jump (players asking for full rebinding).
-- **Engine underneath** (since 9.0.1): pad buttons are ordinary binding
-  keys (`PAD1`–`PAD6`, `PADDUP`/`PADDDOWN`/`PADDLEFT`/`PADDRIGHT`,
-  `PADLSHOULDER`, `PADRSHOULDER`, `PADLTRIGGER`, `PADRTRIGGER`,
-  `PADLSTICK`, `PADRSTICK`, `PADFORWARD`, `PADBACK`), usable with
-  `SetBinding`. Triggers/bumpers act as modifiers via CVars
-  `GamePadEmulateShift` / `Ctrl` / `Alt` (classic defaults: Shift = LT,
-  Ctrl = LB), so a trigger layer is a modifier chord like `SHIFT-PAD1`:
-  the same shape as our modes' `mods`.
-- **Unknown:** whether the Forever Gamepad UI stores its bindings as those
-  standard bindings (then `layout.toml` could generate a controller
-  profile the addon applies) or in its own system; whether its window
-  navigation is reachable from keyboard bindings; how it coexists with
-  addons (Bagnon replaces the bag frame it may navigate).
-- `/wowkeys pad` lists every binding on a pad button plus the gamepad
-  CVars, to answer the first unknown in game.
+- **Turn on:** Options → Gameplay → Gamepad (Alpha) → "Enable Gamepad UI
+  (Alpha)". **Keyboard and gamepad layouts are kept separately** when
+  toggling, so a controller profile doesn't disturb the keyboard one.
+- **Action bars:** a cross of 8 inputs (D-pad + face buttons) × 4 layers
+  (none, LT, RT, LT+RT) × 3 arrangements (switch with LB+RB+D-pad Right)
+  = 12 bars. Unmodified face buttons are fixed: A jump, X auto-attack /
+  contextual interact, Y context menu (right-click), B cancel (Esc).
+  Unmodified D-pad and all trigger layers take spells, items and (likely)
+  macros.
+- **Binding:** spellbook → highlight → X "Bind to Action Bar" → press the
+  combo. Items: bags → Y "More" → Bind.
+- **Targeting:** RB tap = enemy ahead, RB + D-pad/stick cycles enemies;
+  LB tap = friendly ahead; hold LB + A self, X pet, B assist, Y mark;
+  LB + D-pad = group members by frame position.
+- **Shortcuts (hold LB+RB):** D-pad Up quests, D-pad Down chat, D-pad Right
+  bar arrangement, B Combined Backpack, X sheathe, Y buff viewer, right
+  stick camera zoom.
+- **Menus:** Start opens a radial menu (right stick browses, LB/RB tabs):
+  Character, Talents, Professions, Bags, Spellbook, Game Menu, Chat,
+  Quests/Map; left tab Group Finder, Collections, Social…; right PvP,
+  Calendar. In the menu, D-pad Down sit/stand, Up emotes.
+- **Windows (the cursor-free navigation we lacked):** D-pad moves focus,
+  triggers switch between open frames, bumpers change tabs, X confirms /
+  equips, Y "More" (split, destroy, bind), B closes. Bags support moving,
+  equipping, stack splitting; character panel works; quest log and map
+  (bumpers zoom, X places a marker). NPCs: walk up and press the X prompt,
+  D-pad picks the quest, Accept.
+- **Gaps:** typing chat still needs a keyboard. Addon compatibility
+  (Bagnon vs. the Combined Backpack) is untested.
+- **Engine underneath** (since 9.0.1): pad buttons are binding keys
+  (`PAD1`–`PAD6`, `PADDUP`…, `PADLTRIGGER`, `PADRTRIGGER`, `PADLSHOULDER`,
+  …) and triggers can act as modifiers (`GamePadEmulateShift`/`Ctrl`/`Alt`).
+  Whether Forever's Gamepad UI uses these standard bindings is unknown.
+
+**Transfer plan** (owner wants to play on controller if possible): our
+layout's spells and macros become controller bar content. The addon
+already places spells/macros in action slots, so `layout.toml` could gain
+a controller section (combo → spell/macro) that the addon places into the
+controller bars' slots. Needs, from the game: which action slot ids the
+controller bars use and whether bindings are standard. Tools:
+`/wowkeys pad` (bindings on pad buttons + gamepad CVars), `/wowkeys slots`
+(filled action slots by id). Focus/target-focus/clear-focus become macros
+on bar slots; dialogs, loot, trainers and windows are handled natively.
 
 ## Addons
 
