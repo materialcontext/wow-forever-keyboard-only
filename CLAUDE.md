@@ -271,7 +271,17 @@ ActionButton<n>` plus a matching `GamepadActionBarEditFrame…` for edit
 mode. Unknown: which input each Button<n> is (padbuttons now prints screen
 positions to read the cross layout), and where arrangements 2/3 live
 (guess 209–236, 237–264; re-run after LB+RB+D-pad Right). Slot 397 is
-ExtraActionButton1 (Blizzard's special-action button), not ours. WowKeys only manages slots
+ExtraActionButton1 (Blizzard's special-action button), not ours.
+
+**Known pairs (owner, PlayStation pad):** Fire Blast on RT+Triangle =
+slot 198, Fireball on RT+Circle = 199, Frostbolt on RT+Cross = 200. So the
+Right bar is the RT layer and buttons 5–8 run clockwise around the face
+buttons from the left: 5 Square/X(Xbox), 6 Triangle/Y, 7 Circle/B,
+8 Cross/A. Working assumption until padbuttons positions confirm: buttons
+1–4 are the D-pad in the same order (1 Left, 2 Up, 3 Right, 4 Down); Top
+bar = no trigger (D-pad only), Left bar = LT, Bottom bar = LT+RT. So slot
+= base + layer offset + index, with base 181 for arrangement 1 and layer
+offsets none 0 (4 slots), LT 4, RT 12, LT+RT 20. WowKeys only manages slots
 1–12 and 61–69, so it never touches controller slots.
 
 **Trigger latching (decided):** the owner wants LT/RT to latch (tap on,
