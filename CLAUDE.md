@@ -261,7 +261,17 @@ bindings (the Gamepad UI routes buttons itself). So the addon **can**
 place `layout.toml` content into controller bars with `PlaceAction`; what's
 missing is the slot → (arrangement, layer, input) map.
 `/wowkeys padbuttons` lists frames showing slots > 180 with their frame
-paths, to read that map off the Gamepad UI. WowKeys only manages slots
+paths, to read that map off the Gamepad UI.
+
+**Third probe: the arrangement shown is four bars, 28 slots:**
+Top 181–184 (4, no trigger: D-pad only, face buttons fixed), Left 185–192,
+Right 193–200, Bottom 201–208 (8 each; presumably LT, RT, LT+RT). Frame
+names are `GamepadMainActionBarFramePageUnit<Side>CenteredAnchor<Side>Bar
+ActionButton<n>` plus a matching `GamepadActionBarEditFrame…` for edit
+mode. Unknown: which input each Button<n> is (padbuttons now prints screen
+positions to read the cross layout), and where arrangements 2/3 live
+(guess 209–236, 237–264; re-run after LB+RB+D-pad Right). Slot 397 is
+ExtraActionButton1 (Blizzard's special-action button), not ours. WowKeys only manages slots
 1–12 and 61–69, so it never touches controller slots.
 
 **Transfer plan** (owner wants to play on controller if possible): our

@@ -306,26 +306,45 @@ local function listSlots()
 end
 
 -- Lists every frame that shows an action slot above 180 (the controller
--- bars), with its frame path, to learn which slot is which controller
--- input (e.g. "...LTLayer.Button3").
+-- bars) with a short name and its on-screen centre, to learn which slot is
+-- which controller input. The Gamepad UI has a main bar frame and an edit
+-- frame for the same slots; only the main one is listed when present.
+local function frameName(frame)
+  return (frame.GetDebugName and frame:GetDebugName()) or frame:GetName() or "?"
+end
+
+local function shortName(name)
+  local bar, n = name:match("Anchor(%a+)BarActionButton(%d+)$")
+  return bar and (bar .. "." .. n) or name
+end
+
 local function listPadButtons()
-  local rows = {}
+  local rows, hasMain = {}, false
   local frame = EnumerateFrames()
   while frame do
     local ok, slot = pcall(function()
       return frame.action or (frame.GetAttribute and frame:GetAttribute("action"))
     end)
     if ok and type(slot) == "number" and slot > 180 then
-      local name = (frame.GetDebugName and frame:GetDebugName()) or frame:GetName() or "?"
-      table.insert(rows, { slot, name })
+      local name = frameName(frame)
+      local x, y -- (`a and f()` would keep only f's first result)
+      if frame.GetCenter then x, y = frame:GetCenter() end
+      local isMain = name:find("GamepadMainActionBar", 1, true) ~= nil
+      hasMain = hasMain or isMain
+      table.insert(rows, { slot, name, x, y, isMain })
     end
     frame = EnumerateFrames(frame)
   end
   table.sort(rows, function(a, b) return a[1] < b[1] end)
+  local shown = 0
   for _, r in ipairs(rows) do
-    print(("  %3d  %s"):format(r[1], r[2]))
+    if r[5] or not hasMain then
+      shown = shown + 1
+      local where = (r[3] and r[4]) and ("  (%d, %d)"):format(r[3], r[4]) or ""
+      print(("  %3d  %s%s"):format(r[1], shortName(r[2]), where))
+    end
   end
-  print(("WowKeys: %d button(s) on slots above 180"):format(#rows))
+  print(("WowKeys: %d button(s) on slots above 180"):format(shown))
 end
 
 SlashCmdList.WOWKEYS = function(arg)

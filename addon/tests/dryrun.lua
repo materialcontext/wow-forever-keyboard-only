@@ -241,9 +241,11 @@ check(said("filled action slot"), "slots prints a count")
 
 -- /wowkeys padbuttons lists frames pointing at slots above 180.
 local fakeFrames = {
-  { action = 197, GetDebugName = function() return "GamePadHUD.LT.Button1" end },
+  { action = 197, GetDebugName = function() return "GamepadMainActionBarFramePageUnitRightCenteredAnchorRightBarActionButton5" end,
+    GetCenter = function() return 900.4, 120.6 end },
+  { action = 197, GetDebugName = function() return "GamepadActionBarEditFramePageUnitRightCenteredAnchorRightBarActionButton5" end },
   { action = 5 },
-  { GetAttribute = function(_, k) return k == "action" and 182 or nil end, GetName = function() return "PadBtn182" end },
+  { action = 182, GetDebugName = function() return "GamepadMainActionBarFramePageUnitTopCenteredAnchorTopBarActionButton2" end },
 }
 function EnumerateFrames(after)
   if not after then return fakeFrames[1] end
@@ -251,8 +253,8 @@ function EnumerateFrames(after)
 end
 printed = {}
 SlashCmdList.WOWKEYS("padbuttons")
-check(said("182  PadBtn182") and said("197  GamePadHUD.LT.Button1"), "padbuttons lists controller buttons by slot")
-check(said("2 button%(s%) on slots above 180"), "padbuttons skips keyboard slots")
+check(said("182  Top.2") and said("197  Right.5  %(900, 120%)"), "padbuttons shows short names and positions")
+check(said("2 button%(s%) on slots above 180"), "padbuttons skips keyboard slots and edit-frame duplicates")
 
 -- Chat banner, then combat starts: warning sound.
 frames.WowKeysMode_chat.scripts.OnClick()
