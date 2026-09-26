@@ -342,7 +342,8 @@ etc.). `/wowkeys pagetest` makes `WowKeysPageNext` (SecureActionButton,
 If it pages without the "blocked" warning (in and out of combat), it goes
 into `layout.toml` as the binding command `CLICK WowKeysPageNext:LeftButton`.
 **Result: Ctrl+F8 pages the arrangements, no warning** (owner, 2026-09-26).
-Ctrl+F7 (right-click) works too; which direction it goes is unrecorded.
+Ctrl+F7 (right-click) goes **backwards** (owner): `CLICK WowKeysPage:RightButton`
+= previous arrangement, not bound yet.
 RB tap targeting works while LT is latched. **Built:** `WowKeysPage`
 (set up out of combat by the ticker once the Gamepad UI exists) and a
 `[[steam_button]]` entry: touchpad left half → Ctrl+F8 →

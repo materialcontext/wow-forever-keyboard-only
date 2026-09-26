@@ -220,6 +220,7 @@ south = "b"    # bank
 # Single controller inputs Steam turns into one keyboard chord, for actions
 # the Gamepad UI can't hold. WowKeysPage is a secure button that clicks the
 # Gamepad UI's own change-page button (an addon may not page it directly).
+# LeftButton = next arrangement, RightButton = previous (tested).
 [[steam_button]]
 input = "Touchpad, left half (click)"
 key = "f8"
