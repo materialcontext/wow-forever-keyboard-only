@@ -75,11 +75,11 @@ character sheet, the triggers switch focus between open frames.
 
 ## Controller: touchpad halves (Steam Input)
 
-The left half of the touchpad cycles bar arrangements (it sends the
-combo in `wow/steam-layers.md`); the right half keeps opening the radial
-menu. In the controller layout → Touchpad (center pad): set its style to
+The touchpad pages bar arrangements: right half next, left half
+previous (keys in `wow/steam-layers.md`). The radial menu stays on its
+own button, so the touchpad doesn't need it. In the controller layout → Touchpad (center pad): set its style to
 **Directional Pad** (or a split if Steam offers one) with **Requires
-Click** on. Left: **F8** (next arrangement). Up: **F7** (previous). Right:
-the **Options** button. Down: leave empty for now. Steam's names here vary
+Click** on. Right: **F8** (next arrangement). Left: **F7** (previous).
+Up/Down: leave empty for now. Steam's names here vary
 between versions; the goal is only left click → combo, right click →
 Options.

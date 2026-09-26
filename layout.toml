@@ -223,13 +223,13 @@ south = "b"    # bank
 # LeftButton = next arrangement, RightButton = previous (tested).
 # Plain keys: Steam sends one key per input.
 [[steam_button]]
-input = "Touchpad, left half (click)"
+input = "Touchpad, right half (click)"
 key = "f8"
 command = "CLICK WowKeysPage:LeftButton"
 does = "next bar arrangement (1 → 2 → 3 → 1)"
 
 [[steam_button]]
-input = "Touchpad, top half (click)"
+input = "Touchpad, left half (click)"
 key = "f7"
 command = "CLICK WowKeysPage:RightButton"
 does = "previous bar arrangement (1 → 3 → 2 → 1)"
