@@ -143,9 +143,6 @@ o = "TOGGLESPELLBOOK"
 p = "TOGGLETALENTS"
 l = "TOGGLEQUESTLOG"
 m = "TOGGLEWORLDMAP"
-# Addon settings panels (names from /wowkeys find leatrix).
-"[" = "LEATRIX_PLUS_GLOBAL_TOGGLE"
-"]" = "LEATRIX_MAPS_GLOBAL_TOGGLE"
 # Type into a text box that opened by itself (mail, search): Enter or Esc
 # ends it, like chat.
 "'" = { mode = "chat" }
@@ -188,7 +185,6 @@ f = "FOCUSTARGET"                               # current target becomes focus
 t = "TARGETFOCUS"                               # target your focus
 c = { macro = "ClearFocus", body = "/clearfocus" }
 "/" = "NAMEPLATES" # toggle enemy nameplates; off again at login
-r = "LEATRIX_PLUS_GLOBAL_RARE"   # announce the rare you're targeting
 
 [[mode]]
 name = "chat"

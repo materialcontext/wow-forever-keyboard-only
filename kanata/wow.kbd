@@ -30,18 +30,15 @@
   os-A-C-S-u (fork A-C-S-u u (lalt lctl lmet))
   os-A-C-i (fork A-C-i i (lalt lctl lmet))
   os-A-C-l (fork A-C-l l (lalt lctl lmet))
-  os-A-C-lbrc (fork A-C-[ [ (lalt lctl lmet))
   os-A-C-m (fork A-C-m m (lalt lctl lmet))
   os-A-C-o (fork A-C-o o (lalt lctl lmet))
   os-A-C-p (fork A-C-p p (lalt lctl lmet))
-  os-A-C-rbrc (fork A-C-] ] (lalt lctl lmet))
   os-A-C-u (fork A-C-u u (lalt lctl lmet))
   os-C-c (fork C-c c (lalt lctl lmet))
   os-C-f (fork C-f f (lalt lctl lmet))
   os-C-j (fork C-j j (lalt lctl lmet))
   os-C-k (fork C-k k (lalt lctl lmet))
   os-C-l (fork C-l l (lalt lctl lmet))
-  os-C-r (fork C-r r (lalt lctl lmet))
   os-C-slsh (fork C-/ / (lalt lctl lmet))
   os-C-t (fork C-t t (lalt lctl lmet))
   os-apos-ui-to-chat (fork @ui-to-chat ' (lalt lctl lmet))
@@ -58,7 +55,7 @@
 (defsrc
   esc
   grv 1 2 3 4 5 6 7 8 9 0 - = bspc
-  tab                  q w e r       t       y u           i           o         p         [            ]            \
+  tab                  q w e r t       y u           i           o         p         [ ] \
   caps                        a s d f       g h           j           k           l           ;              '                   ret
   lsft                     z x c       v b n           m           , . /          rsft
   lctl lmet lalt spc ralt                      rmet rctl
@@ -67,7 +64,7 @@
 (deflayer combat
   _
   _   _ _ _ _ _ _ _ _ _ _ _ _ _
-  @os-tab-combat-to-ui _ _ _ _       _       _ _           _           _         _         _            _            _
+  @os-tab-combat-to-ui _ _ _ _ _       _ _           _           _         _         _ _ _
   @os-caps-combat-to-combat   _ _ _ _       _ _           _           _           _           _              _                   @os-ret-combat-to-chat-ret
   @os-lsft-combat-to-world _ _ _       _ _ _           _           _ _ _          _
   _    _    _    _   @os-ralt-combat-to-leader _    _
@@ -76,7 +73,7 @@
 (deflayer ui
   _
   _   _ _ _ _ _ _ _ _ _ _ _ _ _
-  @os-tab-combat-to-ui _ _ _ _       _       _ @os-A-C-u   @os-A-C-i   @os-A-C-o @os-A-C-p @os-A-C-lbrc @os-A-C-rbrc _
+  @os-tab-combat-to-ui _ _ _ _ _       _ @os-A-C-u   @os-A-C-i   @os-A-C-o @os-A-C-p _ _ _
   @os-caps-combat-to-combat   _ _ _ _       _ _           _           _           @os-A-C-l   _              @os-apos-ui-to-chat @os-ret-combat-to-chat-ret
   @os-lsft-combat-to-world _ _ _       _ _ _           @os-A-C-m   _ _ _          _
   _    _    _    _   @os-ralt-combat-to-leader _    _
@@ -85,7 +82,7 @@
 (deflayer world
   _
   _   _ _ _ _ _ _ _ _ _ _ _ _ _
-  @os-tab-combat-to-ui _ _ _ _       _       _ @os-A-C-S-u @os-A-C-S-i _         _         _            _            _
+  @os-tab-combat-to-ui _ _ _ _ _       _ @os-A-C-S-u @os-A-C-S-i _         _         _ _ _
   @os-caps-combat-to-combat   _ _ _ _       _ @os-A-C-S-h @os-A-C-S-j @os-A-C-S-k @os-A-C-S-l @os-A-C-S-scln _                   @os-ret-combat-to-chat-ret
   @os-lsft-combat-to-world _ _ _       _ _ @os-A-C-S-n @os-A-C-S-m _ _ _          _
   _    _    _    _   @os-ralt-combat-to-leader _    _
@@ -94,7 +91,7 @@
 (deflayer leader
   _
   _   _ _ _ _ _ _ _ _ _ _ _ _ _
-  @os-tab-combat-to-ui _ _ _ @os-C-r @os-C-t _ _           _           _         _         _            _            _
+  @os-tab-combat-to-ui _ _ _ _ @os-C-t _ _           _           _         _         _ _ _
   @os-caps-combat-to-combat   _ _ _ @os-C-f _ _           @os-C-j     @os-C-k     @os-C-l     _              _                   @os-ret-combat-to-chat-ret
   @os-lsft-combat-to-world _ _ @os-C-c _ _ _           _           _ _ @os-C-slsh _
   _    _    _    _   @os-ralt-combat-to-leader _    _
@@ -103,7 +100,7 @@
 (deflayer chat
   @os-esc-chat-to-combat-esc
   _   _ _ _ _ _ _ _ _ _ _ _ _ _
-  _                    _ _ _ _       _       _ _           _           _         _         _            _            _
+  _                    _ _ _ _ _       _ _           _           _         _         _ _ _
   @os-caps-chat-to-combat-esc _ _ _ _       _ _           _           _           _           _              _                   @os-ret-chat-to-combat-ret
   _                        _ _ _       _ _ _           _           _ _ _          _
   _    _    _    _   _                         _    _
