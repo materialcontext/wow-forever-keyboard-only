@@ -277,7 +277,7 @@ ExtraActionButton1 (Blizzard's special-action button), not ours. WowKeys only ma
 **Trigger latching (decided):** the owner wants LT/RT to latch (tap on,
 tap off) instead of hold. WoW can't do that (the Gamepad UI reads the
 physical trigger state), so Steam Input's per-trigger "Toggle" does it;
-setup in `wow/setup.md`. Chosen over Steam action-layer switching because
+setup in `wow/setup.md` (**confirmed working in game**). Chosen over Steam action-layer switching because
 Blizzard's HUD keeps highlighting the latched layer. Caveat: latched
 triggers switch frame focus inside windows, so release them first. A
 WowKeys banner for latched layers (via the gamepad button state) is
