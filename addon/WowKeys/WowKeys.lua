@@ -245,7 +245,10 @@ local function findBindings(text)
   for i = 1, GetNumBindings() do
     local command, _, key1, key2 = GetBinding(i)
     local name = command and GetBindingName(command) or ""
-    if command and (command:lower():find(text, 1, true) or name:lower():find(text, 1, true)) then
+    -- HEADER_* entries are section titles in the keybinding menu, not bindings.
+    local isHeader = command and command:find("^HEADER_")
+    if command and not isHeader
+      and (command:lower():find(text, 1, true) or name:lower():find(text, 1, true)) then
       shown = shown + 1
       if shown <= 40 then
         local keys = key1 and (" [" .. key1 .. (key2 and (", " .. key2) or "") .. "]") or ""

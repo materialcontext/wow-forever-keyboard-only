@@ -241,6 +241,7 @@ layout for them** (owner's call, test 4). Then put the command into
   chat mode already covers.
 - Auctionator: none matched "auctionator". Still to try: `find auction`,
   `find post`, `find cancel`.
+- AtlasLoot: `ATLASLOOT_TOGGLE` (open/close).
 
 **Rules for coexisting:**
 - `Commands.lua` finds dialogs by Blizzard's frame names. An addon that
@@ -350,8 +351,9 @@ learns the first one, one spell per press.
 - [x] `/wowkeys find leatrix` works in game (names recorded under Addons).
 - [x] `/wowkeys find` for bagnon, dbm, auctionator (names recorded under
       Addons).
+- [x] `/wowkeys find atlas` (recorded under Addons).
 - [ ] `/wowkeys find auction`, `post`, `cancel` (Auctionator under other
-      names?) and `atlas`.
+      names?).
 - [ ] Loot rolls and full-bag loot windows: note what you'd want to press.
 
 Later:
