@@ -289,8 +289,10 @@ bar = no trigger (D-pad only), Left bar = LT, Bottom bar = LT+RT. So slot
 offsets none 0 (4 slots), LT 4, RT 12, LT+RT 20. WowKeys only manages slots
 1–12 and 61–69, so it never touches controller slots.
 
-**Trigger latching (decided):** the owner wants LT/RT to latch (tap on,
-tap off) instead of hold. WoW can't do that (the Gamepad UI reads the
+**Trigger latching (decided, revised):** LT latches (tap on, tap off; the
+combat home layer), **RT is a plain hold** (the owner took it off latch so
+a one-off from LT+RT is one chord, not three taps). Originally both
+latched. WoW can't do that (the Gamepad UI reads the
 physical trigger state), so Steam Input's per-trigger "Toggle" does it;
 setup in `wow/setup.md` (**confirmed working in game**). Chosen over Steam action-layer switching because
 Blizzard's HUD keeps highlighting the latched layer. Caveat: latched
@@ -340,9 +342,25 @@ etc.). `/wowkeys pagetest` makes `WowKeysPageNext` (SecureActionButton,
 If it pages without the "blocked" warning (in and out of combat), it goes
 into `layout.toml` as the binding command `CLICK WowKeysPageNext:LeftButton`.
 **Result: Ctrl+F8 pages the arrangements, no warning** (owner, 2026-09-26).
-Still to check: in combat, and what the right-click (Ctrl+F7) does. Next:
-the owner wants to redesign the controller bindings around two thumbs
-before anything is bound. The
+Ctrl+F7 (right-click) works too; which direction it goes is unrecorded.
+RB tap targeting works while LT is latched. **Built:** `WowKeysPage`
+(set up out of combat by the ticker once the Gamepad UI exists) and a
+`[[steam_button]]` entry: touchpad left half → Ctrl+F8 →
+`CLICK WowKeysPage:LeftButton`. `[[steam_button]]` = one controller input
+→ one chord → one WoW command; the generator checks the chord against the
+mode chords, WowKeys binds it, the Steam sheet lists it.
+
+**Controller layout v2 (decided 2026-09-26, two thumbs):** the left thumb
+moves, so the D-pad holds spells with a cast bar (moving cancels those
+anyway); the right thumb presses face buttons while moving, so instants
+go there. Arrangement 1 = combat, 2 = out of combat, 3 = spare.
+LT (latched home): D-pad Frostbolt/Fireball/Poly/Arcane Missiles, face
+Ice Lance ✕, Frost Nova □, Fire Blast △, Blink ○. LT+hold RT: D-pad
+Blizzard/Blood Fury/Arcane Explosion/Mana Shield, face Cone ✕,
+Counterspell □, Ice Block △, health potion ○. RT alone (rare in combat):
+Evocation, mana potion, Cold Snap, Frost Ward, Remove Lesser Curse. No
+trigger D-pad: set / target / clear focus. Arrangement 2: none D-pad
+drink/eat/hearth/mount, LT D-pad armor/intellect/water/food. The
 banner shows `· BAR n` while the Gamepad UI is visible (WowKeys reads the
 slot on the first controller button every 0.25 s).
 
@@ -546,9 +564,10 @@ learns the first one, one spell per press.
 - [ ] `/wowkeys find auction`, `post`, `cancel` (Auctionator under other
       names?).
 - [ ] Loot rolls and full-bag loot windows: note what you'd want to press.
-- [ ] Controller: after `/reload`, the four bars show the draft layout
-      (none: Frostbolt/Ice Lance/Fire Blast/Frost Nova on the D-pad; LT
-      rotation + control; RT defensives/cooldowns; LT+RT out of combat).
+- [ ] Controller: after `/reload`, arrangement 1 shows layout v2 (see
+      Native controller) and arrangement 2 the out-of-combat bars.
+- [ ] Controller: touchpad left half cycles arrangements (also in
+      combat); RT is a plain hold, LT still latches.
 - [ ] Controller: the keyboard bars are unchanged.
 - [ ] Controller UI layer: set up per `wow/steam-layers.md`; Create shows
       `-- UI --`, D-pad/face open the windows, Create again shows COMBAT.

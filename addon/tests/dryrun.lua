@@ -146,9 +146,10 @@ check(actions[6] == nil and actions[7] == nil, "duplicate Frostbolt/Fireball cle
 check(actions[3] == nil and actions[5] == nil, "stray spells cleared from managed slots")
 check(actions[10][1] == "item" and actions[12][1] == "item", "items left alone")
 check(actions[8][1] == "macro", "Blizzard macro")
-check(actions[182][2] == 116 and actions[181] == nil, "controller: Frostbolt on D-pad Up; unlearned Fire Blast slot empty")
-check(actions[189][1] == "macro" and actions[190][1] == "macro", "controller: Poly and Blizzard macros on LT face buttons")
-check(actions[202][2] == 168 and actions[203][2] == 1459, "controller: buffs on LT+RT")
+check(actions[186][2] == 116 and actions[190] == nil, "controller: Frostbolt on LT+Up; unlearned Fire Blast slot empty")
+check(actions[182][1] == "macro" and actions[185][1] == "macro", "controller: focus and Poly macros")
+check(actions[214][2] == 168 and actions[215][2] == 1459, "controller: buffs on arrangement 2")
+check(bindings["CTRL-F8"] == "CLICK WowKeysPage:LeftButton", "touchpad chord pages the controller bars")
 check(said("took off the bars.*Frostbolt"), "reports what it cleared")
 check(said("not learned yet: .*Ice Lance"), "reports unlearned spells")
 
@@ -325,22 +326,21 @@ GamepadMainActionBarFramePageUnit.PageTracker.GetObjectType = function() error("
 printed = {}
 SlashCmdList.WOWKEYS("pagecontrols")
 check(said("WowKeys error: .*secret"), "a failing command prints its error")
--- /wowkeys pagetest points a secure proxy at the change-page button and
--- binds temporary keys to it.
-local overrides = {}
-function SetOverrideBindingClick(_, _, key, name, button) overrides[key] = name .. ":" .. button end
+
+-- WowKeysPage is set up out of combat once the Gamepad UI exists.
 local changePage = {}
 GamepadMainActionBarFramePageUnit.PageTracker = { ChangePageButton = changePage }
-printed = {}
-SlashCmdList.WOWKEYS("pagetest")
-check(frames.WowKeysPageNext.attributes.type == "click" and frames.WowKeysPageNext.attributes.clickbutton == changePage,
-  "pagetest's proxy clicks the change-page button")
-check(overrides["CTRL-F8"] == "WowKeysPageNext:LeftButton" and overrides["CTRL-F7"] == "WowKeysPageNext:RightButton"
-  and said("until /reload"), "pagetest binds temporary keys")
+combat = true
+for _, fn in ipairs(tickers) do fn() end
+check(frames.WowKeysPage == nil, "page button waits for the end of combat")
+combat = false
+for _, fn in ipairs(tickers) do fn() end
+check(frames.WowKeysPage.attributes.type == "click" and frames.WowKeysPage.attributes.clickbutton == changePage,
+  "page button clicks the Gamepad UI's change-page button")
+frames.WowKeysPage = nil
+for _, fn in ipairs(tickers) do fn() end
+check(frames.WowKeysPage == nil, "page button is made once")
 GamepadMainActionBarFramePageUnit = nil
-printed = {}
-SlashCmdList.WOWKEYS("pagetest")
-check(said("no ChangePageButton"), "pagetest without the Gamepad UI")
 
 -- Controller arrangement shows in the banner, and updates when it changes.
 frames.WowKeysMode_combat.scripts.OnClick()

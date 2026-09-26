@@ -22,6 +22,30 @@ pub struct Layout {
     /// A Steam Input layer that makes controller inputs send a mode's key
     /// combos (e.g. UI mode on the Create button).
     pub steam_layer: Option<SteamLayer>,
+    /// Controller inputs Steam turns into one keyboard chord each, for
+    /// actions the Gamepad UI can't hold (e.g. next bar arrangement).
+    #[serde(default, rename = "steam_button")]
+    pub steam_buttons: Vec<SteamButton>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SteamButton {
+    /// The controller input, for the setup sheet.
+    pub input: String,
+    pub key: String,
+    #[serde(default)]
+    pub mods: Vec<Mod>,
+    /// WoW binding command, or `wowkeys:<command>`.
+    pub command: String,
+    /// What it does, for the setup sheet.
+    pub does: String,
+}
+
+impl SteamButton {
+    pub fn chord(&self) -> Chord {
+        Chord::new(&self.mods, &self.key)
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -349,13 +373,8 @@ fn validate(layout: &Layout) -> Vec<String> {
                     continue;
                 }
                 Action::Command(c) => {
-                    if let Some(name) = c.strip_prefix("wowkeys:")
-                        && !ADDON_COMMANDS.contains(&name)
-                    {
-                        errors.push(format!(
-                            "{at}: unknown addon command `{name}` (have: {})",
-                            ADDON_COMMANDS.join(", ")
-                        ));
+                    if let Err(e) = check_command(c) {
+                        errors.push(format!("{at}: {e}"));
                     }
                     c.clone()
                 }
@@ -408,6 +427,26 @@ fn validate(layout: &Layout) -> Vec<String> {
             }
         }
     }
+    for (i, b) in layout.steam_buttons.iter().enumerate() {
+        let at = format!("steam_button {} ({})", i + 1, b.input);
+        if let Err(e) = check_command(&b.command) {
+            errors.push(format!("{at}: {e}"));
+        }
+        if keys::wow_name(&b.key).is_none() {
+            errors.push(format!("{at}: WoW can't bind `{}`", b.key));
+            continue;
+        }
+        let chord = b.chord().wow();
+        match wow_bindings.get(&chord) {
+            Some((other, other_at)) if *other != b.command => errors.push(format!(
+                "{at}: {chord} is already bound to {other} at {other_at}"
+            )),
+            _ => {
+                wow_bindings.insert(chord, (b.command.clone(), at));
+            }
+        }
+    }
+
     if let Some(steam) = &layout.steam_layer {
         match names.get(steam.mode.as_str()) {
             None => errors.push(format!("steam_layer: no mode named `{}`", steam.mode)),
@@ -473,6 +512,16 @@ fn validate(layout: &Layout) -> Vec<String> {
         }
     }
     errors
+}
+
+fn check_command(command: &str) -> Result<(), String> {
+    match command.strip_prefix("wowkeys:") {
+        Some(name) if !ADDON_COMMANDS.contains(&name) => Err(format!(
+            "unknown addon command `{name}` (have: {})",
+            ADDON_COMMANDS.join(", ")
+        )),
+        _ => Ok(()),
+    }
 }
 
 fn check_button(b: &Button) -> Result<(), String> {
@@ -682,6 +731,32 @@ mod tests {
             "#,
         );
         assert_eq!(e.len(), 3, "{e:?}");
+    }
+
+    #[test]
+    fn steam_buttons_are_checked() {
+        let e = errors(
+            r#"
+            [[mode]]
+            name = "a"
+            label = "A"
+            banner = "f9"
+            [mode.keys]
+            j = "JUMP"
+            [[steam_button]]
+            input = "Touchpad"
+            key = "j"
+            command = "SITORSTAND"
+            does = "sit"
+            [[steam_button]]
+            input = "R3"
+            key = "lsft"
+            command = "wowkeys:dance"
+            does = "dance"
+            "#,
+        );
+        assert_eq!(e.len(), 3, "{e:?}");
+        assert!(e[0].contains("already bound to JUMP"), "{e:?}");
     }
 
     #[test]

@@ -51,11 +51,13 @@ The addon also applies the `[cvars]` settings in `layout.toml` on login
 | Click-to-move | off | mouse only |
 | Action Bar 2 | shown | holds the bar-2 buttons in `layout.toml` |
 
-## Controller: latching triggers (Steam Input)
+## Controller: latching LT (Steam Input)
 
 Forever's Gamepad UI switches action layers while LT / RT are **held**.
-The owner wants them to **latch** (tap on, tap off), which WoW can't do
-itself, so Steam Input does it between the controller and the game.
+LT should **latch** (tap on, tap off: the combat home layer); RT stays a
+normal hold (a moment's second layer while LT is latched). WoW can't
+latch a trigger itself, so Steam Input does it between the controller
+and the game.
 
 1. Steam → Games → Add a Non-Steam Game to My Library → Battle.net
    (or browse to `C:\Program Files (x86)\Battle.net\Battle.net Launcher.exe`).
@@ -63,10 +65,21 @@ itself, so Steam Input does it between the controller and the game.
 3. Steam → Settings → Controller: Steam Input on for your controller type.
 4. Right-click Battle.net in the Steam library → Manage → Controller
    layout → Triggers → Left Trigger: full-pull command "Left Trigger",
-   gear icon → **Toggle** on. Same for Right Trigger.
+   gear icon → **Toggle** on. Right Trigger: Toggle **off** (plain hold).
 5. If the latch doesn't reach the game, add the game's own exe (in the
    `_classic_beta_` folder) as a second non-Steam game and launch that from
    Steam with Battle.net running.
 
-Release latched triggers before opening windows: inside bags and the
+Release a latched LT before opening windows: inside bags and the
 character sheet, the triggers switch focus between open frames.
+
+## Controller: touchpad halves (Steam Input)
+
+The left half of the touchpad cycles bar arrangements (it sends the
+combo in `wow/steam-layers.md`); the right half keeps opening the radial
+menu. In the controller layout → Touchpad (center pad): set its style to
+**Directional Pad** (or a two-button split if Steam offers one) with
+**Requires Click** on. Left: the combo from the sheet. Right: the
+**Options** button. Up/Down: leave empty for now. Steam's names here vary
+between versions; the goal is only left click → combo, right click →
+Options.

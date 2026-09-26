@@ -53,6 +53,14 @@ pub fn render(layout: &Layout) -> String {
         }
     }
 
+    for b in &layout.steam_buttons {
+        bindings.push_str(&format!(
+            "    {{ {}, {} }},\n",
+            lua_str(&b.chord().wow()),
+            lua_str(&b.command)
+        ));
+    }
+
     for (layer, inputs) in &layout.controller {
         for (input, b) in inputs {
             let slot = pad_slot(layer, input).expect("validated controller slot");

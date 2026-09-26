@@ -217,49 +217,71 @@ north = "l"    # quest log
 west = "m"     # map
 south = "b"    # bank
 
-# Controller (Forever's Gamepad UI, bar arrangement 1). The addon fills
-# these bars the same way it fills the keyboard bars; bind nothing by hand.
-#   Layers: none (no trigger), lt, rt, ltrt (both). Triggers latch via
-#   Steam Input (see wow/setup.md). End a layer in 2 or 3 for the other
-#   bar arrangements (LB+RB cycles them): [controller.lt2], [controller.none3].
+# Single controller inputs Steam turns into one keyboard chord, for actions
+# the Gamepad UI can't hold. WowKeysPage is a secure button that clicks the
+# Gamepad UI's own change-page button (an addon may not page it directly).
+[[steam_button]]
+input = "Touchpad, left half (click)"
+key = "f8"
+mods = ["ctrl"]
+command = "CLICK WowKeysPage:LeftButton"
+does = "next bar arrangement (1 → 2 → 3 → 1)"
+
+# Controller (Forever's Gamepad UI). The addon fills these bars the same
+# way it fills the keyboard bars; bind nothing by hand.
+#   Layers: none (no trigger), lt, rt, ltrt (both). End a layer in 2 or 3
+#   for the other bar arrangements: [controller.lt2], [controller.none3].
 #   Inputs: up, right, down, left (D-pad); north, east, south, west (face:
 #   Triangle/Y, Circle/B, Cross/A, Square/X). Without a trigger only the
 #   D-pad is free; the face buttons are jump, interact, menu, cancel.
 #   Macros defined in a mode above can be named without repeating the body.
-# Same placement rule as the keyboard: every fight -> easiest reach.
+#
+# Two thumbs: the left one moves, so the D-pad is only for spells with a
+# cast bar (moving cancels those anyway); the right one presses face
+# buttons while you move, so instants go there. LT latches (tap on, tap
+# off: the combat home layer); RT is held for a moment (see wow/setup.md).
+# Arrangement 1 is combat, 2 out of combat, 3 spare; the touchpad cycles.
 
-[controller.none]    # the four you press most
+[controller.none]    # before the pull: focus for Polymorph
+up = { macro = "SetFocus", body = "/focus" }
+right = { macro = "TargetFocus", body = "/target focus" }
+down = { macro = "ClearFocus" }
+
+[controller.lt]      # combat home: latch LT when the fight starts
 up = { spell = "Frostbolt" }
-right = { spell = "Ice Lance" }
-left = { spell = "Fire Blast" }
-down = { spell = "Frost Nova" }
+right = { spell = "Fireball" }
+left = { macro = "Poly" }
+down = { spell = "Arcane Missiles" }
+south = { spell = "Ice Lance" }
+west = { spell = "Frost Nova" }
+north = { spell = "Fire Blast" }
+east = { spell = "Blink" }
 
-[controller.lt]      # rest of the rotation and control
-up = { spell = "Fireball" }
-right = { spell = "Arcane Missiles" }
+[controller.ltrt]    # LT latched + hold RT: the rest of the fight
+up = { macro = "Blizzard" }
+right = { spell = "Blood Fury" }
 left = { spell = "Arcane Explosion" }
-down = { spell = "Cone of Cold" }
-north = { macro = "Blizzard" }
-east = { spell = "Counterspell" }
-south = { spell = "Blink" }
-west = { macro = "Poly" }
+down = { spell = "Mana Shield" }
+south = { spell = "Cone of Cold" }
+west = { spell = "Counterspell" }
+north = { spell = "Ice Block" }
+east = { macro = "HealthPot" }
 
-[controller.rt]      # defensives and cooldowns
-up = { spell = "Mana Shield" }
-right = { spell = "Ice Block" }
-left = { spell = "Cold Snap" }
-down = { spell = "Evocation" }
-north = { spell = "Blood Fury" }
-east = { spell = "Frost Ward" }
-south = { macro = "HealthPot" }
-west = { spell = "Remove Lesser Curse" }
+[controller.rt]      # hold RT alone: rare in combat
+up = { spell = "Evocation" }
+south = { macro = "ManaPot" }
+west = { spell = "Cold Snap" }
+north = { spell = "Frost Ward" }
+east = { spell = "Remove Lesser Curse" }
 
-[controller.ltrt]    # out of combat
-up = { spell = "Frost Armor" }
+[controller.none2]   # out of combat
+up = { macro = "Drink" }
+right = { macro = "Eat" }
+down = { macro = "Hearth" }
+left = { macro = "Mount" }
+
+[controller.lt2]
+up = { spell = "Frost Armor" }       # Ice Armor replaces it at 30
 right = { spell = "Arcane Intellect" }
-left = { spell = "Conjure Food" }
 down = { spell = "Conjure Water" }
-north = { macro = "Hearth" }
-east = { macro = "Mount" }
-south = { macro = "Drink" }
-west = { macro = "Eat" }
+left = { spell = "Conjure Food" }
