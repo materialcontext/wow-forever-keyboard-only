@@ -199,6 +199,24 @@ ret = { mode = "combat", send = "ret" }
 esc = { mode = "combat", send = "esc" }
 caps = { mode = "combat", send = "esc" }
 
+# Controller UI layer (Steam Input): tapping Create latches a layer in which
+# the controller sends the UI-mode combos below; tap Create again to leave.
+# `cargo run` writes the Steam setup steps to wow/steam-layers.md.
+# Inputs as in [controller]; values are keys of the named mode. Circle/B is
+# left alone so it still closes windows.
+[steam_layer]
+mode = "ui"
+button = "Create (PlayStation) / View (Xbox)"
+
+[steam_layer.keys]
+up = "i"       # character
+right = "o"    # spellbook
+down = "u"     # bags
+left = "p"     # talents
+north = "l"    # quest log
+west = "m"     # map
+south = "b"    # bank
+
 # Controller (Forever's Gamepad UI, bar arrangement 1). The addon fills
 # these bars the same way it fills the keyboard bars; bind nothing by hand.
 #   Layers: none (no trigger), lt, rt, ltrt (both). Triggers latch via

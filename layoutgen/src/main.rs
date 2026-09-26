@@ -8,6 +8,7 @@ mod addon;
 mod kanata;
 mod keys;
 mod layout;
+mod steam;
 
 use std::path::Path;
 use std::process::ExitCode;
@@ -35,10 +36,13 @@ fn main() -> ExitCode {
         }
     };
 
-    let outputs = [
+    let mut outputs = vec![
         ("kanata/wow.kbd", kanata::render(&layout)),
         ("addon/WowKeys/Layout.lua", addon::render(&layout)),
     ];
+    if let Some(sheet) = steam::render(&layout) {
+        outputs.push(("wow/steam-layers.md", sheet));
+    }
 
     let mut ok = true;
     for (path, content) in outputs {

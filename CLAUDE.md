@@ -307,6 +307,20 @@ only the D-pad is allowed (face buttons are fixed). Arrangements 2/3 are
 not mapped yet (slots unknown; would hold mana potion, focus macros,
 nameplates).
 
+**Controller UI layer (decided, built):** quick menu access without the
+radial menu. Steam Input action layer latched by **Create** (PlayStation;
+View on Xbox; Forever leaves it unused, Options opens the radial menu). In
+the layer the controller sends the keyboard UI-mode combos, which WowKeys
+already binds (keyboard bindings stay live with the Gamepad UI on,
+confirmed). `[steam_layer]` in `layout.toml` names the mode and maps
+controller inputs to that mode's keys; `cargo run` writes the Steam setup
+sheet `wow/steam-layers.md` (GENERATED). Entering/leaving also sends the
+mode's / home's banner combo, so the banner shows `-- UI --` while the
+layer is latched (kanata's keyboard mode doesn't change; the banner
+follows whichever device switched last). Circle/B is left native so it
+still closes windows. No separate world layer: buffs/conjure/food/hearth
+are already on the LT+RT controller bar.
+
 **Transfer plan** (owner wants to play on controller if possible): our
 layout's spells and macros become controller bar content. The addon
 already places spells/macros in action slots, so `layout.toml` could gain
@@ -386,6 +400,7 @@ addon/WowKeys/Commands.lua # dialog/loot/popup/vendor commands (wowkeys:*)
 addon/WowKeys/WowKeys.lua # applies Layout.lua, mode banner
 addon/tests/dryrun.lua    # offline test of the addon with stubbed WoW APIs
 wow/setup.md              # addon install, one-time game settings
+wow/steam-layers.md       # GENERATED: Steam Input setup for the controller UI layer
 ```
 
 ## Open questions
@@ -496,6 +511,8 @@ learns the first one, one spell per press.
       (none: Frostbolt/Ice Lance/Fire Blast/Frost Nova on the D-pad; LT
       rotation + control; RT defensives/cooldowns; LT+RT out of combat).
 - [ ] Controller: the keyboard bars are unchanged.
+- [ ] Controller UI layer: set up per `wow/steam-layers.md`; Create shows
+      `-- UI --`, D-pad/face open the windows, Create again shows COMBAT.
 
 Later:
 - [ ] `A` interacts with objects too (assumed `INTERACTTARGET`).
