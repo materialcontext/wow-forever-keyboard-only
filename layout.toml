@@ -295,7 +295,8 @@ down = { macro = "ClearFocus" }
 up = { spell = "Frostbolt" }
 right = { spell = "Fireball" }
 left = { macro = "Poly" }
-down = { spell = "Arcane Missiles" }
+# LT takes over Square, Blizzard's attack button: wand if equipped, else melee.
+down = { macro = "Attack", body = "#showtooltip\n/cast [equipped:Wands] !Shoot\n/startattack [noequipped:Wands]" }
 south = { spell = "Ice Lance" }
 west = { spell = "Frost Nova" }
 north = { spell = "Fire Blast" }
@@ -313,6 +314,7 @@ east = { macro = "HealthPot" }
 
 [controller.rt]      # hold RT alone: rare in combat
 up = { spell = "Evocation" }
+right = { spell = "Arcane Missiles" }
 south = { macro = "ManaPot" }
 west = { spell = "Cold Snap" }
 north = { spell = "Frost Ward" }

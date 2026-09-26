@@ -359,13 +359,17 @@ mode chords, WowKeys binds it, the Steam sheet lists it.
 moves, so the D-pad holds spells with a cast bar (moving cancels those
 anyway); the right thumb presses face buttons while moving, so instants
 go there. Arrangement 1 = combat, 2 = out of combat, 3 = spare.
-LT (latched home): D-pad Frostbolt/Fireball/Poly/Arcane Missiles, face
+LT (latched home): D-pad Frostbolt/Fireball/Poly/Attack, face
 Ice Lance ✕, Frost Nova □, Fire Blast △, Blink ○. LT+hold RT: D-pad
 Blizzard/Blood Fury/Arcane Explosion/Mana Shield, face Cone ✕,
 Counterspell □, Ice Block △, health potion ○. RT alone (rare in combat):
-Evocation, mana potion, Cold Snap, Frost Ward, Remove Lesser Curse. No
+Evocation, Arcane Missiles, mana potion, Cold Snap, Frost Ward, Remove Lesser Curse. No
 trigger D-pad: set / target / clear focus. Arrangement 2: none D-pad
-drink/eat/hearth/mount, LT D-pad armor/intellect/water/food. The
+drink/eat/hearth/mount, LT D-pad armor/intellect/water/food.
+Attack (macro: `/cast [equipped:Wands] !Shoot`, else `/startattack`) is
+on LT+D-pad Down because latched LT covers Square, Blizzard's native
+attack/interact button (owner found no way to attack in LT). Interact
+(looting) still needs LT unlatched. The
 banner shows `· BAR n` while the Gamepad UI is visible (WowKeys reads the
 slot on the first controller button every 0.25 s).
 
