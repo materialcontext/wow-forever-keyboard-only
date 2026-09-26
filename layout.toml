@@ -310,7 +310,7 @@ left = { spell = "Arcane Explosion" }
 down = { spell = "Mana Shield" }
 
 [controller.lt]      # less often
-# south: free (Ice Barrier at 40?)
+south = { spell = "Ice Barrier" }   # level 40; placed once learned
 west = { spell = "Counterspell" }
 north = { spell = "Ice Block" }
 east = { macro = "HealthPot" }
