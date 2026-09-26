@@ -224,7 +224,9 @@ does = "previous bar arrangement (1 → 3 → 2 → 1)"
 # and triggers stay native so Blizzard's Gamepad UI works inside windows.
 # Numpad keys: kanata passes them through and no mode uses them. The
 # D-pad matches the numpad arrows (8 up, 6 right, 2 down, 4 left). Bank
-# opens by talking to a banker, so it isn't here.
+# opens by talking to a banker, so it isn't here. Ranked by use like the
+# controller bars: the four most opened windows on the D-pad (bags, quest
+# log, map, character), the rarest on Triangle/Square (spellbook, talents).
 [steam_layer]
 name = "UI"
 button = "Create (PlayStation) / View (Xbox)"
@@ -233,43 +235,43 @@ button = "Create (PlayStation) / View (Xbox)"
 layer = "UI"
 input = "D-pad Up"
 key = "kp8"
-command = "TOGGLECHARACTER0"
-does = "character"
-
-[[steam_button]]
-layer = "UI"
-input = "D-pad Right"
-key = "kp6"
-command = "TOGGLESPELLBOOK"
-does = "spellbook"
-
-[[steam_button]]
-layer = "UI"
-input = "D-pad Down"
-key = "kp2"
 command = "OPENALLBAGS"
 does = "bags"
 
 [[steam_button]]
 layer = "UI"
-input = "D-pad Left"
-key = "kp4"
-command = "TOGGLETALENTS"
-does = "talents"
-
-[[steam_button]]
-layer = "UI"
-input = "Triangle / Y"
-key = "kp9"
+input = "D-pad Right"
+key = "kp6"
 command = "TOGGLEQUESTLOG"
 does = "quest log"
 
 [[steam_button]]
 layer = "UI"
-input = "Square / X"
-key = "kp7"
+input = "D-pad Down"
+key = "kp2"
 command = "TOGGLEWORLDMAP"
 does = "map"
+
+[[steam_button]]
+layer = "UI"
+input = "D-pad Left"
+key = "kp4"
+command = "TOGGLECHARACTER0"
+does = "character"
+
+[[steam_button]]
+layer = "UI"
+input = "Triangle / Y"
+key = "kp9"
+command = "TOGGLESPELLBOOK"
+does = "spellbook"
+
+[[steam_button]]
+layer = "UI"
+input = "Square / X"
+key = "kp7"
+command = "TOGGLETALENTS"
+does = "talents"
 
 # Controller (Forever's Gamepad UI). The addon fills these bars the same
 # way it fills the keyboard bars; bind nothing by hand.

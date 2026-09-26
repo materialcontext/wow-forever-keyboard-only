@@ -31,11 +31,11 @@ tabs, as Blizzard's Gamepad UI intends.
 
 | Controller input | Key | Does |
 |---|---|---|
-| D-pad Up | Keypad 8 | character |
-| D-pad Right | Keypad 6 | spellbook |
-| D-pad Down | Keypad 2 | bags |
-| D-pad Left | Keypad 4 | talents |
-| Triangle / Y | Keypad 9 | quest log |
-| Square / X | Keypad 7 | map |
+| D-pad Up | Keypad 8 | bags |
+| D-pad Right | Keypad 6 | quest log |
+| D-pad Down | Keypad 2 | map |
+| D-pad Left | Keypad 4 | character |
+| Triangle / Y | Keypad 9 | spellbook |
+| Square / X | Keypad 7 | talents |
 
 Keep Num Lock on, in case Steam sends the keypad keys as scan codes.

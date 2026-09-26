@@ -377,10 +377,12 @@ slot on the first controller button every 0.25 s).
 
 **Controller UI layer (decided, rebuilt for single keys):** quick window
 access without the radial menu. **Create** (View on Xbox) toggles a Steam
-action layer (Add Layer / Remove Layer, one command each). In it D-pad
-Up/Right/Down/Left open character/spellbook/bags/talents and Triangle /
-Square the quest log / map, each by sending one **numpad key** (8/6/2/4,
-9/7), which WowKeys binds (kanata passes the numpad through; no mode uses
+action layer (Add Layer / Remove Layer, one command each). Kept as a
+Steam layer and a latch (owner, despite no-latch triggers) because it can
+later hold our own advanced combat macros. Ranked by use like the bars:
+D-pad Up/Right/Down/Left open bags/quest log/map/character, Triangle /
+Square the spellbook / talents, each by sending one **numpad key**
+(8/6/2/4, 9/7), which WowKeys binds (kanata passes the numpad through; no mode uses
 it). **Cross (accept), Circle (cancel), the sticks (move focus), bumpers
 and triggers stay native**, so Blizzard's Gamepad UI works inside windows
 (owner: sticks navigate, X accepts, Circle cancels). Bank opens by
