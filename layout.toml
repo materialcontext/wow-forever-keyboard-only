@@ -297,13 +297,12 @@ does = "talents"
 up = { spell = "Frostbolt" }
 right = { spell = "Fireball" }
 left = { macro = "Poly" }
-# Wand if equipped, else melee (Blizzard's Square may only melee).
-down = { macro = "Attack", body = "#showtooltip\n/cast [equipped:Wands] !Shoot\n/startattack [noequipped:Wands]" }
+down = { spell = "Fire Blast" }   # attack is Blizzard's Square
 
 [controller.rt]      # often: instants on the move, then standing casts
 south = { spell = "Ice Lance" }
 west = { spell = "Frost Nova" }
-north = { spell = "Fire Blast" }
+north = { spell = "Cone of Cold" }
 east = { spell = "Blink" }
 up = { macro = "Blizzard" }
 right = { spell = "Blood Fury" }
@@ -311,7 +310,7 @@ left = { spell = "Arcane Explosion" }
 down = { spell = "Mana Shield" }
 
 [controller.lt]      # less often
-south = { spell = "Cone of Cold" }
+# south: free (Ice Barrier at 40?)
 west = { spell = "Counterspell" }
 north = { spell = "Ice Block" }
 east = { macro = "HealthPot" }

@@ -359,12 +359,11 @@ no latching. Every arrangement ranks its layers the same way: no trigger
 face buttons = instants used on the move (right thumb), D-pad = casts
 while standing (left thumb; moving cancels a cast bar anyway).
 Arrangement 1 = combat, 2 = out of combat, 3 = spare.
-- 1, no trigger D-pad: Frostbolt ↑, Fireball →, Poly ←, Attack ↓ (macro:
-  `/cast [equipped:Wands] !Shoot`, else `/startattack`; Blizzard's Square
-  may only melee).
-- 1, RT: face Ice Lance ✕, Frost Nova □, Fire Blast △, Blink ○; D-pad
+- 1, no trigger D-pad: Frostbolt ↑, Fireball →, Poly ←, Fire Blast ↓
+  (attack is Blizzard's native Square, owner; the Attack macro is gone).
+- 1, RT: face Ice Lance ✕, Frost Nova □, Cone of Cold △, Blink ○; D-pad
   Blizzard ↑, Blood Fury →, Arcane Explosion ←, Mana Shield ↓.
-- 1, LT: face Cone of Cold ✕, Counterspell □, Ice Block △, health potion
+- 1, LT: face free ✕ (Ice Barrier at 40?), Counterspell □, Ice Block △, health potion
   ○; D-pad Evocation ↑, Arcane Missiles →, set focus ←, clear focus ↓.
 - 1, LT+RT: mana potion ✕, Cold Snap □, Frost Ward △, Remove Lesser Curse
   ○; target focus ↑.
