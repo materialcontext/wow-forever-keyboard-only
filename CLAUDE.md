@@ -274,6 +274,15 @@ positions to read the cross layout), and where arrangements 2/3 live
 ExtraActionButton1 (Blizzard's special-action button), not ours. WowKeys only manages slots
 1–12 and 61–69, so it never touches controller slots.
 
+**Trigger latching (decided):** the owner wants LT/RT to latch (tap on,
+tap off) instead of hold. WoW can't do that (the Gamepad UI reads the
+physical trigger state), so Steam Input's per-trigger "Toggle" does it;
+setup in `wow/setup.md`. Chosen over Steam action-layer switching because
+Blizzard's HUD keeps highlighting the latched layer. Caveat: latched
+triggers switch frame focus inside windows, so release them first. A
+WowKeys banner for latched layers (via the gamepad button state) is
+possible later if the HUD highlight isn't enough.
+
 **Transfer plan** (owner wants to play on controller if possible): our
 layout's spells and macros become controller bar content. The addon
 already places spells/macros in action slots, so `layout.toml` could gain
