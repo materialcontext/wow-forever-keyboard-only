@@ -286,7 +286,7 @@ check(said("GamepadShortcutNextPageButton.*shown") and not said("PlayerFrame")
 
 -- /wowkeys inspect shows a frame's fields, functions and children.
 local nextButton = { GetName = function() end, GetObjectType = function() return "Button" end,
-  IsShown = function() return true end, GetText = function() return "Next" end }
+  IsShown = function() return true end, GetText = function() return "Next" end, GetChildren = function() end }
 local shortcuts = { currentPage = 2, NextPage = function() end, Next = nextButton,
   GetName = function() return "GamepadMainActionBarFramePageUnitShortcutsActionBar" end,
   GetObjectType = function() return "Frame" end, GetChildren = function() return nextButton end }
@@ -307,6 +307,21 @@ GamepadMainActionBarFramePageUnit = {
 printed = {}
 SlashCmdList.WOWKEYS("page")
 check(said("GetCurrentPage %-> 1") and said("page order 1: PageBar1"), "page shows the current page")
+-- /wowkeys pagecontrols inspects the tracker and menu, two levels deep.
+local pageButton = { GetName = function() end, GetObjectType = function() return "Button" end,
+  IsShown = function() return true end, GetChildren = function() end }
+local pips = { NextButton = pageButton, GetName = function() end, GetObjectType = function() return "Frame" end,
+  IsShown = function() return true end, GetChildren = function() return pageButton end }
+GamepadMainActionBarFramePageUnit.PageTracker = { Pips = pips, GetObjectType = function() return "Frame" end,
+  GetChildren = function() return pips end }
+printed = {}
+SlashCmdList.WOWKEYS("pagecontrols")
+check(said("PageTracker %(Frame%)") and said("Pips%.NextButton Button") and said("no ShortcutsActionBar"),
+  "pagecontrols lists nested children by parent key")
+GamepadMainActionBarFramePageUnit.PageTracker.GetObjectType = function() error("secret") end
+printed = {}
+SlashCmdList.WOWKEYS("pagecontrols")
+check(said("WowKeys error: .*secret"), "a failing command prints its error")
 GamepadMainActionBarFramePageUnit = nil
 
 -- Controller arrangement shows in the banner, and updates when it changes.

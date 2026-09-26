@@ -328,7 +328,9 @@ has `GetCurrentPage`, `SetCurrentPage`, `ClickChangePageButton` and
 `/wowkeys page` only reads. Next route: a key press clicking Blizzard's own
 change-page button through a secure proxy (SecureActionButton
 `type=click`), which runs as Blizzard code. `ClickChangePageButton` hints
-such a button exists; look in PageTracker / ShortcutsActionBar. The
+such a button exists; `/wowkeys pagecontrols` lists PageTracker's and
+ShortcutsActionBar's children two levels deep. (`inspect <name>` with an
+argument wouldn't run in game; commands now print their Lua errors.) The
 banner shows `· BAR n` while the Gamepad UI is visible (WowKeys reads the
 slot on the first controller button every 0.25 s).
 

@@ -453,33 +453,68 @@ end
 
 -- Shows a frame's own fields, its functions (mixin methods, not the widget
 -- API) and its children, to find how the Gamepad UI pages its bars.
-local function inspectFrame(text)
-  local frame = frameByName(text)
-  if not frame then return end
-  local fields, functions, keyOf = {}, {}, {}
+-- tostring that survives values the client hides from addons.
+local function safeString(v)
+  local ok, s = pcall(function() return tostring(v) end)
+  return ok and s or "?"
+end
+
+-- Parent keys of a frame's table fields, so unnamed children get a label.
+local function parentKeys(frame)
+  local keyOf = {}
+  for k, v in pairs(frame) do
+    if type(k) == "string" and type(v) == "table" then keyOf[v] = k end
+  end
+  return keyOf
+end
+
+-- Adds "path Type [hidden] ["text"]" for each child, two levels deep.
+local function listChildren(frame, prefix, rows, depth)
+  local keyOf = parentKeys(frame)
+  for _, child in ipairs({ frame:GetChildren() }) do
+    local ok, row = pcall(function()
+      local label = prefix .. (keyOf[child] or child:GetName() or "?")
+      local text = child.GetText and child:GetText()
+      if depth > 1 then listChildren(child, label .. ".", rows, depth - 1) end
+      return ("%s %s%s%s"):format(label, child:GetObjectType(),
+        isShown(child) and "" or " hidden", text and (" \"" .. safeString(text) .. "\"") or "")
+    end)
+    table.insert(rows, ok and row or (prefix .. "? (error)"))
+  end
+end
+
+local function inspectFrame(frame, title)
+  local fields, functions = {}, {}
   for k, v in pairs(frame) do
     if type(k) == "string" then
       if type(v) == "function" then
         table.insert(functions, k)
       elseif type(v) == "table" then
-        keyOf[v] = k
-        table.insert(fields, k .. "=" .. (v.GetObjectType and v:GetObjectType() or "table"))
+        table.insert(fields, k .. "=" .. (v.GetObjectType and safeString(v:GetObjectType()) or "table"))
       else
-        table.insert(fields, k .. "=" .. tostring(v))
+        table.insert(fields, k .. "=" .. safeString(v))
       end
     end
   end
-  print("WowKeys: " .. (frame:GetName() or "?") .. " (" .. frame:GetObjectType() .. ")")
+  print("WowKeys: " .. title .. " (" .. frame:GetObjectType() .. ")")
   printList("fields", fields)
   printList("functions", functions)
   local children = {}
-  for _, child in ipairs({ frame:GetChildren() }) do
-    local label = child:GetName() or keyOf[child] or "?"
-    local text = child.GetText and child:GetText()
-    table.insert(children, ("%s %s%s%s"):format(label, child:GetObjectType(),
-      isShown(child) and "" or " hidden", text and (" \"" .. text .. "\"") or ""))
-  end
+  listChildren(frame, "", children, 2)
   printList("children", children)
+end
+
+-- The Gamepad UI's page tracker and shortcut menu, where a change-page
+-- button would live.
+local function inspectPageControls()
+  local unit = GamepadMainActionBarFramePageUnit
+  if not unit then
+    print("WowKeys: no Gamepad UI page unit (is the Gamepad UI on?)")
+    return
+  end
+  for _, key in ipairs({ "PageTracker", "ShortcutsActionBar" }) do
+    if unit[key] then inspectFrame(unit[key], key) else print("WowKeys: no " .. key) end
+  end
 end
 
 -- Prints the Gamepad UI's current page (arrangement) and its pageable bars.
@@ -500,7 +535,7 @@ local function probePage()
   end
 end
 
-SlashCmdList.WOWKEYS = function(arg)
+local function dispatch(arg)
   local text = arg:match("^find%s+(.+)$")
   local frameText = arg:match("^frames%s+(.+)$")
   local newWait = arg:match("^newframes%s*(%d*)$")
@@ -517,7 +552,10 @@ SlashCmdList.WOWKEYS = function(arg)
   elseif arg == "page" then
     probePage()
   elseif inspectText then
-    inspectFrame(inspectText)
+    local frame = frameByName(inspectText)
+    if frame then inspectFrame(frame, frame:GetName() or inspectText) end
+  elseif arg == "pagecontrols" then
+    inspectPageControls()
   elseif newWait then
     newFrames(tonumber(newWait) or 5)
   elseif frameText then
@@ -535,5 +573,12 @@ SlashCmdList.WOWKEYS = function(arg)
     print("  /wowkeys newframes [s] list frames that appear within s seconds (default 5)")
     print("  /wowkeys inspect <name> list a frame's fields, functions and children")
     print("  /wowkeys page         show the controller page (arrangement)")
+    print("  /wowkeys pagecontrols inspect the controller page tracker and shortcut menu")
   end
+end
+
+-- A failing probe prints its error instead of failing silently.
+SlashCmdList.WOWKEYS = function(arg)
+  local ok, err = pcall(dispatch, arg)
+  if not ok then print("WowKeys error: " .. safeString(err)) end
 end
