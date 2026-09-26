@@ -338,7 +338,11 @@ etc.). `/wowkeys pagetest` makes `WowKeysPageNext` (SecureActionButton,
 `type=click`, `clickbutton` = ChangePageButton) and binds Ctrl+F8
 (LeftButton) / Ctrl+F7 (RightButton) as override bindings until /reload.
 If it pages without the "blocked" warning (in and out of combat), it goes
-into `layout.toml` as the binding command `CLICK WowKeysPageNext:LeftButton`. The
+into `layout.toml` as the binding command `CLICK WowKeysPageNext:LeftButton`.
+**Result: Ctrl+F8 pages the arrangements, no warning** (owner, 2026-09-26).
+Still to check: in combat, and what the right-click (Ctrl+F7) does. Next:
+the owner wants to redesign the controller bindings around two thumbs
+before anything is bound. The
 banner shows `· BAR n` while the Gamepad UI is visible (WowKeys reads the
 slot on the first controller button every 0.25 s).
 
