@@ -370,30 +370,63 @@ local function listPadButtons()
   print(("WowKeys: %d button(s) on slots above 180"):format(shown))
 end
 
+-- Calls fn(frame, name) for every named frame.
+local function eachNamedFrame(fn)
+  local frame = EnumerateFrames()
+  while frame do
+    local ok, name = pcall(frame.GetName, frame)
+    if ok and name then fn(frame, name) end
+    frame = EnumerateFrames(frame)
+  end
+end
+
+local function isShown(frame)
+  return frame.IsShown and frame:IsShown() or false
+end
+
+local function printFrames(rows, what)
+  table.sort(rows)
+  for i = 1, math.min(#rows, 60) do print(rows[i]) end
+  print(("WowKeys: %d frame(s) %s%s"):format(#rows, what, #rows > 60 and " (first 60 shown)" or ""))
+end
+
+local function frameRow(frame, name)
+  local kind = frame.GetObjectType and frame:GetObjectType() or "?"
+  return ("  %s  |cff999999%s, %s|r"):format(name, kind, isShown(frame) and "shown" or "hidden")
+end
+
 -- Lists named frames whose name contains some text, with their type and
 -- whether they're shown, to find Blizzard buttons a CLICK binding can press
 -- (e.g. the Gamepad UI's next/previous arrangement controls).
 local function findFrames(text)
   text = text:lower()
   local rows = {}
-  local frame = EnumerateFrames()
-  while frame do
-    local ok, name = pcall(frame.GetName, frame)
-    if ok and name and name:lower():find(text, 1, true) then
-      local kind = frame.GetObjectType and frame:GetObjectType() or "?"
-      local shown = frame.IsShown and frame:IsShown() and "shown" or "hidden"
-      table.insert(rows, ("  %s  |cff999999%s, %s|r"):format(name, kind, shown))
-    end
-    frame = EnumerateFrames(frame)
-  end
-  table.sort(rows)
-  for i = 1, math.min(#rows, 60) do print(rows[i]) end
-  print(("WowKeys: %d frame(s) match \"%s\"%s"):format(#rows, text, #rows > 60 and " (first 60 shown)" or ""))
+  eachNamedFrame(function(frame, name)
+    if name:lower():find(text, 1, true) then table.insert(rows, frameRow(frame, name)) end
+  end)
+  printFrames(rows, ("match \"%s\""):format(text))
+end
+
+-- Notes which named frames are shown now, waits, then lists the ones shown
+-- since. For menus that close when chat opens: run it, then open the menu
+-- and hold it until the list prints.
+local function newFrames(seconds)
+  local before = {}
+  eachNamedFrame(function(frame, name) before[name] = isShown(frame) end)
+  print(("WowKeys: open the menu now; listing new frames in %d s"):format(seconds))
+  C_Timer.After(seconds, function()
+    local rows = {}
+    eachNamedFrame(function(frame, name)
+      if isShown(frame) and not before[name] then table.insert(rows, frameRow(frame, name)) end
+    end)
+    printFrames(rows, ("appeared in the last %d s"):format(seconds))
+  end)
 end
 
 SlashCmdList.WOWKEYS = function(arg)
   local text = arg:match("^find%s+(.+)$")
   local frameText = arg:match("^frames%s+(.+)$")
+  local newWait = arg:match("^newframes%s*(%d*)$")
   if arg == "bars" then
     outOfCombat(applyBarsVerbose)
   elseif arg == "pad" then
@@ -402,6 +435,8 @@ SlashCmdList.WOWKEYS = function(arg)
     listSlots()
   elseif arg == "padbuttons" then
     listPadButtons()
+  elseif newWait then
+    newFrames(tonumber(newWait) or 5)
   elseif frameText then
     findFrames(frameText)
   elseif text then
@@ -414,5 +449,6 @@ SlashCmdList.WOWKEYS = function(arg)
     print("  /wowkeys slots        list filled action slots by id")
     print("  /wowkeys padbuttons   list controller-bar buttons and their slots")
     print("  /wowkeys frames <text> list named frames (find buttons to click)")
+    print("  /wowkeys newframes [s] list frames that appear within s seconds (default 5)")
   end
 end

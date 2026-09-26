@@ -272,6 +272,18 @@ printed = {}
 SlashCmdList.WOWKEYS("frames page")
 check(said("GamepadShortcutNextPageButton.*Button, hidden") and said("1 frame%(s%) match"), "frames finds named frames")
 
+-- /wowkeys newframes lists frames shown after a delay that weren't before.
+local menuUp = false
+fakeFrames[1].IsShown = function() return menuUp end
+fakeFrames[2].IsShown = function() return true end
+printed, timers = {}, {}
+SlashCmdList.WOWKEYS("newframes 3")
+check(#timers == 1 and said("listing new frames in 3 s"), "newframes waits")
+menuUp = true
+timers[1](); timers = {}
+check(said("GamepadShortcutNextPageButton.*shown") and not said("PlayerFrame")
+  and said("1 frame%(s%) appeared in the last 3 s"), "newframes lists only frames that appeared")
+
 -- Controller arrangement shows in the banner, and updates when it changes.
 frames.WowKeysMode_combat.scripts.OnClick()
 check(banner == "-- COMBAT --", "no arrangement shown without the Gamepad UI")

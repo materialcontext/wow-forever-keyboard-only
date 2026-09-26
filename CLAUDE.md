@@ -315,7 +315,8 @@ exists:** `find arrang`/`gamepad` match nothing, and `ACTIONPAGE1`–`6`
 arrangements (tested). Options: a Steam button pressing LB+RB+D-pad Right
 (one-press cycle), or, if the shortcut menu's next/previous page controls
 are named buttons, CLICK bindings to them (`/wowkeys frames <text>` finds
-named frames). The
+named frames; `/wowkeys newframes [s]` lists frames that appear within
+s seconds, because the shortcut menu closes when chat opens). The
 banner shows `· BAR n` while the Gamepad UI is visible (WowKeys reads the
 slot on the first controller button every 0.25 s).
 
