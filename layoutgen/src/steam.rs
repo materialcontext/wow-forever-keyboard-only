@@ -53,11 +53,10 @@ tabs, as Blizzard's Gamepad UI intends.
 2. **Base layout, {button}:** *Add Layer* `{name}`.
 3. **In the `{name}` layer, {button}:** *Remove Layer* `{name}`.
 4. **In the `{name}` layer**, bind each input below to its key.
-5. Recommended: give each input below a **sub command** *Remove Layer*
-   `{name}` (Steam's sub commands add more outputs to the same press).
-   Then one press opens the window and drops you back to your normal
-   controller, so the D-pad can't be left opening windows when a fight
-   starts.
+5. Optional, safer: if Steam lets you *add an extra command* to an input,
+   give each one below a second command *Remove Layer* `{name}`. Then one
+   press opens the window and drops you back to your normal controller,
+   so the D-pad can't be left opening windows when a fight starts.
 
 {}
 Keep Num Lock on, in case Steam sends the keypad keys as scan codes.
