@@ -187,11 +187,13 @@ greeting, reward choice, trainer or loot window opens.
   straight back. J health potion, K mana potion (macros; update item names
   as you find better potions), L Frost Ward (situational; on bar 2 button 8
   so its cooldown shows), F set focus to target, T target focus, C clear
-  focus, / toggle enemy nameplates. Later: long cooldowns.
+  focus, / toggle enemy nameplates, R announce rare (Leatrix Plus). Later:
+  long cooldowns.
   `,` is a Polymorph macro that sheeps the focus if you have one, else the
   target.
 - **UI (Tab, Ctrl+Alt+key):** U bags, I character, O spellbook, P talents,
-  L quest log, M map, `'` type into a text box. Vendor chores belong to
+  L quest log, M map, `[` Leatrix Plus panel, `]` Leatrix Maps panel, `'`
+  type into a text box. Vendor chores belong to
   Leatrix Plus (the `wowkeys:vendor` command still exists if ever needed). Esc closes windows. Navigating *inside* windows (bags, talents) still
   needs a UI addon or our own commands.
 - **World (Left Shift, Ctrl+Alt+Shift+key):** J Frost Armor, K Arcane
@@ -214,8 +216,8 @@ it goes in.
 
 | Addon | Job | Keyboard impact |
 |---|---|---|
-| Leatrix Plus | auto quest accept/turn-in, sell junk, repair, QoL | **Owns quest accept/turn-in and vendor chores** (decided). UI K removed; G and 1–9 cover what it doesn't (gossip, rewards, popups, loot, trainers). No keys needed; settings via `/ltp` in chat. To skip its automation for one NPC, hold **Right** Shift while pressing A (Left Shift is the world-mode key and never sends Shift). |
-| Leatrix Maps | world map improvements (reveal, coordinates, zone levels, scale) | UI M still opens the map (it enhances Blizzard's). Settings via `/ltm`. Map zoom/pan are mouse-only in WoW; with reveal and coordinates on, reading the map needs neither. |
+| Leatrix Plus | auto quest accept/turn-in, sell junk, repair, QoL | **Owns quest accept/turn-in and vendor chores** (decided). UI K removed; G and 1–9 cover what it doesn't (gossip, rewards, popups, loot, trainers). Bindings: UI `[` panel, leader R announce rare (web link and mount special skipped: mouse-hover / cosmetic). To skip its automation for one NPC, hold **Right** Shift while pressing A (Left Shift is the world-mode key and never sends Shift). |
+| Leatrix Maps | world map improvements (reveal, coordinates, zone levels, scale) | UI M still opens the map (it enhances Blizzard's). UI `]` opens its panel. Map zoom/pan are mouse-only in WoW; with reveal and coordinates on, reading the map needs neither. |
 | Bagnon | combined bag window | UI U should open it (it takes over the bag toggle). Navigating inside it is still unsolved. |
 | Plater | enemy nameplates | Q/B cycling and leader / depend on nameplates. Plater manages nameplate CVars; if it fights our `nameplateShowEnemies`, drop ours from `[cvars]`. Midnight limits nameplate addons in combat. |
 | DBM | boss timers and warnings | Display only. Midnight limits boss mods hardest and the modern client has built-in boss warnings; check what the Forever build can still do. |
@@ -332,7 +334,11 @@ learns the first one, one spell per press.
 - [x] G accepts a resurrection popup (so StaticPopup1's button works).
 - [ ] G accepts a group invite.
 - [ ] Ctrl+Alt / Ctrl+Alt+Shift chords don't trigger anything in Windows.
-- [ ] `/wowkeys find auctionator` (and `dbm`, `atlas`, `bagnon`, `leatrix`): paste
+- [x] `/wowkeys find leatrix` works in game: `LEATRIX_PLUS_GLOBAL_TOGGLE`,
+      `LEATRIX_MAPS_GLOBAL_TOGGLE`, `LEATRIX_PLUS_GLOBAL_RARE` bound;
+      `..._WEBLINK` and `..._MOUNTSPECIAL` skipped.
+- [ ] UI `[` / `]` open the Leatrix panels; leader R announces a rare.
+- [ ] `/wowkeys find auctionator` (and `dbm`, `atlas`, `bagnon`): paste
       the output here.
 - [ ] Loot rolls and full-bag loot windows: note what you'd want to press.
 
