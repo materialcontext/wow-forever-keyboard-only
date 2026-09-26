@@ -535,6 +535,37 @@ local function probePage()
   end
 end
 
+-- A secure button that clicks the Gamepad UI's own change-page button, so a
+-- key press switches controller arrangements as Blizzard code would
+-- (calling SetCurrentPage from an addon is blocked). Out of combat only.
+local PAGE_PROXY = "WowKeysPageNext"
+
+local function setUpPageProxy()
+  local unit = GamepadMainActionBarFramePageUnit
+  local target = unit and unit.PageTracker and unit.PageTracker.ChangePageButton
+  if not target then return false end
+  local proxy = _G[PAGE_PROXY] or CreateFrame("Button", PAGE_PROXY, UIParent, "SecureActionButtonTemplate")
+  -- Both transitions; the template acts on the one ActionButtonUseKeyDown picks.
+  proxy:RegisterForClicks("AnyUp", "AnyDown")
+  proxy:SetAttribute("type", "click")
+  proxy:SetAttribute("clickbutton", target)
+  return true
+end
+
+-- Temporary keys (override bindings, gone after /reload) to try the proxy:
+-- Ctrl+F8 left-clicks the change-page button, Ctrl+F7 right-clicks it.
+local function pageTest()
+  if InCombatLockdown() then
+    print("WowKeys: leave combat first")
+  elseif not setUpPageProxy() then
+    print("WowKeys: no ChangePageButton (is the Gamepad UI on?)")
+  else
+    SetOverrideBindingClick(owner, false, "CTRL-F8", PAGE_PROXY, "LeftButton")
+    SetOverrideBindingClick(owner, false, "CTRL-F7", PAGE_PROXY, "RightButton")
+    print("WowKeys: until /reload, Ctrl+F8 clicks the change-page button, Ctrl+F7 right-clicks it; watch BAR n")
+  end
+end
+
 local function dispatch(arg)
   local text = arg:match("^find%s+(.+)$")
   local frameText = arg:match("^frames%s+(.+)$")
@@ -554,6 +585,8 @@ local function dispatch(arg)
   elseif inspectText then
     local frame = frameByName(inspectText)
     if frame then inspectFrame(frame, frame:GetName() or inspectText) end
+  elseif arg == "pagetest" then
+    pageTest()
   elseif arg == "pagecontrols" then
     inspectPageControls()
   elseif newWait then
@@ -574,6 +607,7 @@ local function dispatch(arg)
     print("  /wowkeys inspect <name> list a frame's fields, functions and children")
     print("  /wowkeys page         show the controller page (arrangement)")
     print("  /wowkeys pagecontrols inspect the controller page tracker and shortcut menu")
+    print("  /wowkeys pagetest     Ctrl+F8/F7 click the change-page button until /reload")
   end
 end
 

@@ -20,10 +20,13 @@ function CreateFrame(_, name)
     return { SetPoint = function() end, SetText = function(_, t) banner = t end, SetTextColor = function() end }
   end
   function f:SetScript(k, fn) self.scripts[k] = fn end
+  f.attributes = {}
+  function f:SetAttribute(k, v) self.attributes[k] = v end
+  function f:RegisterForClicks() end
   function f:RegisterEvent(e)
     if e == "LEARNED_SPELL_IN_TAB" then error("unknown event") end
   end
-  if name then frames[name] = f end
+  if name then frames[name] = f; _G[name] = f end
   return f
 end
 UIParent, SOUNDKIT = {}, { RAID_WARNING = 1 }
@@ -322,7 +325,22 @@ GamepadMainActionBarFramePageUnit.PageTracker.GetObjectType = function() error("
 printed = {}
 SlashCmdList.WOWKEYS("pagecontrols")
 check(said("WowKeys error: .*secret"), "a failing command prints its error")
+-- /wowkeys pagetest points a secure proxy at the change-page button and
+-- binds temporary keys to it.
+local overrides = {}
+function SetOverrideBindingClick(_, _, key, name, button) overrides[key] = name .. ":" .. button end
+local changePage = {}
+GamepadMainActionBarFramePageUnit.PageTracker = { ChangePageButton = changePage }
+printed = {}
+SlashCmdList.WOWKEYS("pagetest")
+check(frames.WowKeysPageNext.attributes.type == "click" and frames.WowKeysPageNext.attributes.clickbutton == changePage,
+  "pagetest's proxy clicks the change-page button")
+check(overrides["CTRL-F8"] == "WowKeysPageNext:LeftButton" and overrides["CTRL-F7"] == "WowKeysPageNext:RightButton"
+  and said("until /reload"), "pagetest binds temporary keys")
 GamepadMainActionBarFramePageUnit = nil
+printed = {}
+SlashCmdList.WOWKEYS("pagetest")
+check(said("no ChangePageButton"), "pagetest without the Gamepad UI")
 
 -- Controller arrangement shows in the banner, and updates when it changes.
 frames.WowKeysMode_combat.scripts.OnClick()

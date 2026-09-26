@@ -330,7 +330,15 @@ change-page button through a secure proxy (SecureActionButton
 `type=click`), which runs as Blizzard code. `ClickChangePageButton` hints
 such a button exists; `/wowkeys pagecontrols` lists PageTracker's and
 ShortcutsActionBar's children two levels deep. (`inspect <name>` with an
-argument wouldn't run in game; commands now print their Lua errors.) The
+argument wouldn't run in game; commands now print their Lua errors.)
+**Found:** `PageTracker.ChangePageButton` (Button, shown), plus
+`currentPage` and `standardSlot1`–`3` (Frames, the page pips). The
+shortcut menu's D-pad/face buttons are CheckButtons (`dpadRightButton`
+etc.). `/wowkeys pagetest` makes `WowKeysPageNext` (SecureActionButton,
+`type=click`, `clickbutton` = ChangePageButton) and binds Ctrl+F8
+(LeftButton) / Ctrl+F7 (RightButton) as override bindings until /reload.
+If it pages without the "blocked" warning (in and out of combat), it goes
+into `layout.toml` as the binding command `CLICK WowKeysPageNext:LeftButton`. The
 banner shows `· BAR n` while the Gamepad UI is visible (WowKeys reads the
 slot on the first controller button every 0.25 s).
 
