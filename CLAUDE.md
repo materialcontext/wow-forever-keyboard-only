@@ -153,7 +153,8 @@ The WowKeys addon (one addon, not a separate ModeBanner):
 - places spells and creates macros on bars when the layout's buttons change
   (revision hash), when you learn a spell, or on `/wowkeys bars`. Managed
   slots whose spell isn't learned yet are cleared of other spells (WoW's
-  starter bar left duplicates); items and macros there are left alone;
+  starter bar left duplicates) and of WowKeys' own macros left over from
+  an older layout; items and the player's own macros are left alone;
 - binds each mode's banner chord to a hidden button that updates the
   on-screen mode label, and plays a warning if combat starts outside the
   home (first) mode.

@@ -169,6 +169,10 @@ end
 -- items and macros there are left alone.
 local function applyBars(verbose)
   local missing, cleared = {}, {}
+  -- Our macros in a slot the layout now gives to something else are
+  -- leftovers from an older layout; other macros and items are yours.
+  local ourMacros = {}
+  for _, m in ipairs(L.macros) do ourMacros[m[1]] = true end
   for _, b in ipairs(L.buttons) do
     ClearCursor()
     pickup(b)
@@ -178,8 +182,9 @@ local function applyBars(verbose)
     else
       table.insert(missing, b.spell or b.macro)
       local kind, id = GetActionInfo(b.slot)
-      if kind == "spell" then
-        table.insert(cleared, spellName(id) or tostring(id))
+      local macroName = kind == "macro" and GetMacroInfo(id)
+      if kind == "spell" or (macroName and ourMacros[macroName] and macroName ~= b.macro) then
+        table.insert(cleared, macroName or spellName(id) or tostring(id))
         PickupAction(b.slot)
         ClearCursor()
       end

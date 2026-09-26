@@ -12,6 +12,9 @@ local actions = {
   [1] = { "spell", 116 }, [3] = { "spell", 168 }, [4] = { "spell", 133 },
   [5] = { "spell", 1459 }, [6] = { "spell", 116 }, [7] = { "spell", 133 },
   [10] = { "item", 1 }, [11] = { "item", 2 }, [12] = { "item", 3 },
+  -- An older layout's Poly macro where unlearned Frost Nova now goes, and
+  -- the player's own macro where unlearned Cold Snap goes.
+  [189] = { "macro", "Poly" }, [197] = { "macro", "MyOwn" },
 }
 
 function CreateFrame(_, name)
@@ -60,6 +63,7 @@ function GetMacroIndexByName(n) return macros[n] and 1 or 0 end
 function CreateMacro(n, _, body) macros[n] = body end
 function EditMacro(_, n, _, body) macros[n] = body end
 function PickupMacro(n) cursor = macros[n] and { "macro", n } end
+function GetMacroInfo(id) return id end -- action ids here are macro names
 function GetCursorInfo() return cursor end
 function ClearCursor() cursor = nil end
 function PlaceAction(slot) cursor, actions[slot] = actions[slot], cursor end
@@ -148,6 +152,8 @@ check(actions[10][1] == "item" and actions[12][1] == "item", "items left alone")
 check(actions[8][1] == "macro", "Blizzard macro")
 check(actions[186][2] == 116 and actions[190] == nil, "controller: Frostbolt on LT+Up; unlearned Fire Blast slot empty")
 check(actions[182][1] == "macro" and actions[185][1] == "macro", "controller: focus and Poly macros")
+check(actions[189] == nil and said("took off the bars.*Poly"), "old layout's macro cleared from an unlearned spell's slot")
+check(actions[197][2] == "MyOwn", "the player's own macro left alone")
 check(actions[214][2] == 168 and actions[215][2] == 1459, "controller: buffs on arrangement 2")
 check(bindings["CTRL-F8"] == "CLICK WowKeysPage:LeftButton", "touchpad chord pages the controller bars")
 check(said("took off the bars.*Frostbolt"), "reports what it cleared")
