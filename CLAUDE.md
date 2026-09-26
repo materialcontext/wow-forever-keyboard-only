@@ -379,6 +379,12 @@ follows whichever device switched last). Circle/B is left native so it
 still closes windows. No separate world layer: buffs/conjure/food/hearth
 are already on the LT+RT controller bar.
 
+**Controller play doesn't need kanata:** Steam Input (LT latch, touchpad,
+Create layer, banner combos) talks to WoW directly and WowKeys binds the
+combos. If kanata runs too, it sees Steam's injected keys; Ctrl/Alt combos
+pass (os_hold), but a Shift sent before Ctrl/Alt would hit kanata's
+world-mode key (banner jumps to WORLD; Caps fixes). Untested.
+
 **Transfer plan** (owner wants to play on controller if possible): our
 layout's spells and macros become controller bar content. The addon
 already places spells/macros in action slots, so `layout.toml` could gain
