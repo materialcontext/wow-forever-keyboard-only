@@ -214,7 +214,7 @@ it goes in.
 
 | Addon | Job | Keyboard impact |
 |---|---|---|
-| Leatrix Plus | auto quest accept/turn-in, sell junk, repair, QoL | **Owns quest accept/turn-in and vendor chores** (decided). UI K removed; G and 1–9 cover what it doesn't (gossip, rewards, popups, loot, trainers). |
+| Leatrix Plus | auto quest accept/turn-in, sell junk, repair, QoL | **Owns quest accept/turn-in and vendor chores** (decided). UI K removed; G and 1–9 cover what it doesn't (gossip, rewards, popups, loot, trainers). No keys needed; settings via `/ltp` in chat. To skip its automation for one NPC, hold **Right** Shift while pressing A (Left Shift is the world-mode key and never sends Shift). |
 | Bagnon | combined bag window | UI U should open it (it takes over the bag toggle). Navigating inside it is still unsolved. |
 | Plater | enemy nameplates | Q/B cycling and leader / depend on nameplates. Plater manages nameplate CVars; if it fights our `nameplateShowEnemies`, drop ours from `[cvars]`. Midnight limits nameplate addons in combat. |
 | DBM | boss timers and warnings | Display only. Midnight limits boss mods hardest and the modern client has built-in boss warnings; check what the Forever build can still do. |
@@ -331,7 +331,7 @@ learns the first one, one spell per press.
 - [x] G accepts a resurrection popup (so StaticPopup1's button works).
 - [ ] G accepts a group invite.
 - [ ] Ctrl+Alt / Ctrl+Alt+Shift chords don't trigger anything in Windows.
-- [ ] `/wowkeys find auctionator` (and `dbm`, `atlas`, `bagnon`): paste
+- [ ] `/wowkeys find auctionator` (and `dbm`, `atlas`, `bagnon`, `leatrix`): paste
       the output here.
 - [ ] Loot rolls and full-bag loot windows: note what you'd want to press.
 
