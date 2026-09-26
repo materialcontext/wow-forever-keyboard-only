@@ -322,10 +322,13 @@ menu shows `GamepadMainActionBarFramePageUnitPageTracker`,
 `/wowkeys inspect <name>` lists a frame's fields, functions and children
 to find the paging logic. **Found:** `GamepadMainActionBarFramePageUnit`
 has `GetCurrentPage`, `SetCurrentPage`, `ClickChangePageButton` and
-`pageableActionBarsIndexOrder`. `/wowkeys page [n]` probes whether an
-addon may call them (out of combat and in combat; watch for "action
-blocked" or taint errors). If it works, arrangement switching becomes
-absolute: `wowkeys:page1`..`page3` commands on keys, sent by Steam. The
+`pageableActionBarsIndexOrder` (4 entries: Top, Left, Right, Bottom bar).
+**Calling `SetCurrentPage` from an addon is blocked** (it switched, then
+"blocked from an action only available to the Blizzard UI"; tested), so
+`/wowkeys page` only reads. Next route: a key press clicking Blizzard's own
+change-page button through a secure proxy (SecureActionButton
+`type=click`), which runs as Blizzard code. `ClickChangePageButton` hints
+such a button exists; look in PageTracker / ShortcutsActionBar. The
 banner shows `· BAR n` while the Gamepad UI is visible (WowKeys reads the
 slot on the first controller button every 0.25 s).
 
