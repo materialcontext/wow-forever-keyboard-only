@@ -423,10 +423,70 @@ local function newFrames(seconds)
   end)
 end
 
+-- The frame named exactly `text`, or the only named frame containing it.
+local function frameByName(text)
+  if type(_G[text]) == "table" and _G[text].GetObjectType then return _G[text] end
+  local found, names = nil, {}
+  eachNamedFrame(function(frame, name)
+    if name:lower():find(text:lower(), 1, true) then
+      found = frame
+      table.insert(names, name)
+    end
+  end)
+  if #names == 1 then return found end
+  if #names == 0 then
+    print(("WowKeys: no frame named like \"%s\""):format(text))
+  else
+    printFrames(names, ("match \"%s\"; name one"):format(text))
+  end
+end
+
+-- Prints names in lines of a few each.
+local function printList(label, list)
+  table.sort(list)
+  if #list == 0 then return end
+  print(("  |cffffd200%s|r (%d)"):format(label, #list))
+  for i = 1, #list, 5 do
+    print("    " .. table.concat(list, ", ", i, math.min(i + 4, #list)))
+  end
+end
+
+-- Shows a frame's own fields, its functions (mixin methods, not the widget
+-- API) and its children, to find how the Gamepad UI pages its bars.
+local function inspectFrame(text)
+  local frame = frameByName(text)
+  if not frame then return end
+  local fields, functions, keyOf = {}, {}, {}
+  for k, v in pairs(frame) do
+    if type(k) == "string" then
+      if type(v) == "function" then
+        table.insert(functions, k)
+      elseif type(v) == "table" then
+        keyOf[v] = k
+        table.insert(fields, k .. "=" .. (v.GetObjectType and v:GetObjectType() or "table"))
+      else
+        table.insert(fields, k .. "=" .. tostring(v))
+      end
+    end
+  end
+  print("WowKeys: " .. (frame:GetName() or "?") .. " (" .. frame:GetObjectType() .. ")")
+  printList("fields", fields)
+  printList("functions", functions)
+  local children = {}
+  for _, child in ipairs({ frame:GetChildren() }) do
+    local label = child:GetName() or keyOf[child] or "?"
+    local text = child.GetText and child:GetText()
+    table.insert(children, ("%s %s%s%s"):format(label, child:GetObjectType(),
+      isShown(child) and "" or " hidden", text and (" \"" .. text .. "\"") or ""))
+  end
+  printList("children", children)
+end
+
 SlashCmdList.WOWKEYS = function(arg)
   local text = arg:match("^find%s+(.+)$")
   local frameText = arg:match("^frames%s+(.+)$")
   local newWait = arg:match("^newframes%s*(%d*)$")
+  local inspectText = arg:match("^inspect%s+(.+)$")
   if arg == "bars" then
     outOfCombat(applyBarsVerbose)
   elseif arg == "pad" then
@@ -435,6 +495,8 @@ SlashCmdList.WOWKEYS = function(arg)
     listSlots()
   elseif arg == "padbuttons" then
     listPadButtons()
+  elseif inspectText then
+    inspectFrame(inspectText)
   elseif newWait then
     newFrames(tonumber(newWait) or 5)
   elseif frameText then
@@ -450,5 +512,6 @@ SlashCmdList.WOWKEYS = function(arg)
     print("  /wowkeys padbuttons   list controller-bar buttons and their slots")
     print("  /wowkeys frames <text> list named frames (find buttons to click)")
     print("  /wowkeys newframes [s] list frames that appear within s seconds (default 5)")
+    print("  /wowkeys inspect <name> list a frame's fields, functions and children")
   end
 end

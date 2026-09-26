@@ -284,6 +284,20 @@ timers[1](); timers = {}
 check(said("GamepadShortcutNextPageButton.*shown") and not said("PlayerFrame")
   and said("1 frame%(s%) appeared in the last 3 s"), "newframes lists only frames that appeared")
 
+-- /wowkeys inspect shows a frame's fields, functions and children.
+local nextButton = { GetName = function() end, GetObjectType = function() return "Button" end,
+  IsShown = function() return true end, GetText = function() return "Next" end }
+local shortcuts = { currentPage = 2, NextPage = function() end, Next = nextButton,
+  GetName = function() return "GamepadMainActionBarFramePageUnitShortcutsActionBar" end,
+  GetObjectType = function() return "Frame" end, GetChildren = function() return nextButton end }
+fakeFrames = { shortcuts, { GetName = function() return "PlayerFrame" end } }
+printed = {}
+SlashCmdList.WOWKEYS("inspect ShortcutsActionBar")
+check(said("currentPage=2") and said("NextPage") and said("Next Button \"Next\""), "inspect lists fields, functions, children")
+printed = {}
+SlashCmdList.WOWKEYS("inspect Frame")
+check(said("2 frame%(s%) match"), "inspect asks to pick when several frames match")
+
 -- Controller arrangement shows in the banner, and updates when it changes.
 frames.WowKeysMode_combat.scripts.OnClick()
 check(banner == "-- COMBAT --", "no arrangement shown without the Gamepad UI")
