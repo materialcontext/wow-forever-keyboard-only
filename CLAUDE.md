@@ -285,8 +285,23 @@ wow/setup.md              # addon install, one-time game settings
 - Whether the owner accepts kanata mouse-movement keys as a last-resort UI
   fallback (keyboard input, but it drives a pointer).
 - Leader timeout (1000 ms for now) and whether a second leader is needed.
-- Navigating inside windows (bags, talents, spellbook): a verified UI addon,
-  or more of our own commands.
+- **Navigating inside windows** (character/equipment, bags, bank, spellbook,
+  talents) is the next big piece. Owner wants no cursor kludge. Plan:
+  1. Check whether Forever's native controller UI (alpha in the beta)
+     exposes its navigation as bindings: `/wowkeys find` with `navigat`,
+     `cursor`, `gamepad`, `pad`, `controller`, `interface`; optionally try a
+     real controller on bags/character/talents.
+  2. If bindable: map them into UI mode (least code). If it needs a real
+     gamepad, avoid it (virtual-controller driver + Rust bridge = a second
+     input system).
+  3. Otherwise build our own navigator in WowKeys, ConsolePort-style:
+     a focus on one clickable widget in open windows (found generically, so
+     Bagnon etc. work); move focus with Vimium-style letter hints and/or
+     H/J/K/L spatial steps; act with left/right-click keys bound to a
+     secure click proxy (SecureActionButton `type=click`, `clickbutton` =
+     focus), so protected actions like equipping work; show the focus's
+     tooltip. Out of combat only. Start with bags, bank, character.
+  Chat `/equip` and `/use` by name already work as a stopgap.
 - Group loot rolls (need/greed/pass) by key.
 
 ## Test 1 results (level 5, beta)
@@ -373,5 +388,6 @@ Later:
 ## Next steps
 
 1. Finish "Still to verify" in game.
-2. Loot rolls, bag navigation, talents: pick a UI addon or extend Commands.
+2. Window navigation (see Open questions): the check, then route 1 or 3.
+   Loot rolls after that.
 3. Long cooldowns on the leader layer.
