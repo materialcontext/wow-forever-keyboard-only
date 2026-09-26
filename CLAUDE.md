@@ -320,15 +320,16 @@ learns the first one, one spell per press.
 
 ## Still to verify
 
-- [ ] Trainer: 1–9 and G learn spells; the list reprints after each.
-- [ ] Bar 2 is shown (it holds the , . / X C V Z buttons).
+- [x] Trainer: 1–9 and G learn spells; the list reprints after each.
+- [x] Bar 2 is shown (it holds the , . / X C V Z buttons).
 - [x] `,` Polymorphs the focus when set, the target otherwise (level 8).
 - [x] Punctuation keys `,` `.` `/` once their spells are learned (WoW's
       names for them are the literal characters, as assumed).
 - [ ] Talk to an NPC with gossip options (A): options print numbered in
       chat; 1–9 picks.
-- [ ] G takes the only reward; with several rewards it asks for a number.
-- [ ] G accepts a group invite / resurrection popup.
+- [x] G takes the only reward; with several rewards it asks for a number.
+- [x] G accepts a resurrection popup (so StaticPopup1's button works).
+- [ ] G accepts a group invite.
 - [ ] Ctrl+Alt / Ctrl+Alt+Shift chords don't trigger anything in Windows.
 - [ ] `/wowkeys find auctionator` (and `dbm`, `atlas`, `bagnon`): paste
       the output here.
