@@ -234,6 +234,13 @@ layout for them** (owner's call, test 4). Then put the command into
   `LEATRIX_PLUS_GLOBAL_RARE` (announce rare),
   `LEATRIX_PLUS_GLOBAL_MOUNTSPECIAL` (mount special animation).
 - Leatrix Maps: `LEATRIX_MAPS_GLOBAL_TOGGLE` (panel).
+- Bagnon: `BAGNON_TOGGLE` (inventory; UI U already opens it via the bag
+  toggle), `BAGNON_BANK_TOGGLE` (bank), `BAGNON_VAULT_TOGGLE` (void
+  storage), `BAGNON_GUILD_TOGGLE` (guild bank).
+- DBM: none. It's driven by chat commands (`/dbm`, `/dbm pull 10`), which
+  chat mode already covers.
+- Auctionator: none matched "auctionator". Still to try: `find auction`,
+  `find post`, `find cancel`.
 
 **Rules for coexisting:**
 - `Commands.lua` finds dialogs by Blizzard's frame names. An addon that
@@ -341,8 +348,10 @@ learns the first one, one spell per press.
 - [ ] G accepts a group invite.
 - [ ] Ctrl+Alt / Ctrl+Alt+Shift chords don't trigger anything in Windows.
 - [x] `/wowkeys find leatrix` works in game (names recorded under Addons).
-- [ ] `/wowkeys find auctionator` (and `dbm`, `atlas`, `bagnon`): paste
-      the output here.
+- [x] `/wowkeys find` for bagnon, dbm, auctionator (names recorded under
+      Addons).
+- [ ] `/wowkeys find auction`, `post`, `cancel` (Auctionator under other
+      names?) and `atlas`.
 - [ ] Loot rolls and full-bag loot windows: note what you'd want to press.
 
 Later:
