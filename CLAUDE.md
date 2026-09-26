@@ -380,8 +380,11 @@ and triggers stay native**, so Blizzard's Gamepad UI works inside windows
 (owner: sticks navigate, X accepts, Circle cancels). Bank opens by
 talking to a banker, so it's not in the layer. Steam sends one key per
 input (owner), so the first design (UI-mode Ctrl+Alt chords plus banner
-chords) couldn't work; the controller layer has no banner. Optional,
-safer: an extra *Remove Layer* command per input makes it one-shot.
+chords) couldn't work; the controller layer has no banner. Steam's
+**sub commands** add outputs to one press (believed; owner testing): a
+*Remove Layer* sub command per input makes the layer one-shot
+(recommended). Sub commands could also build Ctrl+Alt chords, but numpad
+keys need one output instead of three.
 `[steam_layer]` names the layer and its button; `[[steam_button]]`
 entries with `layer = "UI"` live in it; `cargo run` writes the setup
 sheet `wow/steam-layers.md` (GENERATED).

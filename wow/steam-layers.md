@@ -24,10 +24,11 @@ tabs, as Blizzard's Gamepad UI intends.
 2. **Base layout, Create (PlayStation) / View (Xbox):** *Add Layer* `UI`.
 3. **In the `UI` layer, Create (PlayStation) / View (Xbox):** *Remove Layer* `UI`.
 4. **In the `UI` layer**, bind each input below to its key.
-5. Optional, safer: if Steam lets you *add an extra command* to an input,
-   give each one below a second command *Remove Layer* `UI`. Then one
-   press opens the window and drops you back to your normal controller,
-   so the D-pad can't be left opening windows when a fight starts.
+5. Recommended: give each input below a **sub command** *Remove Layer*
+   `UI` (Steam's sub commands add more outputs to the same press).
+   Then one press opens the window and drops you back to your normal
+   controller, so the D-pad can't be left opening windows when a fight
+   starts.
 
 | Controller input | Key | Does |
 |---|---|---|
