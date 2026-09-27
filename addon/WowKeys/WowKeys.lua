@@ -103,6 +103,43 @@ end
 local CHAT_EXTRAS = { "GeneralDockManager", "ChatFrameMenuButton", "ChatFrameChannelButton",
   "QuickJoinToastButton" }
 
+local function isInside(frame, ancestor)
+  while frame do
+    if frame == ancestor then return true end
+    frame = frame.GetParent and frame:GetParent()
+  end
+  return false
+end
+
+-- What a frame's first anchor point is attached to, if anything.
+local function anchorOf(frame)
+  local ok, _, relativeTo = pcall(function() return frame:GetPoint(1) end)
+  return ok and relativeTo or nil
+end
+
+-- Frames attached to the chat window (or something in it) but not inside
+-- it: a UI addon's own chat background and borders, which follow the
+-- window around. EllesmereUI draws its chat this way (owner's test).
+local function attachedToChat()
+  local found = {}
+  if not (ChatFrame1 and EnumerateFrames) then return found end
+  local frame = EnumerateFrames()
+  while frame do
+    pcall(function()
+      if isInside(frame, ChatFrame1) then return end
+      for i = 1, frame:GetNumPoints() do
+        local _, relativeTo = frame:GetPoint(i)
+        if relativeTo and isInside(relativeTo, ChatFrame1) then
+          table.insert(found, frame)
+          return
+        end
+      end
+    end)
+    frame = EnumerateFrames(frame)
+  end
+  return found
+end
+
 -- The frames a chat window sits in, below UIParent: UI addons (e.g.
 -- EllesmereUI) may wrap the chat in their own container with its own
 -- background.
@@ -128,6 +165,7 @@ local function chatParts()
   if ChatFrame1 then
     for _, ancestor in ipairs(chatAncestors(ChatFrame1)) do table.insert(parts, ancestor) end
   end
+  for _, frame in ipairs(attachedToChat()) do table.insert(parts, frame) end
   for _, name in ipairs(CHAT_EXTRAS) do table.insert(parts, _G[name]) end
   return parts
 end
@@ -590,14 +628,7 @@ end
 
 -- /wowkeys chatcover: visible frames drawn over the chat window's area that
 -- aren't part of it, named or not (a UI addon's own chat background or
--- text), with their parent to tell whose they are.
-local function isInside(frame, ancestor)
-  while frame do
-    if frame == ancestor then return true end
-    frame = frame.GetParent and frame:GetParent()
-  end
-  return false
-end
+-- text), with their parent and what they're attached to.
 
 local function nameOf(frame)
   local ok, name = pcall(function() return frame:GetName() end)
@@ -625,9 +656,10 @@ local function chatCover()
       local x, y, w, h = screenRect(frame)
       local overlaps = x and x < cx + cw and x + w > cx and y < cy + ch and y + h > cy
       if overlaps and w < sw * 0.8 and h < sh * 0.8 then -- skip full-screen frames
-        local parent = frame:GetParent()
-        table.insert(rows, ("  %s %s, parent %s, %dx%d"):format(nameOf(frame), frame:GetObjectType(),
-          parent and nameOf(parent) or "none", w, h))
+        local parent, anchor = frame:GetParent(), anchorOf(frame)
+        table.insert(rows, ("  %s %s, parent %s, attached to %s, %dx%d"):format(nameOf(frame),
+          frame:GetObjectType(), parent and nameOf(parent) or "none", anchor and nameOf(anchor) or "nothing",
+          w, h))
       end
     end)
     frame = EnumerateFrames(frame)

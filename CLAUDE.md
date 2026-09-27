@@ -418,7 +418,14 @@ wrapper), yet chat still visible, and ChatFrame1EditBox shown (kept
 visible on purpose; the edit box may be always-on in their setup). So
 EllesmereUI draws chat in a separate frame. `/wowkeys chatcover` lists
 visible frames (named or not) over the chat window's area that aren't
-part of it, with their parent, to find that frame. Leaving a group natively: target yourself (hold LB + Cross),
+part of it, with their parent and what they're attached to. **Owner's
+chatcover:** three unnamed frames parented to UIParent (~261x157,
+284x175, 290x174) plus unnamed children (247x125): EllesmereUI's chat
+background/borders. Fix: the toggle now also fades any frame whose
+anchor points attach it to ChatFrame1 (or something inside it); these
+follow the window, so they count as part of it. Unverified that
+EllesmereUI anchors them to the chat (chatcover now prints "attached
+to"). Leaving a group natively: target yourself (hold LB + Cross),
 Triangle opens the context menu, Leave Group. WowKeys now warns at login
 about any bound command the game doesn't know.
 

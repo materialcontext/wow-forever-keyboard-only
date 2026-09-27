@@ -193,6 +193,11 @@ end
 UIParent.GetScaledRect = function() return 0, 0, 1920, 1080 end
 ChatFrame1.GetScaledRect = function() return 20, 100, 400, 200 end
 local cover = rectFrame(nil, 10, 90, 420, 220, UIParent)
+-- EllesmereUI-style background: unnamed, parented to UIParent, attached to the chat.
+cover.alpha, cover.SetAlpha = 1, function(self, a) self.alpha = a end
+cover.GetNumPoints = function() return 1 end
+cover.GetPoint = function() return "TOPLEFT", ChatFrame1, "TOPLEFT", -10, 10 end
+ChatFrame1.GetName = function() return "ChatFrame1" end
 local coverFrames = { cover, rectFrame("Minimap", 1700, 800, 200, 200, UIParent),
   rectFrame("WorldFrame", 0, 0, 1920, 1080, nil), ChatFrame1 }
 function EnumerateFrames(after)
@@ -202,10 +207,15 @@ end
 ChatFrame1.IsVisible = function() return true end
 ChatFrame1.GetEffectiveAlpha = function() return 0 end
 SlashCmdList.WOWKEYS("chatcover")
-check(said("unnamed Frame, parent unnamed, 420x220") and not said("Minimap") and not said("WorldFrame")
-  and said("1 frame%(s%) drawn over the chat window"), "chatcover finds the unnamed frame over the chat")
+check(said("unnamed Frame, parent unnamed, attached to ChatFrame1, 420x220") and not said("Minimap")
+  and not said("WorldFrame") and said("1 frame%(s%) drawn over the chat window"),
+  "chatcover finds the unnamed frame over the chat and what it's attached to")
 frames.WowKeysCmd_chat.scripts.OnClick()
 check(ChatFrame1.alpha == 1 and ChatFrame1Tab.alpha == 1 and container.alpha == 1, "chat shown again")
+frames.WowKeysCmd_chat.scripts.OnClick()
+check(cover.alpha == 0, "a frame attached to the chat window fades with it")
+frames.WowKeysCmd_chat.scripts.OnClick()
+check(cover.alpha == 1 and ChatFrame1.alpha == 1, "and comes back with it")
 ChatFrame1:SetAlpha(0.5)
 check(ChatFrame1.alpha == 0.5, "others may fade it while shown")
 
