@@ -24,6 +24,10 @@ tabs, as Blizzard's Gamepad UI intends.
 2. **Base layout, Create (PlayStation) / View (Xbox):** *Add Layer* `UI`.
 3. **In the `UI` layer, Create (PlayStation) / View (Xbox):** *Remove Layer* `UI`.
 4. **In the `UI` layer**, bind each input below to its key.
+   If the new layer came up blank (Steam may create it empty, or as an
+   Action Set, which never inherits), also copy every other input from
+   the base layout: sticks, triggers, bumpers, Cross, Circle and the
+   touchpad keys above, and Create itself as in step 3.
 5. Optional, safer: if Steam lets you *add an extra command* to an input,
    give each one below a second command *Remove Layer* `UI`. Then one
    press opens the window and drops you back to your normal controller,

@@ -389,6 +389,8 @@ talking to a banker, so it's not in the layer. Steam sends one key per
 input (owner), so the first design (UI-mode Ctrl+Alt chords plus banner
 chords) couldn't work; the controller layer has no banner. Optional,
 safer: an extra *Remove Layer* command per input makes it one-shot.
+Owner's Steam made the new layer blank, so every other input had to be
+copied from the base by hand (the sheet says so).
 `[steam_layer]` names the layer and its button; `[[steam_button]]`
 entries with `layer = "UI"` live in it; `cargo run` writes the setup
 sheet `wow/steam-layers.md` (GENERATED).
