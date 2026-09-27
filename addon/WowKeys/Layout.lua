@@ -2,7 +2,7 @@
 local _, ns = ...
 ns.layout = {
   -- Changes when buttons or macros change; the addon re-places bars then.
-  revision = "0b43ad8d",
+  revision = "df06ea55",
   modes = {
     { name = "combat", label = "COMBAT", key = "ALT-CTRL-SHIFT-F9" },
     { name = "ui", label = "UI", key = "ALT-CTRL-SHIFT-F10" },
@@ -76,6 +76,7 @@ ns.layout = {
     { "CTRL-/", "NAMEPLATES" },
     { "F8", "CLICK WowKeysPage:LeftButton" },
     { "F7", "CLICK WowKeysPage:RightButton" },
+    { "NUMPAD5", "TOGGLEAUTORUN" },
     { "F9", "wowkeys:strafe" },
     { "NUMPAD8", "TOGGLESOCIAL" },
     { "NUMPAD4", "TOGGLEGUILDTAB" },
@@ -111,7 +112,6 @@ ns.layout = {
     { slot = 183, spell = "Fireball" },
     { slot = 184, spell = "Fire Blast" },
     { slot = 185, macro = "SetFocus" },
-    { slot = 186, spell = "Evocation" },
     { slot = 187, spell = "Arcane Missiles" },
     { slot = 188, macro = "ClearFocus" },
     { slot = 189, spell = "Counterspell" },
@@ -127,6 +127,7 @@ ns.layout = {
     { slot = 199, spell = "Blink" },
     { slot = 200, spell = "Ice Lance" },
     { slot = 202, macro = "TargetFocus" },
+    { slot = 203, spell = "Evocation" },
     { slot = 205, spell = "Cold Snap" },
     { slot = 206, spell = "Frost Ward" },
     { slot = 207, spell = "Remove Lesser Curse" },
