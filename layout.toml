@@ -275,7 +275,6 @@ macro = "Trade"
 body = "/trade"
 does = "trade with your target (hand out water and food)"
 
-# Name assumed (Blizzard's follow binding); WowKeys warns at login if wrong.
 [[steam_button]]
 layer = "Social"
 input = "LT"
