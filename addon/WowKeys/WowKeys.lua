@@ -588,6 +588,53 @@ local function findFrames(text)
   printFrames(rows, ("match \"%s\""):format(text))
 end
 
+-- /wowkeys chatcover: visible frames drawn over the chat window's area that
+-- aren't part of it, named or not (a UI addon's own chat background or
+-- text), with their parent to tell whose they are.
+local function isInside(frame, ancestor)
+  while frame do
+    if frame == ancestor then return true end
+    frame = frame.GetParent and frame:GetParent()
+  end
+  return false
+end
+
+local function nameOf(frame)
+  local ok, name = pcall(function() return frame:GetName() end)
+  return ok and type(name) == "string" and name or "unnamed"
+end
+
+local function screenRect(frame)
+  if frame.GetScaledRect then return frame:GetScaledRect() end
+  return frame:GetRect()
+end
+
+local function chatCover()
+  local cx, cy, cw, ch -- (`a and f()` would keep only f's first result)
+  if ChatFrame1 then cx, cy, cw, ch = screenRect(ChatFrame1) end
+  if not cx then
+    print("WowKeys: the chat window has no position")
+    return
+  end
+  local _, _, sw, sh = screenRect(UIParent)
+  local rows = {}
+  local frame = EnumerateFrames()
+  while frame do
+    pcall(function()
+      if not frame:IsVisible() or frame:GetEffectiveAlpha() == 0 or isInside(frame, ChatFrame1) then return end
+      local x, y, w, h = screenRect(frame)
+      local overlaps = x and x < cx + cw and x + w > cx and y < cy + ch and y + h > cy
+      if overlaps and w < sw * 0.8 and h < sh * 0.8 then -- skip full-screen frames
+        local parent = frame:GetParent()
+        table.insert(rows, ("  %s %s, parent %s, %dx%d"):format(nameOf(frame), frame:GetObjectType(),
+          parent and nameOf(parent) or "none", w, h))
+      end
+    end)
+    frame = EnumerateFrames(frame)
+  end
+  printFrames(rows, "drawn over the chat window, outside it")
+end
+
 -- Notes which named frames are shown now, waits, then lists the ones shown
 -- since. For menus that close when chat opens: run it, then open the menu
 -- and hold it until the list prints.
@@ -737,6 +784,8 @@ local function dispatch(arg)
     if frame then inspectFrame(frame, frame:GetName() or inspectText) end
   elseif arg == "chatinfo" then
     chatInfo()
+  elseif arg == "chatcover" then
+    chatCover()
   elseif arg == "pagecontrols" then
     inspectPageControls()
   elseif newWait then
@@ -758,6 +807,7 @@ local function dispatch(arg)
     print("  /wowkeys page         show the controller page (arrangement)")
     print("  /wowkeys pagecontrols inspect the controller page tracker and shortcut menu")
     print("  /wowkeys chatinfo     show the chat window's frames and visibility")
+    print("  /wowkeys chatcover    list visible frames drawn over the chat window")
   end
 end
 

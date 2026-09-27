@@ -184,6 +184,26 @@ ChatFrame1:SetAlpha(0.8) -- another addon fades it back in
 check(ChatFrame1.alpha == 0, "the fade holds while hidden")
 SlashCmdList.WOWKEYS("chatinfo") -- appends: later checks read the login output
 check(said("hidden = true"), "chatinfo reports the chat window")
+-- /wowkeys chatcover finds a visible frame over the chat that isn't part of it.
+local function rectFrame(name, x, y, w, h, parent)
+  return { GetName = function() return name end, GetObjectType = function() return "Frame" end,
+    IsVisible = function() return true end, GetEffectiveAlpha = function() return 1 end,
+    GetScaledRect = function() return x, y, w, h end, GetParent = function() return parent end }
+end
+UIParent.GetScaledRect = function() return 0, 0, 1920, 1080 end
+ChatFrame1.GetScaledRect = function() return 20, 100, 400, 200 end
+local cover = rectFrame(nil, 10, 90, 420, 220, UIParent)
+local coverFrames = { cover, rectFrame("Minimap", 1700, 800, 200, 200, UIParent),
+  rectFrame("WorldFrame", 0, 0, 1920, 1080, nil), ChatFrame1 }
+function EnumerateFrames(after)
+  if not after then return coverFrames[1] end
+  for i, f in ipairs(coverFrames) do if f == after then return coverFrames[i + 1] end end
+end
+ChatFrame1.IsVisible = function() return true end
+ChatFrame1.GetEffectiveAlpha = function() return 0 end
+SlashCmdList.WOWKEYS("chatcover")
+check(said("unnamed Frame, parent unnamed, 420x220") and not said("Minimap") and not said("WorldFrame")
+  and said("1 frame%(s%) drawn over the chat window"), "chatcover finds the unnamed frame over the chat")
 frames.WowKeysCmd_chat.scripts.OnClick()
 check(ChatFrame1.alpha == 1 and ChatFrame1Tab.alpha == 1 and container.alpha == 1, "chat shown again")
 ChatFrame1:SetAlpha(0.5)

@@ -412,7 +412,13 @@ box is a child of the chat window. For UI addons (EllesmereUI) it also
 fades the frames ChatFrame1 sits in below UIParent (a wrapper with its
 own background) and hooks SetAlpha on every faded part so another
 addon's fading can't bring it back while hidden. `/wowkeys chatinfo`
-prints ChatFrame1's parent chain with alpha and visibility. Leaving a group natively: target yourself (hold LB + Cross),
+prints ChatFrame1's parent chain with alpha and visibility. **Owner's
+result with EllesmereUI:** ChatFrame1 at alpha 0, parent UIParent (no
+wrapper), yet chat still visible, and ChatFrame1EditBox shown (kept
+visible on purpose; the edit box may be always-on in their setup). So
+EllesmereUI draws chat in a separate frame. `/wowkeys chatcover` lists
+visible frames (named or not) over the chat window's area that aren't
+part of it, with their parent, to find that frame. Leaving a group natively: target yourself (hold LB + Cross),
 Triangle opens the context menu, Leave Group. WowKeys now warns at login
 about any bound command the game doesn't know.
 
