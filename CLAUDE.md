@@ -389,19 +389,21 @@ layer blank, so every other input had to be copied from the base.
 in `[steam_layer]`): hold Create with the left thumb, press with the right
 hand, let go and the window navigates natively. Left stick, D-pad, Cross
 and Circle stay Blizzard's (Cross confirms invites natively, owner; verify
-on a real invite). Triangle `TOGGLESOCIAL` (social window; name assumed:
-the `find social` line was cut off in the paste), Square `TOGGLEGUILDTAB`,
-right stick up `TOGGLEGROUPFINDER` (both confirmed by `/wowkeys find`),
-right stick down macro `/invite` (invites the target), RT macro
-`/run C_PartyInfo.LeaveParty()` (on a trigger so it isn't hit by
-accident). Keys: numpad 8/4/6/2/1. `[[steam_button]]` takes `macro` +
-`body` instead of `command` for these. Right stick right (numpad 3)
-trades with the
-target (macro `/trade`: mages hand out water and food), LT (numpad 9)
-follows the target (`FOLLOWTARGET`, name assumed). Right stick left
-and R3 spare. Rarer
-actions (inspect, whisper, promote, loot settings) stay in Blizzard's
-context menu: target a player, Triangle.
+on a real invite). Windows: Triangle `TOGGLESOCIAL` (name assumed: the
+`find social` line was cut off in the paste), Square `TOGGLEGUILDTAB`,
+right stick up `TOGGLEGROUPFINDER` (both confirmed by `/wowkeys find`).
+**Actions on the target sit on the shoulders** (owner, 2026-09-27; pick
+the target with Blizzard's bumpers first, then hold Create): LT follow
+(`FOLLOWTARGET`, name assumed), RT trade (macro `/trade`: mages hand out
+water and food), RB invite (macro `/invite`). Right stick down leaves the
+group (macro `/run C_PartyInfo.LeaveParty()`; only live while Create is
+held). Keys: numpad 8 social, 4 guild, 6 group finder, 9 follow, 3 trade,
+2 invite, 1 leave. `[[steam_button]]` takes `macro` + `body` instead of
+`command`. Right stick left/right and R3 spare. Rarer actions (inspect,
+whisper, promote, loot settings) stay in Blizzard's context menu: target
+a player, Triangle. **Group finder didn't open** (owner): check Numpad 6
+on the keyboard to split Steam (right stick style) from WoW (level lock
+or disabled in the beta).
 
 **Chat window toggle: removed (2026-09-27).** A WowKeys fade of the chat
 windows worked on Blizzard's chat but not with EllesmereUI, which draws

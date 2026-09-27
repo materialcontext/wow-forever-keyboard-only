@@ -31,9 +31,9 @@ normal, so a window you opened navigates natively (D-pad, Cross, Circle).
 | Triangle / Y | Keypad 8 | social window (friends, who, raid) |
 | Square / X | Keypad 4 | guild & communities |
 | Right stick up | Keypad 6 | group finder |
-| Right stick down | Keypad 2 | invite your target to the group |
-| Right stick right | Keypad 3 | trade with your target (hand out water and food) |
+| RB | Keypad 2 | invite your target to the group |
+| RT | Keypad 3 | trade with your target (hand out water and food) |
 | LT | Keypad 9 | follow your target |
-| RT | Keypad 1 | leave the group |
+| Right stick down | Keypad 1 | leave the group |
 
 Keep Num Lock on, in case Steam sends the keypad keys as scan codes.

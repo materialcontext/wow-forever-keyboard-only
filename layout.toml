@@ -258,9 +258,11 @@ key = "kp6"
 command = "TOGGLEGROUPFINDER"
 does = "group finder"
 
+# Actions on your target sit on the shoulders: pick the target first
+# (Blizzard's bumpers), then hold Create and pull or press.
 [[steam_button]]
 layer = "Social"
-input = "Right stick down"
+input = "RB"
 key = "kp2"
 macro = "Invite"
 body = "/invite"
@@ -268,7 +270,7 @@ does = "invite your target to the group"
 
 [[steam_button]]
 layer = "Social"
-input = "Right stick right"
+input = "RT"
 key = "kp3"
 macro = "Trade"
 body = "/trade"
@@ -282,10 +284,10 @@ key = "kp9"
 command = "FOLLOWTARGET"
 does = "follow your target"
 
-# On a trigger so it isn't pressed by accident.
+# Only while Create is held, so it isn't pressed by accident.
 [[steam_button]]
 layer = "Social"
-input = "RT"
+input = "Right stick down"
 key = "kp1"
 macro = "LeaveGroup"
 body = "/run C_PartyInfo.LeaveParty()"
