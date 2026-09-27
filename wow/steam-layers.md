@@ -12,34 +12,4 @@ controller behaviour.
 |---|---|---|
 | Touchpad, right half (click) | F8 | next bar arrangement (1 → 2 → 3 → 1) |
 | Touchpad, left half (click) | F7 | previous bar arrangement (1 → 3 → 2 → 1) |
-
-## UI layer on Create (PlayStation) / View (Xbox)
-
-**Create (PlayStation) / View (Xbox)** toggles a Steam action layer. While it's on, the inputs below
-open windows; everything else stays native, so inside a window the
-sticks move, Cross/A accepts, Circle/B cancels and the bumpers change
-tabs, as Blizzard's Gamepad UI intends.
-
-1. **Action Layers → add a layer** named `UI`.
-2. **Base layout, Create (PlayStation) / View (Xbox):** *Add Layer* `UI`.
-3. **In the `UI` layer, Create (PlayStation) / View (Xbox):** *Remove Layer* `UI`.
-4. **In the `UI` layer**, bind each input below to its key.
-   If the new layer came up blank (Steam may create it empty, or as an
-   Action Set, which never inherits), also copy every other input from
-   the base layout: sticks, triggers, bumpers, Cross, Circle and the
-   touchpad keys above, and Create itself as in step 3.
-5. Optional, safer: if Steam lets you *add an extra command* to an input,
-   give each one below a second command *Remove Layer* `UI`. Then one
-   press opens the window and drops you back to your normal controller,
-   so the D-pad can't be left opening windows when a fight starts.
-
-| Controller input | Key | Does |
-|---|---|---|
-| D-pad Up | Keypad 8 | bags |
-| D-pad Right | Keypad 6 | quest log |
-| D-pad Down | Keypad 2 | map |
-| D-pad Left | Keypad 4 | character |
-| Triangle / Y | Keypad 9 | spellbook |
-| Square / X | Keypad 7 | talents |
-
-Keep Num Lock on, in case Steam sends the keypad keys as scan codes.
+| L3 (click the left stick) | F9 | strafe mode on/off |

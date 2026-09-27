@@ -169,7 +169,7 @@ fighting over one WoW chord, and one macro name with two bodies.
 Action kinds in `layout.toml`: WoW binding command; spell or macro on a bar
 button; spell or macro bound directly (`SPELL x` / `MACRO x`, no bar slot,
 used outside combat mode); mode switch; `wowkeys:<command>` (addon
-commands: `confirm`, `vendor`, `choose1`..`choose9`). One-shot modes
+commands: `confirm`, `vendor`, `strafe`, `choose1`..`choose9`). One-shot modes
 (`oneshot = ms`) use kanata `one-shot` over `layer-while-held` and have no
 banner.
 
@@ -374,26 +374,29 @@ attack button, and the owner found no way to attack.) The
 banner shows `· BAR n` while the Gamepad UI is visible (WowKeys reads the
 slot on the first controller button every 0.25 s).
 
-**Controller UI layer (decided, rebuilt for single keys):** quick window
-access without the radial menu. **Create** (View on Xbox) toggles a Steam
-action layer (Add Layer / Remove Layer, one command each). Kept as a
-Steam layer and a latch (owner, despite no-latch triggers) because it can
-later hold our own advanced combat macros. Ranked by use like the bars:
-D-pad Up/Right/Down/Left open bags/quest log/map/character, Triangle /
-Square the spellbook / talents, each by sending one **numpad key**
-(8/6/2/4, 9/7), which WowKeys binds (kanata passes the numpad through; no mode uses
-it). **Cross (accept), Circle (cancel), the sticks (move focus), bumpers
-and triggers stay native**, so Blizzard's Gamepad UI works inside windows
-(owner: sticks navigate, X accepts, Circle cancels). Bank opens by
-talking to a banker, so it's not in the layer. Steam sends one key per
-input (owner), so the first design (UI-mode Ctrl+Alt chords plus banner
-chords) couldn't work; the controller layer has no banner. Optional,
-safer: an extra *Remove Layer* command per input makes it one-shot.
-Owner's Steam made the new layer blank, so every other input had to be
-copied from the base by hand (the sheet says so).
-`[steam_layer]` names the layer and its button; `[[steam_button]]`
-entries with `layer = "UI"` live in it; `cargo run` writes the setup
-sheet `wow/steam-layers.md` (GENERATED).
+**Controller UI layer: dropped (2026-09-27).** It was a Steam layer
+latched by Create whose D-pad / Triangle / Square sent numpad keys to open
+windows. Owner's test: Blizzard's Gamepad UI navigates windows with the
+**D-pad** (Cross accepts, Circle cancels), so a latched layer on the D-pad
+fights it; and the Start radial menu is fine for character, bags, quests
+and map. The generator still supports `[steam_layer]` + `[[steam_button]]`
+with `layer = "..."` (numpad digits `kp0`–`kp9` are bindable) for a future
+layer. Lessons: a layer must not latch over the D-pad (use a **hold**
+layer, released before navigating); the owner's Steam created a new
+layer blank, so every other input had to be copied from the base.
+
+**Social shortcuts (wanted, not built):** the owner wants social controls
+closer than the radial menu's Social tab. Proposal: a Steam **hold** layer
+on Create (left thumb holds, right thumb presses a face button, release
+and the window navigates natively). Needs: which social actions, and
+their binding names via `/wowkeys find social|guild|group|friend`.
+
+**Strafe mode (built):** L3 → F9 → `wowkeys:strafe` toggles the Gamepad
+UI's face-movement angle (`GamePadFaceMovementMaxAngle` and `…Combat`)
+between 0 (stick strafes and backpedals) and the previous values (turns
+toward the stick). Banner shows `· STRAFE`. CVar names are from retail's
+Gamepad settings; unverified in Forever (`/wowkeys pad` now lists every
+setting with "GamePad" in its name).
 
 **Controller play doesn't need kanata:** Steam Input (LT latch, touchpad,
 Create layer, banner combos) talks to WoW directly and WowKeys binds the
@@ -480,7 +483,7 @@ addon/WowKeys/Commands.lua # dialog/loot/popup/vendor commands (wowkeys:*)
 addon/WowKeys/WowKeys.lua # applies Layout.lua, mode banner
 addon/tests/dryrun.lua    # offline test of the addon with stubbed WoW APIs
 wow/setup.md              # addon install, one-time game settings
-wow/steam-layers.md       # GENERATED: Steam Input setup (touchpad paging, UI layer)
+wow/steam-layers.md       # GENERATED: Steam Input setup (touchpad paging, strafe toggle)
 ```
 
 ## Open questions
@@ -592,9 +595,9 @@ learns the first one, one spell per press.
 - [x] Controller: touchpad pages arrangements (also in combat); RT is a
       plain hold, LT still latches; stale Poly macro cleared.
 - [x] Controller: the keyboard bars are unchanged.
-- [ ] Controller UI layer: set up per `wow/steam-layers.md`; with it on,
-      D-pad/Triangle/Square open the windows, sticks/Cross/Circle work
-      inside them, Create again turns it off. Numpad keys reach WoW.
+- [x] Controller UI layer: tested; D-pad conflict, dropped (see above).
+- [ ] Strafe mode: L3 (F9) makes the stick strafe/backpedal, banner shows
+      STRAFE; L3 again turns as before. Works in combat.
 
 Later:
 - [ ] `A` interacts with objects too (assumed `INTERACTTARGET`).

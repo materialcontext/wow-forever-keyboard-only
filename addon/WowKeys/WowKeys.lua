@@ -31,9 +31,21 @@ end
 
 local shownArrangement
 
+-- Controller strafe mode: the Gamepad UI turns the character toward the
+-- stick's direction up to a maximum angle ("face movement"). At 0 the
+-- stick strafes left/right and backpedals instead of turning.
+local FACE_CVARS = { "GamePadFaceMovementMaxAngle", "GamePadFaceMovementMaxAngleCombat" }
+local getCVar = C_CVar and C_CVar.GetCVar or GetCVar
+local setCVar = C_CVar and C_CVar.SetCVar or SetCVar
+
+local function strafing()
+  return getCVar(FACE_CVARS[1]) == "0"
+end
+
 local function showMode()
   shownArrangement = padArrangement()
-  local suffix = shownArrangement and (" · BAR " .. shownArrangement) or ""
+  local suffix = (shownArrangement and (" · BAR " .. shownArrangement) or "")
+    .. (strafing() and " · STRAFE" or "")
   banner:SetText("-- " .. current.label .. suffix .. " --")
   if InCombatLockdown() and current ~= home then
     banner:SetTextColor(1, 0.2, 0.2)
@@ -57,6 +69,32 @@ end
 
 -- Addon commands --------------------------------------------------------
 
+-- Toggles strafe mode, restoring the angles you had before (saved per
+-- character; 180 if none were saved).
+WowKeysCommands.strafe = function()
+  if getCVar(FACE_CVARS[1]) == nil then
+    print("WowKeys: this client has no " .. FACE_CVARS[1] .. "; try /wowkeys pad for the gamepad settings")
+    return
+  end
+  WowKeysDB = WowKeysDB or {}
+  local db = WowKeysDB
+  local turning = not strafing()
+  if turning then db.faceAngles = {} end
+  for _, name in ipairs(FACE_CVARS) do
+    local value = getCVar(name)
+    if value ~= nil then
+      if turning then
+        db.faceAngles[name] = value
+        setCVar(name, "0")
+      else
+        local saved = db.faceAngles and db.faceAngles[name]
+        setCVar(name, (saved and saved ~= "0") and saved or "180")
+      end
+    end
+  end
+  showMode()
+end
+
 -- One hidden button per command in Commands.lua; bindings "click" it.
 local function commandButtonName(name)
   return "WowKeysCmd_" .. name
@@ -68,9 +106,6 @@ for name, fn in pairs(WowKeysCommands) do
 end
 
 -- Settings ----------------------------------------------------------------
-
-local getCVar = C_CVar and C_CVar.GetCVar or GetCVar
-local setCVar = C_CVar and C_CVar.SetCVar or SetCVar
 
 local function applyCVars()
   for _, c in ipairs(L.cvars) do
@@ -312,7 +347,8 @@ end
 -- Lists everything bound to a controller button, plus the controller
 -- settings, to learn how Forever's gamepad UI stores its bindings.
 local GAMEPAD_CVARS = { "GamePadEnable", "GamePadEmulateShift", "GamePadEmulateCtrl",
-  "GamePadEmulateAlt", "GamePadEmulateEsc" }
+  "GamePadEmulateAlt", "GamePadEmulateEsc", "GamePadFaceMovementMaxAngle",
+  "GamePadFaceMovementMaxAngleCombat" }
 
 local function padBindings()
   local shown = 0
@@ -335,6 +371,16 @@ local function padBindings()
       print(("  %s = %s"):format(name, value))
     end
   end
+  -- Every setting whose name mentions GamePad, to find ones we don't know.
+  local all = C_Console and C_Console.GetAllCommands and C_Console.GetAllCommands() or {}
+  local names = {}
+  for _, c in ipairs(all) do
+    if c.command and c.command:lower():find("gamepad", 1, true) then
+      table.insert(names, c.command)
+    end
+  end
+  table.sort(names)
+  if #names > 0 then print("  all GamePad settings: " .. table.concat(names, ", ")) end
 end
 
 -- Lists every filled action slot with its id, to learn which slots the
