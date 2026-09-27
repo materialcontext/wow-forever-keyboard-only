@@ -159,6 +159,19 @@ check(bindings["F8"] == "CLICK WowKeysPage:LeftButton" and bindings["F7"] == "CL
   "touchpad keys page the controller bars both ways")
 check(bindings["F9"] == "CLICK WowKeysCmd_strafe", "L3's key toggles strafe mode")
 
+-- Chat visibility: windows and tabs fade out, the typing box stays visible.
+local function part() return { alpha = 1, SetAlpha = function(self, a) self.alpha = a end } end
+NUM_CHAT_WINDOWS = 1
+ChatFrame1, ChatFrame1Tab, GeneralDockManager = part(), part(), part()
+ChatFrame1EditBox = { SetIgnoreParentAlpha = function(self, v) self.ignores = v end }
+check(bindings["ALT-CTRL-C"] == "CLICK WowKeysCmd_chat" and bindings["NUMPAD7"] == "CLICK WowKeysCmd_chat",
+  "UI C and the Social layer toggle the chat window")
+frames.WowKeysCmd_chat.scripts.OnClick()
+check(ChatFrame1.alpha == 0 and ChatFrame1Tab.alpha == 0 and GeneralDockManager.alpha == 0
+  and ChatFrame1EditBox.ignores, "chat hidden, typing box still shows")
+frames.WowKeysCmd_chat.scripts.OnClick()
+check(ChatFrame1.alpha == 1 and ChatFrame1Tab.alpha == 1, "chat shown again")
+
 -- Strafe mode: face-movement angles go to 0, then back to what they were.
 cvars.GamePadFaceMovementMaxAngle, cvars.GamePadFaceMovementMaxAngleCombat = "115", "180"
 frames.WowKeysCmd_strafe.scripts.OnClick()

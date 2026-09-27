@@ -144,6 +144,7 @@ p = "TOGGLETALENTS"
 l = "TOGGLEQUESTLOG"
 m = "TOGGLEWORLDMAP"
 b = "BAGNON_BANK_TOGGLE"  # bank (Bagnon), at a banker
+c = "wowkeys:chat"        # show / hide the chat window
 # Type into a text box that opened by itself (mail, search): Enter or Esc
 # ends it, like chat.
 "'" = { mode = "chat" }
@@ -265,6 +266,13 @@ key = "kp2"
 macro = "Invite"
 body = "/invite"
 does = "invite your target to the group"
+
+[[steam_button]]
+layer = "Social"
+input = "Right stick left"
+key = "kp7"
+command = "wowkeys:chat"
+does = "show / hide the chat window"
 
 # On a trigger so it isn't pressed by accident.
 [[steam_button]]

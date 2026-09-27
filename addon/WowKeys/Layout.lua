@@ -55,6 +55,7 @@ WowKeysLayout = {
     { "ALT-CTRL-O", "TOGGLESPELLBOOK" },
     { "ALT-CTRL-P", "TOGGLETALENTS" },
     { "ALT-CTRL-L", "TOGGLEQUESTLOG" },
+    { "ALT-CTRL-C", "wowkeys:chat" },
     { "ALT-CTRL-B", "BAGNON_BANK_TOGGLE" },
     { "ALT-CTRL-M", "TOGGLEWORLDMAP" },
     { "ALT-CTRL-SHIFT-U", "MACRO Drink" },
@@ -80,6 +81,7 @@ WowKeysLayout = {
     { "NUMPAD4", "TOGGLEGUILDTAB" },
     { "NUMPAD6", "TOGGLEGROUPFINDER" },
     { "NUMPAD2", "MACRO Invite" },
+    { "NUMPAD7", "wowkeys:chat" },
     { "NUMPAD1", "MACRO LeaveGroup" },
   },
   buttons = {

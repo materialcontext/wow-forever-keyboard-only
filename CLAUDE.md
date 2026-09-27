@@ -169,7 +169,7 @@ fighting over one WoW chord, and one macro name with two bodies.
 Action kinds in `layout.toml`: WoW binding command; spell or macro on a bar
 button; spell or macro bound directly (`SPELL x` / `MACRO x`, no bar slot,
 used outside combat mode); mode switch; `wowkeys:<command>` (addon
-commands: `confirm`, `vendor`, `strafe`, `choose1`..`choose9`). One-shot modes
+commands: `confirm`, `vendor`, `strafe`, `chat`, `choose1`..`choose9`). One-shot modes
 (`oneshot = ms`) use kanata `one-shot` over `layer-while-held` and have no
 banner.
 
@@ -192,7 +192,8 @@ greeting, reward choice, trainer or loot window opens.
   `,` is a Polymorph macro that sheeps the focus if you have one, else the
   target.
 - **UI (Tab, Ctrl+Alt+key):** U bags, I character, O spellbook, P talents,
-  L quest log, M map, B bank (Bagnon), `'` type into a text box. Vendor chores belong to
+  L quest log, M map, B bank (Bagnon), C show/hide the chat window,
+  `'` type into a text box. Vendor chores belong to
   Leatrix Plus (the `wowkeys:vendor` command still exists if ever needed). Esc closes windows. Navigating *inside* windows (bags, talents) still
   needs a UI addon or our own commands.
 - **World (Left Shift, Ctrl+Alt+Shift+key):** J Frost Armor, K Arcane
@@ -395,8 +396,15 @@ right stick up `TOGGLEGROUPFINDER` (both confirmed by `/wowkeys find`),
 right stick down macro `/invite` (invites the target), RT macro
 `/run C_PartyInfo.LeaveParty()` (on a trigger so it isn't hit by
 accident). Keys: numpad 8/4/6/2/1. `[[steam_button]]` takes `macro` +
-`body` instead of `command` for these. LT, right stick left/right and R3
-spare. Leaving a group natively: target yourself (hold LB + Cross),
+`body` instead of `command` for these. Right stick left (numpad 7)
+toggles the chat window. LT, right stick right and R3 spare.
+
+**Chat window toggle (built):** `wowkeys:chat` (UI C, Social layer right
+stick left). WoW has no binding for it. Fades the chat windows, tabs,
+button frames, dock and chat buttons to alpha 0 and back (saved per
+character, reapplied at login); the typing box is set to ignore its
+parent's alpha so it still shows while typing. Not a Hide(): the typing
+box is a child of the chat window. Leaving a group natively: target yourself (hold LB + Cross),
 Triangle opens the context menu, Leave Group. WowKeys now warns at login
 about any bound command the game doesn't know.
 
@@ -607,6 +615,9 @@ learns the first one, one spell per press.
 - [x] Controller UI layer: tested; D-pad conflict, dropped (see above).
 - [ ] Strafe mode: L3 (F9) makes the stick strafe/backpedal, banner shows
       STRAFE; L3 again turns as before. Works in combat.
+- [ ] Chat toggle: UI C / Create + right stick left fades the chat
+      window out and back; typing still shows the box; state survives
+      /reload. New-message tab flashes may peek through.
 - [ ] Social layer: no login warning about TOGGLESOCIAL; hold Create +
       Triangle / Square / right stick up open social / guild / group
       finder; right stick down invites the target; RT leaves the group;

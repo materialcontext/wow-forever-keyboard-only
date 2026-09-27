@@ -32,6 +32,7 @@ normal, so a window you opened navigates natively (D-pad, Cross, Circle).
 | Square / X | Keypad 4 | guild & communities |
 | Right stick up | Keypad 6 | group finder |
 | Right stick down | Keypad 2 | invite your target to the group |
+| Right stick left | Keypad 7 | show / hide the chat window |
 | RT | Keypad 1 | leave the group |
 
 Keep Num Lock on, in case Steam sends the keypad keys as scan codes.

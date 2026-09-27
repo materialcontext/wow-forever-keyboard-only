@@ -95,6 +95,37 @@ WowKeysCommands.strafe = function()
   showMode()
 end
 
+-- Chat window visibility. Fades the chat windows, their tabs and buttons
+-- to nothing rather than hiding them: the box you type into lives inside
+-- the chat window, so it ignores the fade and still shows while typing.
+local CHAT_EXTRAS = { "GeneralDockManager", "ChatFrameMenuButton", "ChatFrameChannelButton",
+  "QuickJoinToastButton" }
+
+local function chatParts()
+  local parts = {}
+  for i = 1, NUM_CHAT_WINDOWS or 10 do
+    for _, suffix in ipairs({ "", "Tab", "ButtonFrame" }) do
+      table.insert(parts, _G["ChatFrame" .. i .. suffix])
+    end
+    local editBox = _G["ChatFrame" .. i .. "EditBox"]
+    if editBox and editBox.SetIgnoreParentAlpha then editBox:SetIgnoreParentAlpha(true) end
+  end
+  for _, name in ipairs(CHAT_EXTRAS) do table.insert(parts, _G[name]) end
+  return parts
+end
+
+local function showChat(shown)
+  for _, part in ipairs(chatParts()) do
+    if part.SetAlpha then part:SetAlpha(shown and 1 or 0) end
+  end
+end
+
+WowKeysCommands.chat = function()
+  WowKeysDB = WowKeysDB or {}
+  WowKeysDB.chatHidden = not WowKeysDB.chatHidden
+  showChat(not WowKeysDB.chatHidden)
+end
+
 -- One hidden button per command in Commands.lua; bindings "click" it.
 local function commandButtonName(name)
   return "WowKeysCmd_" .. name
@@ -289,6 +320,7 @@ owner:SetScript("OnEvent", function(_, event, isInitialLogin, isReload)
   if event == "PLAYER_ENTERING_WORLD" then
     if isInitialLogin or isReload then
       WowKeysDB = WowKeysDB or {}
+      if WowKeysDB.chatHidden then showChat(false) end
       outOfCombat(applyCVars)
       outOfCombat(applyMacros) -- before bindings and bars that use them
       outOfCombat(applyBindings)
