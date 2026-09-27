@@ -387,9 +387,17 @@ layer blank, so every other input had to be copied from the base.
 
 **Social shortcuts (wanted, not built):** the owner wants social controls
 closer than the radial menu's Social tab. Proposal: a Steam **hold** layer
-on Create (left thumb holds, right thumb presses a face button, release
-and the window navigates natively). Needs: which social actions, and
-their binding names via `/wowkeys find social|guild|group|friend`.
+on Create (left thumb holds, right hand presses; release and the window
+navigates natively). Left stick, D-pad, Cross and Circle stay Blizzard's;
+the layer may use Square, Triangle, the right stick, R3 and the triggers.
+Draft: Triangle social window, Square guild & communities, right stick
+up group finder, down invite target (macro), RT leave group (macro, on a
+trigger so it isn't hit by accident); LT, right stick left/right and R3
+spare. No accept button: Cross confirms popups natively (owner; it does
+in the radial menus; verify on a group invite). Waiting on the binding
+names from `/wowkeys find social|guild|group`. Leaving a group natively:
+target yourself (hold LB + Cross), Triangle opens the context menu,
+Leave Group.
 
 **Strafe mode (built):** L3 → F9 → `wowkeys:strafe` toggles the Gamepad
 UI's face-movement angle (`GamePadFaceMovementMaxAngle` and `…Combat`)
