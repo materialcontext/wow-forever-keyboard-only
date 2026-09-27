@@ -401,9 +401,9 @@ held). Keys: numpad 8 social, 4 guild, 6 group finder, 9 follow, 3 trade,
 2 invite, 1 leave. `[[steam_button]]` takes `macro` + `body` instead of
 `command`. Right stick left/right and R3 spare. Rarer actions (inspect,
 whisper, promote, loot settings) stay in Blizzard's context menu: target
-a player, Triangle. **Group finder didn't open** (owner): check Numpad 6
-on the keyboard to split Steam (right stick style) from WoW (level lock
-or disabled in the beta).
+a player, Triangle. **Group finder didn't open** (owner, keyboard Numpad 6
+too) at **level 9**; the binding is right. Likely the level-10 lock the
+group finder has in retail. Recheck at 10.
 
 **Chat window toggle: removed (2026-09-27).** A WowKeys fade of the chat
 windows worked on Blizzard's chat but not with EllesmereUI, which draws
@@ -629,6 +629,7 @@ learns the first one, one spell per press.
       (no login warning about FOLLOWTARGET); Cross accepts a group invite.
       Square/Triangle confirmed; invite/trade/follow need a player
       targeted (owner's first try had none), leave needs a group.
+      Group finder: recheck at level 10 (did nothing at 9).
 
 Later:
 - [ ] `A` interacts with objects too (assumed `INTERACTTARGET`).
