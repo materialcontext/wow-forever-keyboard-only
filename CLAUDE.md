@@ -49,8 +49,7 @@ The **input layer owns ergonomics**, the **game owns meaning**.
   disable input until reboot after sleep). Replaces the owner's iCUE
   macros; turn those off so they don't stack.
 - **Controller:** Forever's Gamepad UI plays the game. Steam Input adds
-  what WoW can't do itself (touchpad paging, strafe toggle, autorun,
-  Social layer)
+  what WoW can't do itself (touchpad paging, strafe toggle, Social layer)
   by sending single keys. kanata isn't needed for controller play.
 - **WoW side:** the WowKeys addon applies the bindings, bars, macros and
   settings from `layout.toml`, and shows the current mode in a banner
@@ -179,8 +178,8 @@ standing** (left thumb; moving cancels a cast bar anyway).
 |---|---|---|
 | No trigger | Blizzard's (attack is Square) | ↑ Frostbolt → Fireball ← Polymorph ↓ Fire Blast |
 | RT | ✕ Ice Lance □ Frost Nova △ Cone of Cold ○ Blink | ↑ Blizzard → Blood Fury ← Arcane Explosion ↓ Mana Shield |
-| LT | ✕ Ice Barrier (40) □ Counterspell △ Ice Block ○ health potion | ↑ **autorun** (Steam) → Arcane Missiles ← set focus ↓ clear focus |
-| LT+RT | ✕ mana potion □ Cold Snap △ Frost Ward ○ Remove Lesser Curse | ↑ target focus → Evocation |
+| LT | ✕ Ice Barrier (40) □ Counterspell △ Ice Block ○ health potion | ↑ Evocation → Arcane Missiles ← set focus ↓ clear focus |
+| LT+RT | ✕ mana potion □ Cold Snap △ Frost Ward ○ Remove Lesser Curse | ↑ target focus |
 
 Arrangement 2 (out of combat): no trigger D-pad ↑ drink → eat ↓ Conjure
 Water ← Conjure Food; RT D-pad ↑ Frost Armor → Arcane Intellect ↓ hearth
@@ -190,13 +189,6 @@ History: v1 put the main spells on the D-pad (the left thumb can't move
 and press it); v2 latched LT as a combat home layer, which hid Blizzard's
 Square attack. Latching is possible with Steam's per-trigger Toggle if
 ever wanted again.
-
-**Autorun (LT + D-pad Up):** bar slots only take spells, items and
-macros, and `ToggleAutoRun` is protected (macros can't move you), so a
-Steam **D-pad mode shift on LT** sends Keypad 5 → `TOGGLEAUTORUN` for Up
-and passes Left/Right/Down through. The LT+Up bar slot is unreachable and
-left out of the layout; Evocation moved to LT+RT →. (Owner asked,
-2026-09-27; untested.)
 
 ### Paging arrangements (built, works in combat)
 
@@ -244,8 +236,6 @@ Leave Group.
 
 - **One key per input** (no chords): single keys only (F7–F9, numpad
   digits `kp0`–`kp9`, which kanata passes through and no mode uses).
-  A **mode shift** gives an input a second binding while another button
-  is held (autorun on LT + D-pad Up).
 - **Layers must be holds.** A latched layer (Create toggling window keys
   on the D-pad) fought Blizzard's D-pad window navigation; dropped.
 - New layers may come up **blank**: copy the base inputs. Stick
@@ -408,8 +398,6 @@ wow/steam-layers.md        # GENERATED: what to bind in Steam
 ## Still to verify
 
 - [ ] Group finder opens at level 10.
-- [ ] Autorun: LT + D-pad Up toggles it (Steam mode shift); LT + the other
-      D-pad directions still cast.
 - [ ] Cross accepts a real group invite; G does too on the keyboard.
 - [ ] Gossip options print numbered and 1–9 pick them.
 - [ ] Ctrl+Alt / Ctrl+Alt+Shift chords trigger nothing in Windows.
