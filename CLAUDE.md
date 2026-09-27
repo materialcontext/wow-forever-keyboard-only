@@ -613,8 +613,8 @@ learns the first one, one spell per press.
       plain hold, LT still latches; stale Poly macro cleared.
 - [x] Controller: the keyboard bars are unchanged.
 - [x] Controller UI layer: tested; D-pad conflict, dropped (see above).
-- [ ] Strafe mode: L3 (F9) makes the stick strafe/backpedal, banner shows
-      STRAFE; L3 again turns as before. Works in combat.
+- [x] Strafe mode: L3 (F9) makes the stick strafe/backpedal, banner shows
+      STRAFE; L3 again turns as before (owner: "works great").
 - [ ] Chat toggle: UI C / Create + right stick left fades the chat
       window out and back; typing still shows the box; state survives
       /reload. New-message tab flashes may peek through.
