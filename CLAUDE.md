@@ -452,6 +452,7 @@ it goes in.
 | DBM | boss timers and warnings | Display only. Midnight limits boss mods hardest and the modern client has built-in boss warnings; check what the Forever build can still do. |
 | Auctionator | auction house search and selling | Hardest for keyboard-only play (lists, picking a bag item to sell). Its own keybindings (believed: post / cancel undercut) can go on UI-mode keys once named. |
 | AtlasLoot | loot table browser | Mouse-driven browsing; a key to open it at most. |
+| EllesmereUI | UI replacement (owner uses it; found 2026-09-27) | **Breaks `wowkeys:chat`**: fading Blizzard's chat frames does nothing with it on (it likely replaces or re-fades the chat). Next: `/wowkeys find ellesmere` (its own chat toggle?) and `/wowkeys frames chat` (its frame names). Unknown what else it replaces (action bars, unit frames); watch bar placement and hotkey labels. |
 
 **Adding an addon's keybinding:** in game, `/wowkeys find <text>` lists
 matching binding commands with their readable names. **Record the names
@@ -621,12 +622,14 @@ learns the first one, one spell per press.
       STRAFE; L3 again turns as before (owner: "works great").
 - [ ] Chat toggle: UI C / Create + right stick left fades the chat
       window out and back; typing still shows the box; state survives
-      /reload. New-message tab flashes may peek through.
+      /reload. **Fails with EllesmereUI** (see Addons); needs its frames.
 - [ ] Social layer: no login warning about TOGGLESOCIAL; hold Create +
       Triangle / Square / right stick up open social / guild / group
       finder; right stick down invites the target; RT leaves the group;
       right stick right trades with the target; LT follows the target
       (no login warning about FOLLOWTARGET); Cross accepts a group invite.
+      Square/Triangle confirmed; invite/trade/follow need a player
+      targeted (owner's first try had none), leave needs a group.
 
 Later:
 - [ ] `A` interacts with objects too (assumed `INTERACTTARGET`).
