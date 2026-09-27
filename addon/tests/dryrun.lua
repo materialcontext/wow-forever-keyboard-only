@@ -158,6 +158,8 @@ check(actions[222][2] == 168 and actions[223][2] == 1459, "controller: buffs on 
 check(bindings["F8"] == "CLICK WowKeysPage:LeftButton" and bindings["F7"] == "CLICK WowKeysPage:RightButton",
   "touchpad keys page the controller bars both ways")
 check(bindings["F9"] == "CLICK WowKeysCmd_strafe", "L3's key toggles strafe mode")
+check(bindings["NUMPAD3"] == "MACRO Trade" and macros.Trade == "/trade" and bindings["NUMPAD9"] == "FOLLOWTARGET",
+  "Social layer: trade and follow")
 
 -- Chat visibility: windows and tabs fade out, the typing box stays visible.
 local function part() return { alpha = 1, SetAlpha = function(self, a) self.alpha = a end } end

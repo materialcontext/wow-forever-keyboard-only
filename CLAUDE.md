@@ -397,7 +397,11 @@ right stick down macro `/invite` (invites the target), RT macro
 `/run C_PartyInfo.LeaveParty()` (on a trigger so it isn't hit by
 accident). Keys: numpad 8/4/6/2/1. `[[steam_button]]` takes `macro` +
 `body` instead of `command` for these. Right stick left (numpad 7)
-toggles the chat window. LT, right stick right and R3 spare.
+toggles the chat window, right stick right (numpad 3) trades with the
+target (macro `/trade`: mages hand out water and food), LT (numpad 9)
+follows the target (`FOLLOWTARGET`, name assumed). R3 spare. Rarer
+actions (inspect, whisper, promote, loot settings) stay in Blizzard's
+context menu: target a player, Triangle.
 
 **Chat window toggle (built):** `wowkeys:chat` (UI C, Social layer right
 stick left). WoW has no binding for it. Fades the chat windows, tabs,
@@ -621,7 +625,8 @@ learns the first one, one spell per press.
 - [ ] Social layer: no login warning about TOGGLESOCIAL; hold Create +
       Triangle / Square / right stick up open social / guild / group
       finder; right stick down invites the target; RT leaves the group;
-      Cross accepts a group invite.
+      right stick right trades with the target; LT follows the target
+      (no login warning about FOLLOWTARGET); Cross accepts a group invite.
 
 Later:
 - [ ] `A` interacts with objects too (assumed `INTERACTTARGET`).

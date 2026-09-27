@@ -274,6 +274,22 @@ key = "kp7"
 command = "wowkeys:chat"
 does = "show / hide the chat window"
 
+[[steam_button]]
+layer = "Social"
+input = "Right stick right"
+key = "kp3"
+macro = "Trade"
+body = "/trade"
+does = "trade with your target (hand out water and food)"
+
+# Name assumed (Blizzard's follow binding); WowKeys warns at login if wrong.
+[[steam_button]]
+layer = "Social"
+input = "LT"
+key = "kp9"
+command = "FOLLOWTARGET"
+does = "follow your target"
+
 # On a trigger so it isn't pressed by accident.
 [[steam_button]]
 layer = "Social"
