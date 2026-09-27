@@ -408,7 +408,11 @@ stick left). WoW has no binding for it. Fades the chat windows, tabs,
 button frames, dock and chat buttons to alpha 0 and back (saved per
 character, reapplied at login); the typing box is set to ignore its
 parent's alpha so it still shows while typing. Not a Hide(): the typing
-box is a child of the chat window. Leaving a group natively: target yourself (hold LB + Cross),
+box is a child of the chat window. For UI addons (EllesmereUI) it also
+fades the frames ChatFrame1 sits in below UIParent (a wrapper with its
+own background) and hooks SetAlpha on every faded part so another
+addon's fading can't bring it back while hidden. `/wowkeys chatinfo`
+prints ChatFrame1's parent chain with alpha and visibility. Leaving a group natively: target yourself (hold LB + Cross),
 Triangle opens the context menu, Leave Group. WowKeys now warns at login
 about any bound command the game doesn't know.
 
@@ -452,7 +456,7 @@ it goes in.
 | DBM | boss timers and warnings | Display only. Midnight limits boss mods hardest and the modern client has built-in boss warnings; check what the Forever build can still do. |
 | Auctionator | auction house search and selling | Hardest for keyboard-only play (lists, picking a bag item to sell). Its own keybindings (believed: post / cancel undercut) can go on UI-mode keys once named. |
 | AtlasLoot | loot table browser | Mouse-driven browsing; a key to open it at most. |
-| EllesmereUI | UI replacement (owner uses it; found 2026-09-27) | **Breaks `wowkeys:chat`**: fading Blizzard's chat frames does nothing with it on (it likely replaces or re-fades the chat). Next: `/wowkeys find ellesmere` (its own chat toggle?) and `/wowkeys frames chat` (its frame names). Unknown what else it replaces (action bars, unit frames); watch bar placement and hotkey labels. |
+| EllesmereUI | UI replacement (owner uses it; found 2026-09-27) | **Broke `wowkeys:chat`** (fading Blizzard's chat did nothing). No key bindings (`find ellesmere`: 0). Named frames (`frames ellesmere`): action-bar extras (`EllesmereEAB_*`: bag bar, micro bar, extra action button, queue status), unit frames (`EllesmereUIUnitFrames_*`), raid frames, resource bars, micro menu, `EllesmereUIQTBackground`; **no named chat frame**, so it restyles Blizzard's chat. Fix attempt: fade ChatFrame1's wrapper frames too and hold the fade (see chat toggle). Its `/wowkeys frames` scan hit a frame whose name isn't text (fixed: skipped). |
 
 **Adding an addon's keybinding:** in game, `/wowkeys find <text>` lists
 matching binding commands with their readable names. **Record the names

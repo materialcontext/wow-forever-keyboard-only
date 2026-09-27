@@ -168,11 +168,26 @@ ChatFrame1, ChatFrame1Tab, GeneralDockManager = part(), part(), part()
 ChatFrame1EditBox = { SetIgnoreParentAlpha = function(self, v) self.ignores = v end }
 check(bindings["ALT-CTRL-C"] == "CLICK WowKeysCmd_chat" and bindings["NUMPAD7"] == "CLICK WowKeysCmd_chat",
   "UI C and the Social layer toggle the chat window")
+-- A UI addon's container around the chat window, and its own fading.
+local container = part()
+container.GetParent = function() return UIParent end
+ChatFrame1.GetParent = function() return container end
+function hooksecurefunc(t, method, hook)
+  local original = t[method]
+  t[method] = function(self, ...) original(self, ...); hook(self, ...) end
+end
 frames.WowKeysCmd_chat.scripts.OnClick()
 check(ChatFrame1.alpha == 0 and ChatFrame1Tab.alpha == 0 and GeneralDockManager.alpha == 0
-  and ChatFrame1EditBox.ignores, "chat hidden, typing box still shows")
+  and container.alpha == 0 and ChatFrame1EditBox.ignores,
+  "chat and its container hidden, typing box still shows")
+ChatFrame1:SetAlpha(0.8) -- another addon fades it back in
+check(ChatFrame1.alpha == 0, "the fade holds while hidden")
+SlashCmdList.WOWKEYS("chatinfo") -- appends: later checks read the login output
+check(said("hidden = true"), "chatinfo reports the chat window")
 frames.WowKeysCmd_chat.scripts.OnClick()
-check(ChatFrame1.alpha == 1 and ChatFrame1Tab.alpha == 1, "chat shown again")
+check(ChatFrame1.alpha == 1 and ChatFrame1Tab.alpha == 1 and container.alpha == 1, "chat shown again")
+ChatFrame1:SetAlpha(0.5)
+check(ChatFrame1.alpha == 0.5, "others may fade it while shown")
 
 -- Strafe mode: face-movement angles go to 0, then back to what they were.
 -- Forever: 0 turns toward the stick (default), 180 strafes.

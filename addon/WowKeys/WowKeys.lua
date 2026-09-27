@@ -103,6 +103,19 @@ end
 local CHAT_EXTRAS = { "GeneralDockManager", "ChatFrameMenuButton", "ChatFrameChannelButton",
   "QuickJoinToastButton" }
 
+-- The frames a chat window sits in, below UIParent: UI addons (e.g.
+-- EllesmereUI) may wrap the chat in their own container with its own
+-- background.
+local function chatAncestors(frame)
+  local chain = {}
+  local parent = frame.GetParent and frame:GetParent()
+  while parent and parent ~= UIParent do
+    table.insert(chain, parent)
+    parent = parent.GetParent and parent:GetParent()
+  end
+  return chain
+end
+
 local function chatParts()
   local parts = {}
   for i = 1, NUM_CHAT_WINDOWS or 10 do
@@ -112,13 +125,32 @@ local function chatParts()
     local editBox = _G["ChatFrame" .. i .. "EditBox"]
     if editBox and editBox.SetIgnoreParentAlpha then editBox:SetIgnoreParentAlpha(true) end
   end
+  if ChatFrame1 then
+    for _, ancestor in ipairs(chatAncestors(ChatFrame1)) do table.insert(parts, ancestor) end
+  end
   for _, name in ipairs(CHAT_EXTRAS) do table.insert(parts, _G[name]) end
   return parts
 end
 
+-- While the chat is hidden, anything that fades a part back in (a UI
+-- addon's own chat fading, a new-message tab flash) is put back to 0.
+local chatHidden, alphaHooked = false, {}
+
+local function holdAlpha(part)
+  if alphaHooked[part] or not hooksecurefunc then return end
+  alphaHooked[part] = true
+  hooksecurefunc(part, "SetAlpha", function(self, alpha)
+    if chatHidden and alpha ~= 0 then self:SetAlpha(0) end
+  end)
+end
+
 local function showChat(shown)
+  chatHidden = not shown
   for _, part in ipairs(chatParts()) do
-    if part.SetAlpha then part:SetAlpha(shown and 1 or 0) end
+    if part.SetAlpha then
+      holdAlpha(part)
+      part:SetAlpha(shown and 1 or 0)
+    end
   end
 end
 
@@ -126,6 +158,24 @@ WowKeysCommands.chat = function()
   WowKeysDB = WowKeysDB or {}
   WowKeysDB.chatHidden = not WowKeysDB.chatHidden
   showChat(not WowKeysDB.chatHidden)
+end
+
+-- /wowkeys chatinfo: the main chat window and the frames it sits in, with
+-- their visibility, to see what a UI addon changed.
+local function chatInfo()
+  if not ChatFrame1 then print("WowKeys: no ChatFrame1") return end
+  local function row(frame)
+    local ok, name = pcall(frame.GetName, frame)
+    local kind = frame.GetObjectType and frame:GetObjectType() or "?"
+    local alpha = frame.GetAlpha and frame:GetAlpha() or "?"
+    local shown = frame.IsShown and frame:IsShown() and "shown" or "hidden"
+    print(("  %s (%s) alpha %s, %s"):format(ok and type(name) == "string" and name or "unnamed", kind,
+      tostring(alpha), shown))
+  end
+  print("WowKeys: chat window, then the frames it sits in (UIParent not listed); hidden = "
+    .. tostring(chatHidden))
+  row(ChatFrame1)
+  for _, frame in ipairs(chatAncestors(ChatFrame1)) do row(frame) end
 end
 
 -- One hidden button per command in Commands.lua; bindings "click" it.
@@ -685,6 +735,8 @@ local function dispatch(arg)
   elseif inspectText then
     local frame = frameByName(inspectText)
     if frame then inspectFrame(frame, frame:GetName() or inspectText) end
+  elseif arg == "chatinfo" then
+    chatInfo()
   elseif arg == "pagecontrols" then
     inspectPageControls()
   elseif newWait then
@@ -705,6 +757,7 @@ local function dispatch(arg)
     print("  /wowkeys inspect <name> list a frame's fields, functions and children")
     print("  /wowkeys page         show the controller page (arrangement)")
     print("  /wowkeys pagecontrols inspect the controller page tracker and shortcut menu")
+    print("  /wowkeys chatinfo     show the chat window's frames and visibility")
   end
 end
 
