@@ -117,29 +117,6 @@ local function anchorOf(frame)
   return ok and relativeTo or nil
 end
 
--- Frames attached to the chat window (or something in it) but not inside
--- it: a UI addon's own chat background and borders, which follow the
--- window around. EllesmereUI draws its chat this way (owner's test).
-local function attachedToChat()
-  local found = {}
-  if not (ChatFrame1 and EnumerateFrames) then return found end
-  local frame = EnumerateFrames()
-  while frame do
-    pcall(function()
-      if isInside(frame, ChatFrame1) then return end
-      for i = 1, frame:GetNumPoints() do
-        local _, relativeTo = frame:GetPoint(i)
-        if relativeTo and isInside(relativeTo, ChatFrame1) then
-          table.insert(found, frame)
-          return
-        end
-      end
-    end)
-    frame = EnumerateFrames(frame)
-  end
-  return found
-end
-
 -- The frames a chat window sits in, below UIParent: UI addons (e.g.
 -- EllesmereUI) may wrap the chat in their own container with its own
 -- background.
@@ -165,7 +142,6 @@ local function chatParts()
   if ChatFrame1 then
     for _, ancestor in ipairs(chatAncestors(ChatFrame1)) do table.insert(parts, ancestor) end
   end
-  for _, frame in ipairs(attachedToChat()) do table.insert(parts, frame) end
   for _, name in ipairs(CHAT_EXTRAS) do table.insert(parts, _G[name]) end
   return parts
 end

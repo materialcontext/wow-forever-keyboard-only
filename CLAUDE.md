@@ -421,11 +421,13 @@ visible frames (named or not) over the chat window's area that aren't
 part of it, with their parent and what they're attached to. **Owner's
 chatcover:** three unnamed frames parented to UIParent (~261x157,
 284x175, 290x174) plus unnamed children (247x125): EllesmereUI's chat
-background/borders. Fix: the toggle now also fades any frame whose
-anchor points attach it to ChatFrame1 (or something inside it); these
-follow the window, so they count as part of it. Unverified that
-EllesmereUI anchors them to the chat (chatcover now prints "attached
-to"). Leaving a group natively: target yourself (hold LB + Cross),
+background/borders. Tried fading every frame anchored to ChatFrame1:
+**failed and reverted** (owner, 2026-09-27): the Ellesmere frames are
+attached to UIParent, GeneralDockManager or each other, not to the chat
+window (chatcover "attached to"), so the chat stayed; and while hidden
+the chat input box accepted focus but no typing. Don't chase unnamed
+EllesmereUI frames; with it, prefer its own chat settings, or turn its
+chat styling off so the Blizzard-chat toggle applies. Leaving a group natively: target yourself (hold LB + Cross),
 Triangle opens the context menu, Leave Group. WowKeys now warns at login
 about any bound command the game doesn't know.
 

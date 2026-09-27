@@ -212,10 +212,7 @@ check(said("unnamed Frame, parent unnamed, attached to ChatFrame1, 420x220") and
   "chatcover finds the unnamed frame over the chat and what it's attached to")
 frames.WowKeysCmd_chat.scripts.OnClick()
 check(ChatFrame1.alpha == 1 and ChatFrame1Tab.alpha == 1 and container.alpha == 1, "chat shown again")
-frames.WowKeysCmd_chat.scripts.OnClick()
-check(cover.alpha == 0, "a frame attached to the chat window fades with it")
-frames.WowKeysCmd_chat.scripts.OnClick()
-check(cover.alpha == 1 and ChatFrame1.alpha == 1, "and comes back with it")
+
 ChatFrame1:SetAlpha(0.5)
 check(ChatFrame1.alpha == 0.5, "others may fade it while shown")
 
