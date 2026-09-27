@@ -311,6 +311,8 @@ fakeFrames = {
     IsShown = function() return false end },
   { GetName = function() return "PlayerFrame" end },
   { GetName = function() return nil end },
+  { GetName = function() return {} end },  -- a name that isn't text
+  { GetName = function() return "PageBroken" end, GetObjectType = function() error("secret") end },
 }
 printed = {}
 SlashCmdList.WOWKEYS("frames page")

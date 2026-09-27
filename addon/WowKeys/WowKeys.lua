@@ -499,12 +499,14 @@ local function listPadButtons()
   print(("WowKeys: %d button(s) on slots above 180"):format(shown))
 end
 
--- Calls fn(frame, name) for every named frame.
+-- Calls fn(frame, name) for every named frame. Frames whose name isn't
+-- plain text (some addons' frames, values the client hides) are skipped,
+-- and one bad frame never stops the scan.
 local function eachNamedFrame(fn)
   local frame = EnumerateFrames()
   while frame do
     local ok, name = pcall(frame.GetName, frame)
-    if ok and name then fn(frame, name) end
+    if ok and type(name) == "string" then pcall(fn, frame, name) end
     frame = EnumerateFrames(frame)
   end
 end
