@@ -173,12 +173,13 @@ frames.WowKeysCmd_chat.scripts.OnClick()
 check(ChatFrame1.alpha == 1 and ChatFrame1Tab.alpha == 1, "chat shown again")
 
 -- Strafe mode: face-movement angles go to 0, then back to what they were.
-cvars.GamePadFaceMovementMaxAngle, cvars.GamePadFaceMovementMaxAngleCombat = "115", "180"
+-- Forever: 0 turns toward the stick (default), 180 strafes.
+cvars.GamePadFaceMovementMaxAngle, cvars.GamePadFaceMovementMaxAngleCombat = "0", "45"
 frames.WowKeysCmd_strafe.scripts.OnClick()
-check(cvars.GamePadFaceMovementMaxAngle == "0" and cvars.GamePadFaceMovementMaxAngleCombat == "0"
+check(cvars.GamePadFaceMovementMaxAngle == "180" and cvars.GamePadFaceMovementMaxAngleCombat == "180"
   and banner:find("STRAFE"), "strafe on: stick strafes, banner says so")
 frames.WowKeysCmd_strafe.scripts.OnClick()
-check(cvars.GamePadFaceMovementMaxAngle == "115" and cvars.GamePadFaceMovementMaxAngleCombat == "180"
+check(cvars.GamePadFaceMovementMaxAngle == "0" and cvars.GamePadFaceMovementMaxAngleCombat == "45"
   and not banner:find("STRAFE"), "strafe off: previous angles restored")
 check(said("took off the bars.*Frostbolt"), "reports what it cleared")
 check(said("not learned yet: .*Ice Lance"), "reports unlearned spells")

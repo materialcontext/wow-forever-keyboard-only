@@ -408,12 +408,12 @@ box is a child of the chat window. Leaving a group natively: target yourself (ho
 Triangle opens the context menu, Leave Group. WowKeys now warns at login
 about any bound command the game doesn't know.
 
-**Strafe mode (built):** L3 → F9 → `wowkeys:strafe` toggles the Gamepad
-UI's face-movement angle (`GamePadFaceMovementMaxAngle` and `…Combat`)
-between 0 (stick strafes and backpedals) and the previous values (turns
-toward the stick). Banner shows `· STRAFE`. CVar names are from retail's
-Gamepad settings; unverified in Forever (`/wowkeys pad` now lists every
-setting with "GamePad" in its name).
+**Strafe mode (built, works):** L3 → F9 → `wowkeys:strafe` toggles the
+Gamepad UI's face-movement angle (`GamePadFaceMovementMaxAngle` and
+`…Combat`) between 180 (stick strafes and backpedals) and the previous
+values (default 0: turns toward the stick). Banner shows `· STRAFE`.
+**Forever's semantics are the reverse of our first guess** (owner: with
+0 = strafe the label showed while turning), so 0 = turn, 180 = strafe.
 
 **Controller play doesn't need kanata:** Steam Input (LT latch, touchpad,
 Create layer, banner combos) talks to WoW directly and WowKeys binds the

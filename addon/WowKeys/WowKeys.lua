@@ -31,15 +31,17 @@ end
 
 local shownArrangement
 
--- Controller strafe mode: the Gamepad UI turns the character toward the
--- stick's direction up to a maximum angle ("face movement"). At 0 the
--- stick strafes left/right and backpedals instead of turning.
+-- Controller strafe mode, via the Gamepad UI's "face movement" angle. In
+-- Forever 0 (the default) turns the character toward the stick; 180 keeps
+-- it facing ahead, so the stick strafes left/right and backpedals
+-- (tested: the owner found our first guess, 0 = strafe, backwards).
 local FACE_CVARS = { "GamePadFaceMovementMaxAngle", "GamePadFaceMovementMaxAngleCombat" }
+local STRAFE_ANGLE = "180"
 local getCVar = C_CVar and C_CVar.GetCVar or GetCVar
 local setCVar = C_CVar and C_CVar.SetCVar or SetCVar
 
 local function strafing()
-  return getCVar(FACE_CVARS[1]) == "0"
+  return (tonumber(getCVar(FACE_CVARS[1])) or 0) >= tonumber(STRAFE_ANGLE)
 end
 
 local function showMode()
@@ -70,7 +72,7 @@ end
 -- Addon commands --------------------------------------------------------
 
 -- Toggles strafe mode, restoring the angles you had before (saved per
--- character; 180 if none were saved).
+-- character; 0 if none were saved).
 WowKeysCommands.strafe = function()
   if getCVar(FACE_CVARS[1]) == nil then
     print("WowKeys: this client has no " .. FACE_CVARS[1] .. "; try /wowkeys pad for the gamepad settings")
@@ -85,10 +87,10 @@ WowKeysCommands.strafe = function()
     if value ~= nil then
       if turning then
         db.faceAngles[name] = value
-        setCVar(name, "0")
+        setCVar(name, STRAFE_ANGLE)
       else
-        local saved = db.faceAngles and db.faceAngles[name]
-        setCVar(name, (saved and saved ~= "0") and saved or "180")
+        local saved = db.faceAngles and tonumber(db.faceAngles[name])
+        setCVar(name, (saved and saved < tonumber(STRAFE_ANGLE)) and tostring(saved) or "0")
       end
     end
   end
