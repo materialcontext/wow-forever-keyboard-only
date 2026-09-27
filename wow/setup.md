@@ -57,7 +57,7 @@ The addon also applies the `[cvars]` settings in `layout.toml` on login
 Forever's Gamepad UI (Options → Gameplay → Gamepad) plays the game; WowKeys
 fills its bars from `layout.toml`. Steam Input sits between the controller
 and the game for the few extras WoW can't do itself: touchpad paging,
-strafe mode and the Social layer. What to bind is in the generated
+strafe mode, autorun and the Social layer. What to bind is in the generated
 `wow/steam-layers.md`; this is the one-time plumbing. kanata isn't needed
 for controller play.
 
@@ -69,10 +69,15 @@ for controller play.
    layout. Triggers: **Toggle off** on both (plain holds).
 5. Touchpad: style **Directional Pad** with **Requires Click** on; bind
    the halves as the sheet says. The radial menu stays on its own button.
-6. Social layer: follow the sheet. To bind stick directions in a layer,
+6. Autorun (LT + D-pad Up): on the **D-pad**, add a **Mode Shift**
+   (Steam may call it "mode shift" or "hold to change mode") activated by
+   **Left Trigger**. In the shifted D-pad, Up sends **Keypad 5**; Left,
+   Right and Down send the gamepad's own D-pad Left/Right/Down, so the
+   LT D-pad spells keep working. The trigger itself stays a normal hold.
+7. Social layer: follow the sheet. To bind stick directions in a layer,
    set that stick's style to Directional Pad there first; if the new
    layer comes up blank, copy the other inputs from the base layout.
-7. If Steam's changes don't reach the game, add the game's own exe (in
+8. If Steam's changes don't reach the game, add the game's own exe (in
    the `_classic_beta_` folder) as a second non-Steam game and launch that
    from Steam with Battle.net running.
 
