@@ -1,8 +1,11 @@
 -- WowKeys commands: keyboard control of NPC dialogs, loot, popups and
--- vendors, bound through layout.toml as "wowkeys:<name>".
+-- trainers, bound through layout.toml as "wowkeys:<name>". (Strafe mode
+-- lives in WowKeys.lua with the banner it updates.)
 --
 -- Which dialog is open is read from Blizzard's frames at the moment you
 -- press the key, so event order never leaves it confused.
+
+local _, ns = ...
 
 local function shown(name)
   local f = _G[name]
@@ -151,22 +154,6 @@ local function confirm()
   end
 end
 
--- Vendor -------------------------------------------------------------------
-
-local function vendor()
-  if not shown("MerchantFrame") then
-    say("talk to a vendor first")
-    return
-  end
-  if C_MerchantFrame and C_MerchantFrame.SellAllJunkItems then
-    C_MerchantFrame.SellAllJunkItems()
-  end
-  if CanMerchantRepair() then
-    RepairAllItems()
-  end
-  say("sold junk" .. (CanMerchantRepair() and ", repaired" or ""))
-end
-
 -- Wiring -------------------------------------------------------------------
 
 local events = CreateFrame("Frame")
@@ -176,10 +163,9 @@ end
 -- Let the frames show first, then list what the numbers pick.
 events:SetScript("OnEvent", function() C_Timer.After(0, printEntries) end)
 
-WowKeysCommands = {
+ns.commands = {
   confirm = confirm,
-  vendor = vendor,
 }
 for n = 1, 9 do
-  WowKeysCommands["choose" .. n] = function() choose(n) end
+  ns.commands["choose" .. n] = function() choose(n) end
 end

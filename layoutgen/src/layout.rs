@@ -19,8 +19,8 @@ pub struct Layout {
     /// Forever's Gamepad UI bars: layer -> input -> spell or macro.
     #[serde(default)]
     pub controller: BTreeMap<String, BTreeMap<String, Button>>,
-    /// A Steam Input action layer one controller button holds or toggles;
-    /// steam buttons naming it live in it (e.g. social windows on Create).
+    /// A Steam Input action layer, active while one controller button is
+    /// held; steam buttons naming it live in it (social actions on Create).
     pub steam_layer: Option<SteamLayer>,
     /// Controller inputs Steam turns into one key each, for actions the
     /// Gamepad UI can't hold (e.g. next bar arrangement, a window, a macro).
@@ -35,9 +35,8 @@ pub struct SteamButton {
     pub layer: Option<String>,
     /// The controller input, for the setup sheet.
     pub input: String,
+    /// The one key Steam sends (Steam binds one key per input).
     pub key: String,
-    #[serde(default)]
-    pub mods: Vec<Mod>,
     /// WoW binding command, or `wowkeys:<command>`. Or instead a macro,
     /// bound to the key directly: `macro` plus `body` (or just `macro` for
     /// one defined elsewhere in the layout).
@@ -51,7 +50,7 @@ pub struct SteamButton {
 
 impl SteamButton {
     pub fn chord(&self) -> Chord {
-        Chord::new(&self.mods, &self.key)
+        Chord::new(&[], &self.key)
     }
 
     /// The WoW binding command for the key; none if neither is given.
@@ -66,13 +65,12 @@ impl SteamButton {
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
+/// Always a hold layer: a latched one would keep the D-pad from Blizzard's
+/// window navigation (tested with the dropped UI layer).
 pub struct SteamLayer {
     pub name: String,
-    /// The controller button that switches to the layer (for the setup sheet).
+    /// The controller button held for the layer (for the setup sheet).
     pub button: String,
-    /// Active only while the button is held (else the button toggles it).
-    #[serde(default)]
-    pub hold: bool,
 }
 
 /// Action slot for a controller layer and input. The layer name may end in
@@ -255,7 +253,7 @@ impl Chord {
 
 /// Commands the WowKeys addon implements itself, as `wowkeys:<name>`.
 pub const ADDON_COMMANDS: &[&str] = &[
-    "confirm", "vendor", "strafe", "choose1", "choose2", "choose3", "choose4", "choose5",
+    "confirm", "strafe", "choose1", "choose2", "choose3", "choose4", "choose5",
     "choose6", "choose7", "choose8", "choose9",
 ];
 

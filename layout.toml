@@ -21,7 +21,7 @@
 #   { macro = "Name", body = "..." }           bar slot (fine outside combat;
 #                                              bars show cooldowns and glows)
 #   "wowkeys:confirm"                          a WowKeys addon command:
-#                                              confirm, vendor, choose1..9
+#                                              confirm, strafe, choose1..9
 #   { mode = "chat", send = "ret" }            switch mode, optionally sending
 #                                              a key (Enter opens chat)
 #
@@ -129,7 +129,7 @@ v = { bar = 2, button = 6, spell = "Blink" }
 # have one (level 40).
 z = { bar = 2, button = 7, macro = "Mount", body = "/run C_MountJournal.SummonByID(0)" }
 
-# Windows and vendors. Tab, then a key; Caps to leave. Esc closes windows.
+# Windows. Tab, then a key; Caps to leave. Esc closes windows.
 [[mode]]
 name = "ui"
 label = "UI"
@@ -220,7 +220,7 @@ command = "CLICK WowKeysPage:RightButton"
 does = "previous bar arrangement (1 → 3 → 2 → 1)"
 
 # L3 toggles strafe mode: the stick strafes and backpedals instead of
-# turning (WowKeys sets the Gamepad UI's face-movement angle to 0; the
+# turning (WowKeys sets the Gamepad UI's face-movement angle to 180; the
 # banner shows STRAFE).
 [[steam_button]]
 input = "L3 (click the left stick)"
@@ -235,7 +235,6 @@ does = "strafe mode on/off"
 [steam_layer]
 name = "Social"
 button = "Create (PlayStation) / View (Xbox)"
-hold = true
 
 [[steam_button]]
 layer = "Social"

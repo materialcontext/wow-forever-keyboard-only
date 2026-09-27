@@ -1,6 +1,6 @@
 //! Layout -> wow/steam-layers.md, the Steam Input setup sheet: controller
 //! inputs that each send one key, in the base layout or in a Steam layer
-//! one button toggles.
+//! held on one button.
 
 use crate::layout::{Layout, SteamButton, SteamLayer};
 
@@ -40,33 +40,15 @@ fn layer_section(layout: &Layout, layer: &SteamLayer) -> String {
         .iter()
         .filter(|b| b.layer.as_deref() == Some(layer.name.as_str()))
         .collect();
-    let switching = if layer.hold {
-        format!(
-            "**Hold {button}** for the layer; let go and the controller is back to
-normal, so a window you opened navigates natively (D-pad, Cross, Circle).
-
-1. **Action Layers → add a layer** named `{name}`.
-2. **Base layout, {button}:** *Hold Layer* `{name}`.",
-            name = layer.name,
-            button = layer.button,
-        )
-    } else {
-        format!(
-            "**{button}** toggles the layer on and off. Don't put it over the
-D-pad: Blizzard's Gamepad UI navigates windows with it.
-
-1. **Action Layers → add a layer** named `{name}`.
-2. **Base layout, {button}:** *Add Layer* `{name}`; in the layer,
-   {button}: *Remove Layer* `{name}`.",
-            name = layer.name,
-            button = layer.button,
-        )
-    };
     format!(
         "
 ## {name} layer on {button}
 
-{switching}
+**Hold {button}** for the layer; let go and the controller is back to
+normal, so a window you opened navigates natively (D-pad, Cross, Circle).
+
+1. **Action Layers → add a layer** named `{name}`.
+2. **Base layout, {button}:** *Hold Layer* `{name}`.
 3. **In the `{name}` layer**, bind each input below to its key. To bind
    stick directions, set that stick's style to *Directional Pad* in the
    layer first. If the layer came up blank (Steam may create it empty),

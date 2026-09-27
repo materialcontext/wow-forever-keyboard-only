@@ -34,7 +34,8 @@ Reset to Default.
 
 Spells go onto their keys when the layout changes and whenever you learn
 one. A slot whose spell you haven't learned yet is emptied of other spells
-so nothing shows up twice; items and macros are left alone.
+so nothing shows up twice (WowKeys' own macros left over from an older
+layout go too); items and your own macros are left alone.
 `/wowkeys bars` re-places everything by hand.
 
 The addon also applies the `[cvars]` settings in `layout.toml` on login
@@ -53,27 +54,27 @@ The addon also applies the `[cvars]` settings in `layout.toml` on login
 
 ## Controller through Steam Input
 
-Both triggers are plain holds (no latching; decided). Steam Input still
-sits between the controller and the game for the touchpad and the UI
-layer (`wow/steam-layers.md`).
+Forever's Gamepad UI (Options → Gameplay → Gamepad) plays the game; WowKeys
+fills its bars from `layout.toml`. Steam Input sits between the controller
+and the game for the few extras WoW can't do itself: touchpad paging,
+strafe mode and the Social layer. What to bind is in the generated
+`wow/steam-layers.md`; this is the one-time plumbing. kanata isn't needed
+for controller play.
 
 1. Steam → Games → Add a Non-Steam Game to My Library → Battle.net
    (or browse to `C:\Program Files (x86)\Battle.net\Battle.net Launcher.exe`).
 2. Start Battle.net **from Steam**, then press Play on WoW Forever as usual.
 3. Steam → Settings → Controller: Steam Input on for your controller type.
 4. Right-click Battle.net in the Steam library → Manage → Controller
-   layout → Triggers: Left and Right Trigger with **Toggle off**.
-5. If Steam's changes don't reach the game, add the game's own exe (in
+   layout. Triggers: **Toggle off** on both (plain holds).
+5. Touchpad: style **Directional Pad** with **Requires Click** on; bind
+   the halves as the sheet says. The radial menu stays on its own button.
+6. Social layer: follow the sheet. To bind stick directions in a layer,
+   set that stick's style to Directional Pad there first; if the new
+   layer comes up blank, copy the other inputs from the base layout.
+7. If Steam's changes don't reach the game, add the game's own exe (in
    the `_classic_beta_` folder) as a second non-Steam game and launch that
    from Steam with Battle.net running.
 
-## Controller: touchpad halves (Steam Input)
-
-The touchpad pages bar arrangements: right half next, left half
-previous (keys in `wow/steam-layers.md`). The radial menu stays on its
-own button, so the touchpad doesn't need it. In the controller layout → Touchpad (center pad): set its style to
-**Directional Pad** (or a split if Steam offers one) with **Requires
-Click** on. Right: **F8** (next arrangement). Left: **F7** (previous).
-Up/Down: leave empty for now. Steam's names here vary
-between versions; the goal is only left click → combo, right click →
-Options.
+Check the WoW side of any Steam key by pressing the same key on the
+keyboard (Num Lock on for keypad keys).

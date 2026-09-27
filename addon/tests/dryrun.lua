@@ -76,7 +76,7 @@ SlashCmdList = {}
 local open = {}
 local function frame(name) _G[name] = { IsShown = function() return open[name] end } end
 for _, n in ipairs({ "ClassTrainerFrame", "GossipFrame", "QuestFrameDetailPanel", "QuestFrameProgressPanel",
-  "QuestFrameRewardPanel", "QuestFrameGreetingPanel", "LootFrame", "MerchantFrame" }) do
+  "QuestFrameRewardPanel", "QuestFrameGreetingPanel", "LootFrame" }) do
   frame(n)
 end
 local calls = {}
@@ -102,9 +102,6 @@ function GetNumAvailableQuests() return 0 end
 function GetNumLootItems() return 2 end
 function GetLootSlotInfo(i) return nil, ({ "Linen Cloth", "Copper Coin" })[i], i end
 LootSlot = record("LootSlot")
-C_MerchantFrame = { SellAllJunkItems = record("SellAllJunkItems") }
-function CanMerchantRepair() return true end
-RepairAllItems = record("RepairAllItems")
 local services = { { "Frost Nova", "", "available" }, { "Fireball", "Rank 2", "used" },
   { "Frost Armor", "Rank 2", "available" }, { "Blizzard", "", "unavailable" } }
 function GetNumTrainerServices() return #services end
@@ -119,9 +116,11 @@ end
 -- Defaults WoW ships with.
 bindings["1"], bindings.W, bindings.UP = "ACTIONBUTTON1", "MOVEFORWARD", "MOVEFORWARD"
 
-dofile("addon/WowKeys/Layout.lua")
-dofile("addon/WowKeys/Commands.lua")
-dofile("addon/WowKeys/WowKeys.lua")
+-- Load in .toc order, sharing one namespace as WoW does.
+local ns = {}
+for _, file in ipairs({ "Layout.lua", "Commands.lua", "WowKeys.lua", "Diagnostics.lua" }) do
+  assert(loadfile("addon/WowKeys/" .. file))("WowKeys", ns)
+end
 local owner = frames.WowKeysFrame
 local function fire(e, ...) owner.scripts.OnEvent(owner, e, ...) end
 local function said(pattern)
@@ -235,12 +234,6 @@ open.ClassTrainerFrame = nil
 cmd("choose1")
 check(said("nothing to pick from"), "explains where numbers work")
 
-cmd("vendor")
-check(said("talk to a vendor first"), "vendor needs a vendor")
-open.MerchantFrame = true
-cmd("vendor")
-check(called("SellAllJunkItems") and called("RepairAllItems"), "vendor sells junk and repairs")
-
 -- /wowkeys find lists binding commands for layout.toml.
 local allBindings = { { "MOVEFORWARD", "HEADER", "E" }, { "HEADER_AUCTIONATOR", "ADDONS" },
   { "AUCTIONATOR_POST", "ADDONS" }, { "AUCTIONATOR_CANCEL", "ADDONS" } }
@@ -251,6 +244,16 @@ printed = {}
 SlashCmdList.WOWKEYS("find auctionator")
 check(said("AUCTIONATOR_POST.*Post item") and said("2 binding%(s%) match"), "find lists matching bindings")
 check(not said("HEADER_AUCTIONATOR"), "find skips keybinding-menu headers")
+
+-- /wowkeys alone lists every subcommand from the registry; one that
+-- needs an argument shows the list instead of running without it.
+printed = {}
+SlashCmdList.WOWKEYS("")
+check(said("/wowkeys bars") and said("/wowkeys inspect <name>") and said("/wowkeys newframes %[s%]"),
+  "help lists core and diagnostic commands")
+printed = {}
+SlashCmdList.WOWKEYS("find")
+check(said("/wowkeys find <text>") and not said("binding%(s%) match"), "find without text shows help")
 
 -- Login warns about binding commands the game doesn't have.
 printed = {}
