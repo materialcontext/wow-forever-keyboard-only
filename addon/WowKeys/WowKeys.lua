@@ -97,101 +97,6 @@ WowKeysCommands.strafe = function()
   showMode()
 end
 
--- Chat window visibility. Fades the chat windows, their tabs and buttons
--- to nothing rather than hiding them: the box you type into lives inside
--- the chat window, so it ignores the fade and still shows while typing.
-local CHAT_EXTRAS = { "GeneralDockManager", "ChatFrameMenuButton", "ChatFrameChannelButton",
-  "QuickJoinToastButton" }
-
-local function isInside(frame, ancestor)
-  while frame do
-    if frame == ancestor then return true end
-    frame = frame.GetParent and frame:GetParent()
-  end
-  return false
-end
-
--- What a frame's first anchor point is attached to, if anything.
-local function anchorOf(frame)
-  local ok, _, relativeTo = pcall(function() return frame:GetPoint(1) end)
-  return ok and relativeTo or nil
-end
-
--- The frames a chat window sits in, below UIParent: UI addons (e.g.
--- EllesmereUI) may wrap the chat in their own container with its own
--- background.
-local function chatAncestors(frame)
-  local chain = {}
-  local parent = frame.GetParent and frame:GetParent()
-  while parent and parent ~= UIParent do
-    table.insert(chain, parent)
-    parent = parent.GetParent and parent:GetParent()
-  end
-  return chain
-end
-
-local function chatParts()
-  local parts = {}
-  for i = 1, NUM_CHAT_WINDOWS or 10 do
-    for _, suffix in ipairs({ "", "Tab", "ButtonFrame" }) do
-      table.insert(parts, _G["ChatFrame" .. i .. suffix])
-    end
-    local editBox = _G["ChatFrame" .. i .. "EditBox"]
-    if editBox and editBox.SetIgnoreParentAlpha then editBox:SetIgnoreParentAlpha(true) end
-  end
-  if ChatFrame1 then
-    for _, ancestor in ipairs(chatAncestors(ChatFrame1)) do table.insert(parts, ancestor) end
-  end
-  for _, name in ipairs(CHAT_EXTRAS) do table.insert(parts, _G[name]) end
-  return parts
-end
-
--- While the chat is hidden, anything that fades a part back in (a UI
--- addon's own chat fading, a new-message tab flash) is put back to 0.
-local chatHidden, alphaHooked = false, {}
-
-local function holdAlpha(part)
-  if alphaHooked[part] or not hooksecurefunc then return end
-  alphaHooked[part] = true
-  hooksecurefunc(part, "SetAlpha", function(self, alpha)
-    if chatHidden and alpha ~= 0 then self:SetAlpha(0) end
-  end)
-end
-
-local function showChat(shown)
-  chatHidden = not shown
-  for _, part in ipairs(chatParts()) do
-    if part.SetAlpha then
-      holdAlpha(part)
-      part:SetAlpha(shown and 1 or 0)
-    end
-  end
-end
-
-WowKeysCommands.chat = function()
-  WowKeysDB = WowKeysDB or {}
-  WowKeysDB.chatHidden = not WowKeysDB.chatHidden
-  showChat(not WowKeysDB.chatHidden)
-end
-
--- /wowkeys chatinfo: the main chat window and the frames it sits in, with
--- their visibility, to see what a UI addon changed.
-local function chatInfo()
-  if not ChatFrame1 then print("WowKeys: no ChatFrame1") return end
-  local function row(frame)
-    local ok, name = pcall(frame.GetName, frame)
-    local kind = frame.GetObjectType and frame:GetObjectType() or "?"
-    local alpha = frame.GetAlpha and frame:GetAlpha() or "?"
-    local shown = frame.IsShown and frame:IsShown() and "shown" or "hidden"
-    print(("  %s (%s) alpha %s, %s"):format(ok and type(name) == "string" and name or "unnamed", kind,
-      tostring(alpha), shown))
-  end
-  print("WowKeys: chat window, then the frames it sits in (UIParent not listed); hidden = "
-    .. tostring(chatHidden))
-  row(ChatFrame1)
-  for _, frame in ipairs(chatAncestors(ChatFrame1)) do row(frame) end
-end
-
 -- One hidden button per command in Commands.lua; bindings "click" it.
 local function commandButtonName(name)
   return "WowKeysCmd_" .. name
@@ -386,7 +291,6 @@ owner:SetScript("OnEvent", function(_, event, isInitialLogin, isReload)
   if event == "PLAYER_ENTERING_WORLD" then
     if isInitialLogin or isReload then
       WowKeysDB = WowKeysDB or {}
-      if WowKeysDB.chatHidden then showChat(false) end
       outOfCombat(applyCVars)
       outOfCombat(applyMacros) -- before bindings and bars that use them
       outOfCombat(applyBindings)
@@ -602,47 +506,6 @@ local function findFrames(text)
   printFrames(rows, ("match \"%s\""):format(text))
 end
 
--- /wowkeys chatcover: visible frames drawn over the chat window's area that
--- aren't part of it, named or not (a UI addon's own chat background or
--- text), with their parent and what they're attached to.
-
-local function nameOf(frame)
-  local ok, name = pcall(function() return frame:GetName() end)
-  return ok and type(name) == "string" and name or "unnamed"
-end
-
-local function screenRect(frame)
-  if frame.GetScaledRect then return frame:GetScaledRect() end
-  return frame:GetRect()
-end
-
-local function chatCover()
-  local cx, cy, cw, ch -- (`a and f()` would keep only f's first result)
-  if ChatFrame1 then cx, cy, cw, ch = screenRect(ChatFrame1) end
-  if not cx then
-    print("WowKeys: the chat window has no position")
-    return
-  end
-  local _, _, sw, sh = screenRect(UIParent)
-  local rows = {}
-  local frame = EnumerateFrames()
-  while frame do
-    pcall(function()
-      if not frame:IsVisible() or frame:GetEffectiveAlpha() == 0 or isInside(frame, ChatFrame1) then return end
-      local x, y, w, h = screenRect(frame)
-      local overlaps = x and x < cx + cw and x + w > cx and y < cy + ch and y + h > cy
-      if overlaps and w < sw * 0.8 and h < sh * 0.8 then -- skip full-screen frames
-        local parent, anchor = frame:GetParent(), anchorOf(frame)
-        table.insert(rows, ("  %s %s, parent %s, attached to %s, %dx%d"):format(nameOf(frame),
-          frame:GetObjectType(), parent and nameOf(parent) or "none", anchor and nameOf(anchor) or "nothing",
-          w, h))
-      end
-    end)
-    frame = EnumerateFrames(frame)
-  end
-  printFrames(rows, "drawn over the chat window, outside it")
-end
-
 -- Notes which named frames are shown now, waits, then lists the ones shown
 -- since. For menus that close when chat opens: run it, then open the menu
 -- and hold it until the list prints.
@@ -790,10 +653,6 @@ local function dispatch(arg)
   elseif inspectText then
     local frame = frameByName(inspectText)
     if frame then inspectFrame(frame, frame:GetName() or inspectText) end
-  elseif arg == "chatinfo" then
-    chatInfo()
-  elseif arg == "chatcover" then
-    chatCover()
   elseif arg == "pagecontrols" then
     inspectPageControls()
   elseif newWait then
@@ -814,8 +673,6 @@ local function dispatch(arg)
     print("  /wowkeys inspect <name> list a frame's fields, functions and children")
     print("  /wowkeys page         show the controller page (arrangement)")
     print("  /wowkeys pagecontrols inspect the controller page tracker and shortcut menu")
-    print("  /wowkeys chatinfo     show the chat window's frames and visibility")
-    print("  /wowkeys chatcover    list visible frames drawn over the chat window")
   end
 end
 

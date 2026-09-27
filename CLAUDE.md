@@ -169,7 +169,7 @@ fighting over one WoW chord, and one macro name with two bodies.
 Action kinds in `layout.toml`: WoW binding command; spell or macro on a bar
 button; spell or macro bound directly (`SPELL x` / `MACRO x`, no bar slot,
 used outside combat mode); mode switch; `wowkeys:<command>` (addon
-commands: `confirm`, `vendor`, `strafe`, `chat`, `choose1`..`choose9`). One-shot modes
+commands: `confirm`, `vendor`, `strafe`, `choose1`..`choose9`). One-shot modes
 (`oneshot = ms`) use kanata `one-shot` over `layer-while-held` and have no
 banner.
 
@@ -192,8 +192,7 @@ greeting, reward choice, trainer or loot window opens.
   `,` is a Polymorph macro that sheeps the focus if you have one, else the
   target.
 - **UI (Tab, Ctrl+Alt+key):** U bags, I character, O spellbook, P talents,
-  L quest log, M map, B bank (Bagnon), C show/hide the chat window,
-  `'` type into a text box. Vendor chores belong to
+  L quest log, M map, B bank (Bagnon), `'` type into a text box. Vendor chores belong to
   Leatrix Plus (the `wowkeys:vendor` command still exists if ever needed). Esc closes windows. Navigating *inside* windows (bags, talents) still
   needs a UI addon or our own commands.
 - **World (Left Shift, Ctrl+Alt+Shift+key):** J Frost Armor, K Arcane
@@ -396,38 +395,20 @@ right stick up `TOGGLEGROUPFINDER` (both confirmed by `/wowkeys find`),
 right stick down macro `/invite` (invites the target), RT macro
 `/run C_PartyInfo.LeaveParty()` (on a trigger so it isn't hit by
 accident). Keys: numpad 8/4/6/2/1. `[[steam_button]]` takes `macro` +
-`body` instead of `command` for these. Right stick left (numpad 7)
-toggles the chat window, right stick right (numpad 3) trades with the
+`body` instead of `command` for these. Right stick right (numpad 3)
+trades with the
 target (macro `/trade`: mages hand out water and food), LT (numpad 9)
-follows the target (`FOLLOWTARGET`, name assumed). R3 spare. Rarer
+follows the target (`FOLLOWTARGET`, name assumed). Right stick left
+and R3 spare. Rarer
 actions (inspect, whisper, promote, loot settings) stay in Blizzard's
 context menu: target a player, Triangle.
 
-**Chat window toggle (built):** `wowkeys:chat` (UI C, Social layer right
-stick left). WoW has no binding for it. Fades the chat windows, tabs,
-button frames, dock and chat buttons to alpha 0 and back (saved per
-character, reapplied at login); the typing box is set to ignore its
-parent's alpha so it still shows while typing. Not a Hide(): the typing
-box is a child of the chat window. For UI addons (EllesmereUI) it also
-fades the frames ChatFrame1 sits in below UIParent (a wrapper with its
-own background) and hooks SetAlpha on every faded part so another
-addon's fading can't bring it back while hidden. `/wowkeys chatinfo`
-prints ChatFrame1's parent chain with alpha and visibility. **Owner's
-result with EllesmereUI:** ChatFrame1 at alpha 0, parent UIParent (no
-wrapper), yet chat still visible, and ChatFrame1EditBox shown (kept
-visible on purpose; the edit box may be always-on in their setup). So
-EllesmereUI draws chat in a separate frame. `/wowkeys chatcover` lists
-visible frames (named or not) over the chat window's area that aren't
-part of it, with their parent and what they're attached to. **Owner's
-chatcover:** three unnamed frames parented to UIParent (~261x157,
-284x175, 290x174) plus unnamed children (247x125): EllesmereUI's chat
-background/borders. Tried fading every frame anchored to ChatFrame1:
-**failed and reverted** (owner, 2026-09-27): the Ellesmere frames are
-attached to UIParent, GeneralDockManager or each other, not to the chat
-window (chatcover "attached to"), so the chat stayed; and while hidden
-the chat input box accepted focus but no typing. Don't chase unnamed
-EllesmereUI frames; with it, prefer its own chat settings, or turn its
-chat styling off so the Blizzard-chat toggle applies. Leaving a group natively: target yourself (hold LB + Cross),
+**Chat window toggle: removed (2026-09-27).** A WowKeys fade of the chat
+windows worked on Blizzard's chat but not with EllesmereUI, which draws
+its chat background in unnamed frames attached to UIParent / the chat
+dock (fading those broke typing). The owner uses **EllesmereUI → Chat →
+Visibility** instead and doesn't need a key. Lesson: with a UI suite,
+check its own settings before building a workaround. Leaving a group natively: target yourself (hold LB + Cross),
 Triangle opens the context menu, Leave Group. WowKeys now warns at login
 about any bound command the game doesn't know.
 
@@ -471,7 +452,7 @@ it goes in.
 | DBM | boss timers and warnings | Display only. Midnight limits boss mods hardest and the modern client has built-in boss warnings; check what the Forever build can still do. |
 | Auctionator | auction house search and selling | Hardest for keyboard-only play (lists, picking a bag item to sell). Its own keybindings (believed: post / cancel undercut) can go on UI-mode keys once named. |
 | AtlasLoot | loot table browser | Mouse-driven browsing; a key to open it at most. |
-| EllesmereUI | UI replacement (owner uses it; found 2026-09-27) | **Broke `wowkeys:chat`** (fading Blizzard's chat did nothing). No key bindings (`find ellesmere`: 0). Named frames (`frames ellesmere`): action-bar extras (`EllesmereEAB_*`: bag bar, micro bar, extra action button, queue status), unit frames (`EllesmereUIUnitFrames_*`), raid frames, resource bars, micro menu, `EllesmereUIQTBackground`; **no named chat frame**, so it restyles Blizzard's chat. Fix attempt: fade ChatFrame1's wrapper frames too and hold the fade (see chat toggle). Its `/wowkeys frames` scan hit a frame whose name isn't text (fixed: skipped). |
+| EllesmereUI | UI replacement (owner uses it; found 2026-09-27) | **Owns the chat's look and visibility** (Chat → Visibility; our chat toggle was removed). No key bindings (`find ellesmere`: 0). Named frames (`frames ellesmere`): action-bar extras (`EllesmereEAB_*`: bag bar, micro bar, extra action button, queue status), unit frames (`EllesmereUIUnitFrames_*`), raid frames, resource bars, micro menu, `EllesmereUIQTBackground`; **no named chat frame**, so it restyles Blizzard's chat. Its `/wowkeys frames` scan hit a frame whose name isn't text (fixed: skipped). Its chat page also has Idle Fade (delay, strength). |
 
 **Adding an addon's keybinding:** in game, `/wowkeys find <text>` lists
 matching binding commands with their readable names. **Record the names
@@ -639,9 +620,6 @@ learns the first one, one spell per press.
 - [x] Controller UI layer: tested; D-pad conflict, dropped (see above).
 - [x] Strafe mode: L3 (F9) makes the stick strafe/backpedal, banner shows
       STRAFE; L3 again turns as before (owner: "works great").
-- [ ] Chat toggle: UI C / Create + right stick left fades the chat
-      window out and back; typing still shows the box; state survives
-      /reload. **Fails with EllesmereUI** (see Addons); needs its frames.
 - [ ] Social layer: no login warning about TOGGLESOCIAL; hold Create +
       Triangle / Square / right stick up open social / guild / group
       finder; right stick down invites the target; RT leaves the group;

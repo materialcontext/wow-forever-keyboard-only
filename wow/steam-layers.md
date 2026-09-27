@@ -32,7 +32,6 @@ normal, so a window you opened navigates natively (D-pad, Cross, Circle).
 | Square / X | Keypad 4 | guild & communities |
 | Right stick up | Keypad 6 | group finder |
 | Right stick down | Keypad 2 | invite your target to the group |
-| Right stick left | Keypad 7 | show / hide the chat window |
 | Right stick right | Keypad 3 | trade with your target (hand out water and food) |
 | LT | Keypad 9 | follow your target |
 | RT | Keypad 1 | leave the group |
