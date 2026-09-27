@@ -249,6 +249,13 @@ SlashCmdList.WOWKEYS("find auctionator")
 check(said("AUCTIONATOR_POST.*Post item") and said("2 binding%(s%) match"), "find lists matching bindings")
 check(not said("HEADER_AUCTIONATOR"), "find skips keybinding-menu headers")
 
+-- Login warns about binding commands the game doesn't have.
+printed = {}
+fire("PLAYER_ENTERING_WORLD", false, true)
+check(said("no binding command .*TOGGLESOCIAL") and not said("no binding command .*CLICK"),
+  "unknown binding commands are reported, CLICK ones skipped")
+check(not said("no binding command .*MOVEFORWARD"), "known commands aren't reported")
+
 -- /wowkeys pad lists controller bindings and gamepad CVars.
 allBindings = { { "JUMP", "MOVEMENT", "SPACE", "PAD1" }, { "ACTIONBUTTON1", "ACTIONBAR", "J", "SHIFT-PAD2" },
   { "VEHICLEEXIT", "VEHICLE", "NUMPAD5" } }

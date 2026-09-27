@@ -19,11 +19,11 @@ pub struct Layout {
     /// Forever's Gamepad UI bars: layer -> input -> spell or macro.
     #[serde(default)]
     pub controller: BTreeMap<String, BTreeMap<String, Button>>,
-    /// A Steam Input action layer one controller button toggles; steam
-    /// buttons naming it live in it (e.g. UI windows on Create).
+    /// A Steam Input action layer one controller button holds or toggles;
+    /// steam buttons naming it live in it (e.g. social windows on Create).
     pub steam_layer: Option<SteamLayer>,
     /// Controller inputs Steam turns into one key each, for actions the
-    /// Gamepad UI can't hold (e.g. next bar arrangement, open a window).
+    /// Gamepad UI can't hold (e.g. next bar arrangement, a window, a macro).
     #[serde(default, rename = "steam_button")]
     pub steam_buttons: Vec<SteamButton>,
 }
@@ -38,8 +38,13 @@ pub struct SteamButton {
     pub key: String,
     #[serde(default)]
     pub mods: Vec<Mod>,
-    /// WoW binding command, or `wowkeys:<command>`.
-    pub command: String,
+    /// WoW binding command, or `wowkeys:<command>`. Or instead a macro,
+    /// bound to the key directly: `macro` plus `body` (or just `macro` for
+    /// one defined elsewhere in the layout).
+    pub command: Option<String>,
+    #[serde(rename = "macro")]
+    pub macro_name: Option<String>,
+    pub body: Option<String>,
     /// What it does, for the setup sheet.
     pub does: String,
 }
@@ -48,14 +53,26 @@ impl SteamButton {
     pub fn chord(&self) -> Chord {
         Chord::new(&self.mods, &self.key)
     }
+
+    /// The WoW binding command for the key; none if neither is given.
+    pub fn binding(&self) -> Option<String> {
+        match (&self.command, &self.macro_name) {
+            (Some(c), _) => Some(c.clone()),
+            (None, Some(name)) => Some(format!("MACRO {name}")),
+            _ => None,
+        }
+    }
 }
 
 #[derive(Debug, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct SteamLayer {
     pub name: String,
-    /// The controller button that toggles the layer (for the setup sheet).
+    /// The controller button that switches to the layer (for the setup sheet).
     pub button: String,
+    /// Active only while the button is held (else the button toggles it).
+    #[serde(default)]
+    pub hold: bool,
 }
 
 /// Action slot for a controller layer and input. The layer name may end in
@@ -424,31 +441,6 @@ fn validate(layout: &Layout) -> Vec<String> {
             }
         }
     }
-    for (i, b) in layout.steam_buttons.iter().enumerate() {
-        let at = format!("steam_button {} ({})", i + 1, b.input);
-        if let Some(layer) = &b.layer
-            && layout.steam_layer.as_ref().is_none_or(|l| l.name != *layer)
-        {
-            errors.push(format!("{at}: no [steam_layer] named `{layer}`"));
-        }
-        if let Err(e) = check_command(&b.command) {
-            errors.push(format!("{at}: {e}"));
-        }
-        if keys::wow_name(&b.key).is_none() {
-            errors.push(format!("{at}: WoW can't bind `{}`", b.key));
-            continue;
-        }
-        let chord = b.chord().wow();
-        match wow_bindings.get(&chord) {
-            Some((other, other_at)) if *other != b.command => errors.push(format!(
-                "{at}: {chord} is already bound to {other} at {other_at}"
-            )),
-            _ => {
-                wow_bindings.insert(chord, (b.command.clone(), at));
-            }
-        }
-    }
-
     for (layer, inputs) in &layout.controller {
         for (input, b) in inputs {
             let at = format!("controller.{layer}.{input}");
@@ -479,6 +471,46 @@ fn validate(layout: &Layout) -> Vec<String> {
                         macros.insert(name, (b.body.as_deref(), at.clone()));
                     }
                 }
+            }
+        }
+    }
+    for (i, b) in layout.steam_buttons.iter().enumerate() {
+        let at = format!("steam_button {} ({})", i + 1, b.input);
+        if let Some(layer) = &b.layer
+            && layout.steam_layer.as_ref().is_none_or(|l| l.name != *layer)
+        {
+            errors.push(format!("{at}: no [steam_layer] named `{layer}`"));
+        }
+        match (&b.command, &b.macro_name, &b.body) {
+            (Some(c), None, None) => {
+                if let Err(e) = check_command(c) {
+                    errors.push(format!("{at}: {e}"));
+                }
+            }
+            (None, Some(name), body) => match (macros.get(name.as_str()), body) {
+                (None, None) => errors.push(format!("{at}: macro `{name}` needs a body")),
+                (Some((other, other_at)), Some(body)) if *other != Some(body.as_str()) => errors
+                    .push(format!(
+                        "{at}: macro `{name}` has a different body at {other_at}"
+                    )),
+                (None, Some(body)) => {
+                    macros.insert(name, (Some(body.as_str()), at.clone()));
+                }
+                _ => {}
+            },
+            _ => errors.push(format!("{at}: give a `command`, or a `macro` (with `body`)")),
+        }
+        if keys::wow_name(&b.key).is_none() {
+            errors.push(format!("{at}: WoW can't bind `{}`", b.key));
+            continue;
+        }
+        let (chord, command) = (b.chord().wow(), b.binding().unwrap_or_default());
+        match wow_bindings.get(&chord) {
+            Some((other, other_at)) if *other != command => errors.push(format!(
+                "{at}: {chord} is already bound to {other} at {other_at}"
+            )),
+            _ => {
+                wow_bindings.insert(chord, (command, at));
             }
         }
     }
@@ -699,9 +731,20 @@ mod tests {
             key = "kp8"
             command = "TOGGLECHARACTER0"
             does = "character"
+            [[steam_button]]
+            input = "L3"
+            key = "kp1"
+            macro = "Leave"
+            does = "leave group"
+            [[steam_button]]
+            input = "R3"
+            key = "kp2"
+            does = "nothing"
             "#,
         );
-        assert_eq!(e.len(), 4, "{e:?}");
+        assert_eq!(e.len(), 6, "{e:?}");
+        assert!(e[4].contains("`Leave` needs a body"), "{e:?}");
+        assert!(e[5].contains("give a `command`"), "{e:?}");
         assert!(e[3].contains("no [steam_layer] named `Nope`"), "{e:?}");
         assert!(e[0].contains("already bound to JUMP"), "{e:?}");
     }

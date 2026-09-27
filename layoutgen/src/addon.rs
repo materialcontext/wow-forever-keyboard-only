@@ -54,10 +54,13 @@ pub fn render(layout: &Layout) -> String {
     }
 
     for b in &layout.steam_buttons {
+        if let (Some(name), Some(body)) = (&b.macro_name, &b.body) {
+            macros.insert(name.clone(), body.clone());
+        }
         bindings.push_str(&format!(
             "    {{ {}, {} }},\n",
             lua_str(&b.chord().wow()),
-            lua_str(&b.command)
+            lua_str(&b.binding().expect("validated steam button"))
         ));
     }
 

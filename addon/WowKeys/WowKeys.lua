@@ -157,6 +157,27 @@ local function isPlainCommand(command)
   return not (command:find("^wowkeys:") or command:find("^SPELL ") or command:find("^MACRO "))
 end
 
+-- Warns about binding commands the game doesn't know (a typo, or a name
+-- that differs in Forever); CLICK commands name our own buttons instead.
+local function reportUnknownCommands()
+  if not GetNumBindings then return end
+  local known, unknown = {}, {}
+  for i = 1, GetNumBindings() do
+    local command = GetBinding(i)
+    if command then known[command] = true end
+  end
+  for _, b in ipairs(L.bindings) do
+    local command = b[2]
+    if isPlainCommand(command) and not command:find("^CLICK ") and not known[command] then
+      table.insert(unknown, command)
+    end
+  end
+  if #unknown > 0 then
+    print("WowKeys: the game has no binding command " .. table.concat(unknown, ", ")
+      .. " (find the right name with /wowkeys find)")
+  end
+end
+
 local function applyBindings()
   -- Unbind other keys from the commands we own (e.g. `1` from
   -- ACTIONBUTTON1), so button labels show our key, not the old one.
@@ -184,6 +205,7 @@ local function applyBindings()
     end
   end
   SaveBindings(GetCurrentBindingSet())
+  reportUnknownCommands()
 end
 
 -- Bars --------------------------------------------------------------------

@@ -228,9 +228,52 @@ key = "f9"
 command = "wowkeys:strafe"
 does = "strafe mode on/off"
 
-# No [steam_layer] for now: a latched layer on the D-pad fights Blizzard's
-# window navigation (tested), and the radial menu covers the windows.
-# Social shortcuts may bring one back (hold, not latch).
+# Social layer: hold Create, press a button, let go. A hold (not a latch)
+# because Blizzard's Gamepad UI navigates windows with the D-pad; the
+# D-pad, left stick, Cross and Circle stay Blizzard's. The radial menu
+# covers character, bags, quests and map. Cross confirms invites natively.
+[steam_layer]
+name = "Social"
+button = "Create (PlayStation) / View (Xbox)"
+hold = true
+
+[[steam_button]]
+layer = "Social"
+input = "Triangle / Y"
+key = "kp8"
+command = "TOGGLESOCIAL"
+does = "social window (friends, who, raid)"
+
+[[steam_button]]
+layer = "Social"
+input = "Square / X"
+key = "kp4"
+command = "TOGGLEGUILDTAB"
+does = "guild & communities"
+
+[[steam_button]]
+layer = "Social"
+input = "Right stick up"
+key = "kp6"
+command = "TOGGLEGROUPFINDER"
+does = "group finder"
+
+[[steam_button]]
+layer = "Social"
+input = "Right stick down"
+key = "kp2"
+macro = "Invite"
+body = "/invite"
+does = "invite your target to the group"
+
+# On a trigger so it isn't pressed by accident.
+[[steam_button]]
+layer = "Social"
+input = "RT"
+key = "kp1"
+macro = "LeaveGroup"
+body = "/run C_PartyInfo.LeaveParty()"
+does = "leave the group"
 
 # Controller (Forever's Gamepad UI). The addon fills these bars the same
 # way it fills the keyboard bars; bind nothing by hand.

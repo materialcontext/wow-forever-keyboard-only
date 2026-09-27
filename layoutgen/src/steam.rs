@@ -40,27 +40,37 @@ fn layer_section(layout: &Layout, layer: &SteamLayer) -> String {
         .iter()
         .filter(|b| b.layer.as_deref() == Some(layer.name.as_str()))
         .collect();
+    let switching = if layer.hold {
+        format!(
+            "**Hold {button}** for the layer; let go and the controller is back to
+normal, so a window you opened navigates natively (D-pad, Cross, Circle).
+
+1. **Action Layers → add a layer** named `{name}`.
+2. **Base layout, {button}:** *Hold Layer* `{name}`.",
+            name = layer.name,
+            button = layer.button,
+        )
+    } else {
+        format!(
+            "**{button}** toggles the layer on and off. Don't put it over the
+D-pad: Blizzard's Gamepad UI navigates windows with it.
+
+1. **Action Layers → add a layer** named `{name}`.
+2. **Base layout, {button}:** *Add Layer* `{name}`; in the layer,
+   {button}: *Remove Layer* `{name}`.",
+            name = layer.name,
+            button = layer.button,
+        )
+    };
     format!(
         "
 ## {name} layer on {button}
 
-**{button}** toggles a Steam action layer. While it's on, the inputs below
-open windows; everything else stays native, so inside a window the
-sticks move, Cross/A accepts, Circle/B cancels and the bumpers change
-tabs, as Blizzard's Gamepad UI intends.
-
-1. **Action Layers → add a layer** named `{name}`.
-2. **Base layout, {button}:** *Add Layer* `{name}`.
-3. **In the `{name}` layer, {button}:** *Remove Layer* `{name}`.
-4. **In the `{name}` layer**, bind each input below to its key.
-   If the new layer came up blank (Steam may create it empty, or as an
-   Action Set, which never inherits), also copy every other input from
-   the base layout: sticks, triggers, bumpers, Cross, Circle and the
-   touchpad keys above, and Create itself as in step 3.
-5. Optional, safer: if Steam lets you *add an extra command* to an input,
-   give each one below a second command *Remove Layer* `{name}`. Then one
-   press opens the window and drops you back to your normal controller,
-   so the D-pad can't be left opening windows when a fight starts.
+{switching}
+3. **In the `{name}` layer**, bind each input below to its key. To bind
+   stick directions, set that stick's style to *Directional Pad* in the
+   layer first. If the layer came up blank (Steam may create it empty),
+   copy every other input from the base layout.
 
 {}
 Keep Num Lock on, in case Steam sends the keypad keys as scan codes.

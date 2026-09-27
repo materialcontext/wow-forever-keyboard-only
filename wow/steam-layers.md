@@ -13,3 +13,25 @@ controller behaviour.
 | Touchpad, right half (click) | F8 | next bar arrangement (1 → 2 → 3 → 1) |
 | Touchpad, left half (click) | F7 | previous bar arrangement (1 → 3 → 2 → 1) |
 | L3 (click the left stick) | F9 | strafe mode on/off |
+
+## Social layer on Create (PlayStation) / View (Xbox)
+
+**Hold Create (PlayStation) / View (Xbox)** for the layer; let go and the controller is back to
+normal, so a window you opened navigates natively (D-pad, Cross, Circle).
+
+1. **Action Layers → add a layer** named `Social`.
+2. **Base layout, Create (PlayStation) / View (Xbox):** *Hold Layer* `Social`.
+3. **In the `Social` layer**, bind each input below to its key. To bind
+   stick directions, set that stick's style to *Directional Pad* in the
+   layer first. If the layer came up blank (Steam may create it empty),
+   copy every other input from the base layout.
+
+| Controller input | Key | Does |
+|---|---|---|
+| Triangle / Y | Keypad 8 | social window (friends, who, raid) |
+| Square / X | Keypad 4 | guild & communities |
+| Right stick up | Keypad 6 | group finder |
+| Right stick down | Keypad 2 | invite your target to the group |
+| RT | Keypad 1 | leave the group |
+
+Keep Num Lock on, in case Steam sends the keypad keys as scan codes.
