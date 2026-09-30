@@ -2,7 +2,7 @@
 local _, ns = ...
 ns.layout = {
   -- Changes when buttons or macros change; the addon re-places bars then.
-  revision = "0b43ad8d",
+  revision = "657c2fec",
   modes = {
     { name = "combat", label = "COMBAT", key = "ALT-CTRL-SHIFT-F9" },
     { name = "ui", label = "UI", key = "ALT-CTRL-SHIFT-F10" },
@@ -73,6 +73,7 @@ ns.layout = {
     { "CTRL-K", "MACRO ManaPot" },
     { "CTRL-L", "MULTIACTIONBAR1BUTTON8" },
     { "CTRL-C", "MACRO ClearFocus" },
+    { "CTRL-,", "MACRO SheepFocus" },
     { "CTRL-/", "NAMEPLATES" },
     { "F8", "CLICK WowKeysPage:LeftButton" },
     { "F7", "CLICK WowKeysPage:RightButton" },
@@ -110,7 +111,7 @@ ns.layout = {
     { slot = 182, spell = "Frostbolt" },
     { slot = 183, spell = "Fireball" },
     { slot = 184, spell = "Fire Blast" },
-    { slot = 185, macro = "SetFocus" },
+    { slot = 185, macro = "SheepFocus" },
     { slot = 186, spell = "Evocation" },
     { slot = 187, spell = "Arcane Missiles" },
     { slot = 188, macro = "ClearFocus" },
@@ -152,7 +153,7 @@ ns.layout = {
     { "ManaPot", "#showtooltip\n/use Minor Mana Potion" },
     { "Mount", "/run C_MountJournal.SummonByID(0)" },
     { "Poly", "#showtooltip Polymorph\n/cast [@focus,harm,nodead][] Polymorph" },
-    { "SetFocus", "/focus" },
+    { "SheepFocus", "#showtooltip Polymorph\n/focus\n/cast [@focus] Polymorph" },
     { "TargetFocus", "/target focus" },
     { "Trade", "/trade" },
   },

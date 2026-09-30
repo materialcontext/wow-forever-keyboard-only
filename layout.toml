@@ -185,6 +185,9 @@ l = { bar = 2, button = 8, spell = "Frost Ward" }
 f = "FOCUSTARGET"                               # current target becomes focus
 t = "TARGETFOCUS"                               # target your focus
 c = { macro = "ClearFocus", body = "/clearfocus" }
+# Sheep the target and make it your focus in one press; re-sheep with the
+# plain Poly (combat ,: focus if set) after switching targets.
+"," = { macro = "SheepFocus", body = "#showtooltip Polymorph\n/focus\n/cast [@focus] Polymorph" }
 "/" = "NAMEPLATES" # toggle enemy nameplates; off again at login
 
 [[mode]]
@@ -334,7 +337,7 @@ north = { spell = "Ice Block" }
 east = { macro = "HealthPot" }
 up = { spell = "Evocation" }
 right = { spell = "Arcane Missiles" }
-left = { macro = "SetFocus", body = "/focus" }
+left = { macro = "SheepFocus" }   # sheep + set focus (defined on leader ,)
 down = { macro = "ClearFocus" }
 
 [controller.ltrt]    # rarely

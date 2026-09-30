@@ -106,7 +106,8 @@ Non-combat modes add modifiers so their chords never collide with combat.
 - **Leader** (Right Alt; one-shot, 1000 ms; Ctrl+key): J health potion,
   K mana potion (macros; update item names as you find better potions),
   L Frost Ward, F set focus, T target focus, C clear focus, / toggle enemy
-  nameplates.
+  nameplates, `,` sheep + set focus (macro `SheepFocus`: `/focus` then
+  `/cast [@focus] Polymorph`; combat `,` re-sheeps the focus later).
 - **UI** (Tab; Ctrl+Alt+key): U bags (Bagnon), I character, O spellbook,
   P talents, L quest log, M map, B bank (Bagnon, at a banker), `'` type
   into a text box without Enter (mail, auction search). Esc closes
@@ -178,7 +179,7 @@ standing** (left thumb; moving cancels a cast bar anyway).
 |---|---|---|
 | No trigger | Blizzard's (attack is Square) | ↑ Frostbolt → Fireball ← Polymorph ↓ Fire Blast |
 | RT | ✕ Ice Lance □ Frost Nova △ Cone of Cold ○ Blink | ↑ Blizzard → Blood Fury ← Arcane Explosion ↓ Mana Shield |
-| LT | ✕ Ice Barrier (40) □ Counterspell △ Ice Block ○ health potion | ↑ Evocation → Arcane Missiles ← set focus ↓ clear focus |
+| LT | ✕ Ice Barrier (40) □ Counterspell △ Ice Block ○ health potion | ↑ Evocation → Arcane Missiles ← sheep + set focus ↓ clear focus |
 | LT+RT | ✕ mana potion □ Cold Snap △ Frost Ward ○ Remove Lesser Curse | ↑ target focus |
 
 Arrangement 2 (out of combat): no trigger D-pad ↑ drink → eat ↓ Conjure
