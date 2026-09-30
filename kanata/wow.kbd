@@ -38,6 +38,7 @@
   os-C-c (fork C-c c (lalt lctl lmet))
   os-C-comm (fork C-, , (lalt lctl lmet))
   os-C-f (fork C-f f (lalt lctl lmet))
+  os-C-h (fork C-h h (lalt lctl lmet))
   os-C-j (fork C-j j (lalt lctl lmet))
   os-C-k (fork C-k k (lalt lctl lmet))
   os-C-l (fork C-l l (lalt lctl lmet))
@@ -94,7 +95,7 @@
   _
   _   _ _ _ _ _ _ _ _ _ _ _ _ _
   @os-tab-combat-to-ui _ _ _ _ @os-C-t _ _           _           _         _         _ _ _
-  @os-caps-combat-to-combat   _ _ _ @os-C-f _ _           @os-C-j     @os-C-k     @os-C-l     _              _                   @os-ret-combat-to-chat-ret
+  @os-caps-combat-to-combat   _ _ _ @os-C-f _ @os-C-h     @os-C-j     @os-C-k     @os-C-l     _              _                   @os-ret-combat-to-chat-ret
   @os-lsft-combat-to-world _ _ @os-C-c _ _         _           _           @os-C-comm _ @os-C-slsh _
   _    _    _    _   @os-ralt-combat-to-leader _    _
 )

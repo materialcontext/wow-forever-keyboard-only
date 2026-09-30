@@ -12,9 +12,9 @@ local actions = {
   [1] = { "spell", 116 }, [3] = { "spell", 168 }, [4] = { "spell", 133 },
   [5] = { "spell", 1459 }, [6] = { "spell", 116 }, [7] = { "spell", 133 },
   [10] = { "item", 1 }, [11] = { "item", 2 }, [12] = { "item", 3 },
-  -- An older layout's Poly macro where unlearned Frost Nova now goes, and
+  -- An older layout's Poly macro where unlearned Ice Block now goes, and
   -- the player's own macro where unlearned Cold Snap goes.
-  [189] = { "macro", "Poly" }, [197] = { "macro", "MyOwn" },
+  [190] = { "macro", "Poly" }, [197] = { "macro", "MyOwn" },
 }
 
 function CreateFrame(_, name)
@@ -151,9 +151,9 @@ check(actions[10][1] == "item" and actions[12][1] == "item", "items left alone")
 check(actions[8][1] == "macro", "Blizzard macro")
 check(actions[182][2] == 116 and actions[184] == nil, "controller: Frostbolt on D-pad Up; unlearned Fire Blast slot empty")
 check(actions[181][1] == "macro" and actions[185][1] == "macro", "controller: Poly and focus macros")
-check(actions[189] == nil and said("took off the bars.*Poly"), "old layout's macro cleared from an unlearned spell's slot")
+check(actions[190] == nil and said("took off the bars.*Poly"), "old layout's macro cleared from an unlearned spell's slot")
 check(actions[197][2] == "MyOwn", "the player's own macro left alone")
-check(actions[222][2] == 168 and actions[223][2] == 1459, "controller: buffs on arrangement 2's RT layer")
+check(actions[222][2] == 168 and actions[223][1] == "macro", "controller: Frost Armor and the Intellect macro on arrangement 2's RT layer")
 check(bindings["F8"] == "CLICK WowKeysPage:LeftButton" and bindings["F7"] == "CLICK WowKeysPage:RightButton",
   "touchpad keys page the controller bars both ways")
 check(bindings["F9"] == "CLICK WowKeysCmd_strafe", "L3's key toggles strafe mode")

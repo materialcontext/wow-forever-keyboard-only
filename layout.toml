@@ -111,15 +111,20 @@ o = { bar = 1, button = 7, spell = "Cold Snap" }
 p = { bar = 1, button = 8, macro = "Blizzard", body = "#showtooltip\n/cast [@player] Blizzard" }
 
 # Interrupt, defensives, cooldowns
-h = { bar = 1, button = 9, spell = "Counterspell" }
+# Interrupts: /stopcasting drops your own cast so Counterspell goes off now.
+h = { bar = 1, button = 9, macro = "Interrupt", body = "#showtooltip Counterspell\n/stopcasting\n/cast Counterspell" }
 y = { bar = 1, button = 10, spell = "Mana Shield" }
 n = { bar = 1, button = 11, spell = "Ice Block" }
 m = { bar = 1, button = 12, spell = "Evocation" }
 # Polymorph your focus if you have one, else your target: set a focus on
 # the add, keep killing your target, sheep the add without switching.
 "," = { bar = 2, button = 1, macro = "Poly", body = "#showtooltip Polymorph\n/cast [@focus,harm,nodead][] Polymorph" }
-"." = { bar = 2, button = 2, spell = "Blood Fury" }   # Orc racial, every fight
-"/" = { bar = 2, button = 3, spell = "Remove Lesser Curse" }
+# Orc racial with the opener: Blood Fury is (believed) off the global
+# cooldown, so one press pops it and starts Frostbolt; on cooldown, just
+# Frostbolt.
+"." = { bar = 2, button = 2, macro = "Opener", body = "#showtooltip Blood Fury\n/cast Blood Fury\n/cast Frostbolt" }
+# Friendly target if you have one, else yourself.
+"/" = { bar = 2, button = 3, macro = "Decurse", body = "#showtooltip Remove Lesser Curse\n/cast [@target,help,nodead][@player] Remove Lesser Curse" }
 
 # Extras (left hand)
 x = { bar = 2, button = 4, spell = "Frost Nova" }
@@ -157,7 +162,7 @@ mods = ["alt", "ctrl", "shift"]
 
 [mode.keys]
 j = { spell = "Frost Armor" }       # Ice Armor replaces it at 30
-k = { spell = "Arcane Intellect" }
+k = { macro = "Intellect", body = "#showtooltip Arcane Intellect\n/cast [@target,help,nodead][@player] Arcane Intellect" }   # friendly target, else you
 l = { spell = "Conjure Water" }
 ";" = { spell = "Conjure Food" }
 # Conjured item names change with each rank; update when you learn one.
@@ -187,6 +192,7 @@ t = "TARGETFOCUS"                               # target your focus
 c = { macro = "ClearFocus", body = "/clearfocus" }
 # Sheep the target and make it your focus in one press; re-sheep with the
 # plain Poly (combat ,: focus if set) after switching targets.
+h = { macro = "InterruptFocus", body = "#showtooltip Counterspell\n/stopcasting\n/cast [@focus,harm,nodead] Counterspell" }   # interrupt your focus
 "," = { macro = "SheepFocus", body = "#showtooltip Polymorph\n/focus\n/cast [@focus] Polymorph" }
 "/" = "NAMEPLATES" # toggle enemy nameplates; off again at login
 
@@ -326,13 +332,13 @@ west = { spell = "Frost Nova" }
 north = { spell = "Cone of Cold" }
 east = { spell = "Blink" }
 up = { macro = "Blizzard" }
-right = { spell = "Blood Fury" }
+right = { macro = "Opener" }         # Blood Fury + Frostbolt
 left = { spell = "Arcane Explosion" }
 down = { spell = "Mana Shield" }
 
 [controller.lt]      # less often
 south = { spell = "Ice Barrier" }   # level 40; placed once learned
-west = { spell = "Counterspell" }
+west = { macro = "Interrupt" }
 north = { spell = "Ice Block" }
 east = { macro = "HealthPot" }
 up = { spell = "Evocation" }
@@ -344,8 +350,9 @@ down = { macro = "ClearFocus" }
 south = { macro = "ManaPot" }
 west = { spell = "Cold Snap" }
 north = { spell = "Frost Ward" }
-east = { spell = "Remove Lesser Curse" }
+east = { macro = "Decurse" }
 up = { macro = "TargetFocus", body = "/target focus" }
+left = { macro = "InterruptFocus" }
 
 [controller.none2]   # out of combat, all the time
 up = { macro = "Drink" }
@@ -355,6 +362,6 @@ left = { spell = "Conjure Food" }
 
 [controller.rt2]     # out of combat, often
 up = { spell = "Frost Armor" }       # Ice Armor replaces it at 30
-right = { spell = "Arcane Intellect" }
+right = { macro = "Intellect" }
 down = { macro = "Hearth" }
 left = { macro = "Mount" }

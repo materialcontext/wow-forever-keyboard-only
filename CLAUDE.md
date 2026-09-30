@@ -89,9 +89,9 @@ out of combat → world.
 | T | autorun | Z | mount (level 40) |
 | G | confirm (popup, quest, reward, loot all, trainer) | 1–9 | pick dialog option N |
 | J K L ; | Frostbolt, Ice Lance, Fire Blast, Fireball | U I O P | Arcane Missiles, Arcane Explosion, Cold Snap, Blizzard |
-| H | Counterspell | Y, N | Mana Shield, Ice Block |
+| H | Counterspell (interrupts your own cast first) | Y, N | Mana Shield, Ice Block |
 | M | Evocation | , | Polymorph (focus if set, else target) |
-| . | Blood Fury | / | Remove Lesser Curse |
+| . | Blood Fury + Frostbolt | / | Remove Lesser Curse (friendly target, else you) |
 | X C V | Frost Nova, Cone of Cold, Blink | Esc | WoW's own (close, clear target, menu) |
 
 Strafe/turn: W/R strafe, S/F turn (owner preferred turning on the home row).
@@ -106,14 +106,14 @@ Non-combat modes add modifiers so their chords never collide with combat.
 - **Leader** (Right Alt; one-shot, 1000 ms; Ctrl+key): J health potion,
   K mana potion (macros; update item names as you find better potions),
   L Frost Ward, F set focus, T target focus, C clear focus, / toggle enemy
-  nameplates, `,` sheep + set focus (macro `SheepFocus`: `/focus` then
-  `/cast [@focus] Polymorph`; combat `,` re-sheeps the focus later).
+  nameplates, `,` sheep + set focus (combat `,` re-sheeps the focus
+  later), H Counterspell your focus.
 - **UI** (Tab; Ctrl+Alt+key): U bags (Bagnon), I character, O spellbook,
   P talents, L quest log, M map, B bank (Bagnon, at a banker), `'` type
   into a text box without Enter (mail, auction search). Esc closes
   windows. Navigating *inside* windows is still unsolved on the keyboard.
 - **World** (Left Shift; Ctrl+Alt+Shift+key): J Frost Armor, K Arcane
-  Intellect, L Conjure Water, ; Conjure Food, U drink, I eat (macros;
+  Intellect (friendly target, else you), L Conjure Water, ; Conjure Food, U drink, I eat (macros;
   update conjured item names per rank), H hearthstone, N/M camera zoom.
 - **Chat** (Enter): full passthrough. Enter sends, Esc **and Caps** cancel;
   both return to combat. Caps sends Esc there, or the chat box keeps focus
@@ -178,13 +178,29 @@ standing** (left thumb; moving cancels a cast bar anyway).
 | Arrangement 1 (combat) | Face (on the move) | D-pad (standing) |
 |---|---|---|
 | No trigger | Blizzard's (attack is Square) | ↑ Frostbolt → Fireball ← Polymorph ↓ Fire Blast |
-| RT | ✕ Ice Lance □ Frost Nova △ Cone of Cold ○ Blink | ↑ Blizzard → Blood Fury ← Arcane Explosion ↓ Mana Shield |
+| RT | ✕ Ice Lance □ Frost Nova △ Cone of Cold ○ Blink | ↑ Blizzard → Blood Fury + Frostbolt ← Arcane Explosion ↓ Mana Shield |
 | LT | ✕ Ice Barrier (40) □ Counterspell △ Ice Block ○ health potion | ↑ Evocation → Arcane Missiles ← sheep + set focus ↓ clear focus |
-| LT+RT | ✕ mana potion □ Cold Snap △ Frost Ward ○ Remove Lesser Curse | ↑ target focus |
+| LT+RT | ✕ mana potion □ Cold Snap △ Frost Ward ○ Remove Lesser Curse | ↑ target focus ← Counterspell focus |
 
 Arrangement 2 (out of combat): no trigger D-pad ↑ drink → eat ↓ Conjure
 Water ← Conjure Food; RT D-pad ↑ Frost Armor → Arcane Intellect ↓ hearth
 ← mount. Arrangement 3 spare.
+
+**Macros** (shared by keyboard and controller; keyboard modes define the
+body, controller entries name them). A macro may run any number of free
+commands (`/focus`, `/stopcasting`, `/target`) plus one spell on the
+global cooldown per press.
+
+| Macro | Body | Why |
+|---|---|---|
+| `Poly` | `/cast [@focus,harm,nodead][] Polymorph` | re-sheep the focus, else sheep the target |
+| `SheepFocus` | `/focus` + `/cast [@focus] Polymorph` | sheep the target and remember it |
+| `Interrupt` | `/stopcasting` + `/cast Counterspell` | interrupt now, even mid-Frostbolt |
+| `InterruptFocus` | `/stopcasting` + `/cast [@focus,harm,nodead] Counterspell` | interrupt the focus without retargeting; separate because the focus is often the sheep |
+| `Opener` | `/cast Blood Fury` + `/cast Frostbolt` | racial with the opener; on cooldown just Frostbolt (assumes Blood Fury is off the GCD) |
+| `Intellect`, `Decurse` | `/cast [@target,help,nodead][@player] …` | friendly target if any, else yourself |
+| `Blizzard` | `/cast [@player] Blizzard` | ground spell at your feet |
+| potions, drink, eat, hearth, mount, focus | `/use …`, `/focus`… | items and focus commands on keys and bars |
 
 History: v1 put the main spells on the D-pad (the left thumb can't move
 and press it); v2 latched LT as a combat home layer, which hid Blizzard's
@@ -399,6 +415,11 @@ wow/steam-layers.md        # GENERATED: what to bind in Steam
 ## Still to verify
 
 - [ ] Group finder opens at level 10.
+- [ ] New macros: Interrupt cancels a Frostbolt cast and Counterspells;
+      InterruptFocus hits the focus; Opener pops Blood Fury *and* starts
+      Frostbolt (if only Blood Fury happens, it's on the GCD in Forever:
+      split them again); Intellect/Decurse land on a friendly target, else
+      you; SheepFocus sheeps and sets focus.
 - [ ] Cross accepts a real group invite; G does too on the keyboard.
 - [ ] Gossip options print numbered and 1–9 pick them.
 - [ ] Ctrl+Alt / Ctrl+Alt+Shift chords trigger nothing in Windows.
