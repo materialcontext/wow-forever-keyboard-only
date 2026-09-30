@@ -2,7 +2,7 @@
 local _, ns = ...
 ns.layout = {
   -- Changes when buttons or macros change; the addon re-places bars then.
-  revision = "b80cce83",
+  revision = "b44d0944",
   modes = {
     { name = "combat", label = "COMBAT", key = "ALT-CTRL-SHIFT-F9" },
     { name = "ui", label = "UI", key = "ALT-CTRL-SHIFT-F10" },
@@ -88,7 +88,7 @@ ns.layout = {
     { "NUMPAD1", "MACRO LeaveGroup" },
   },
   buttons = {
-    { slot = 1, spell = "Frostbolt" },
+    { slot = 1, macro = "Bolt" },
     { slot = 2, spell = "Ice Lance" },
     { slot = 3, spell = "Fire Blast" },
     { slot = 4, spell = "Fireball" },
@@ -101,7 +101,7 @@ ns.layout = {
     { slot = 11, spell = "Ice Block" },
     { slot = 12, spell = "Evocation" },
     { slot = 61, macro = "Poly" },
-    { slot = 62, macro = "Opener" },
+    { slot = 62, spell = "Blood Fury" },
     { slot = 63, macro = "Decurse" },
     { slot = 64, spell = "Frost Nova" },
     { slot = 65, spell = "Cone of Cold" },
@@ -109,7 +109,7 @@ ns.layout = {
     { slot = 67, macro = "Mount" },
     { slot = 68, spell = "Frost Ward" },
     { slot = 181, macro = "Poly" },
-    { slot = 182, spell = "Frostbolt" },
+    { slot = 182, macro = "Bolt" },
     { slot = 183, spell = "Fireball" },
     { slot = 184, spell = "Fire Blast" },
     { slot = 185, macro = "SheepFocus" },
@@ -122,7 +122,7 @@ ns.layout = {
     { slot = 192, spell = "Ice Barrier" },
     { slot = 193, spell = "Arcane Explosion" },
     { slot = 194, macro = "Blizzard" },
-    { slot = 195, macro = "Opener" },
+    { slot = 195, spell = "Blood Fury" },
     { slot = 196, spell = "Mana Shield" },
     { slot = 197, spell = "Frost Nova" },
     { slot = 198, spell = "Cone of Cold" },
@@ -145,6 +145,7 @@ ns.layout = {
   },
   macros = {
     { "Blizzard", "#showtooltip\n/cast [@player] Blizzard" },
+    { "Bolt", "#showtooltip Frostbolt\n/cast Blood Fury\n/cast Frostbolt\n/run UIErrorsFrame:Clear()" },
     { "ClearFocus", "/clearfocus" },
     { "Decurse", "#showtooltip Remove Lesser Curse\n/cast [@target,help,nodead][@player] Remove Lesser Curse" },
     { "Drink", "#showtooltip\n/use Conjured Water" },
@@ -158,7 +159,6 @@ ns.layout = {
     { "LeaveGroup", "/run C_PartyInfo.LeaveParty()" },
     { "ManaPot", "#showtooltip\n/use Minor Mana Potion" },
     { "Mount", "/run C_MountJournal.SummonByID(0)" },
-    { "Opener", "#showtooltip Blood Fury\n/cast Blood Fury\n/cast Frostbolt" },
     { "Poly", "#showtooltip Polymorph\n/cast [@focus,harm,nodead][] Polymorph" },
     { "SheepFocus", "#showtooltip Polymorph\n/focus\n/cast [@focus] Polymorph" },
     { "TargetFocus", "/target focus" },

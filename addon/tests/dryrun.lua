@@ -144,12 +144,12 @@ check(bindings["ALT-CTRL-SHIFT-F12"] == "CLICK WowKeysMode_chat", "banner chord"
 check(cvars.autoLootDefault == "1", "auto loot on")
 check(said("no setting AutoPushSpellToActionBar"), "unknown cvar reported")
 
-check(actions[1][2] == 116 and actions[4][2] == 133, "known spells placed")
+check(actions[1][1] == "macro" and actions[4][2] == 133, "known spells and macros placed")
 check(actions[6] == nil and actions[7] == nil, "duplicate Frostbolt/Fireball cleared")
 check(actions[3] == nil and actions[5] == nil, "stray spells cleared from managed slots")
 check(actions[10][1] == "item" and actions[12][1] == "item", "items left alone")
 check(actions[8][1] == "macro", "Blizzard macro")
-check(actions[182][2] == 116 and actions[184] == nil, "controller: Frostbolt on D-pad Up; unlearned Fire Blast slot empty")
+check(actions[182][1] == "macro" and actions[184] == nil, "controller: Bolt macro on D-pad Up; unlearned Fire Blast slot empty")
 check(actions[181][1] == "macro" and actions[185][1] == "macro", "controller: Poly and focus macros")
 check(actions[190] == nil and said("took off the bars.*Poly"), "old layout's macro cleared from an unlearned spell's slot")
 check(actions[197][2] == "MyOwn", "the player's own macro left alone")
@@ -275,7 +275,7 @@ check(not said("NUMPAD5"), "numpad keys aren't controller buttons")
 -- /wowkeys slots lists filled action slots by id.
 printed = {}
 SlashCmdList.WOWKEYS("slots")
-check(said("  1  spell  Frostbolt"), "slots lists a spell slot by id")
+check(said("  4  spell  Fireball") and said("  1  macro  Bolt"), "slots lists spell and macro slots by id")
 check(said("filled action slot"), "slots prints a count")
 
 -- /wowkeys padbuttons lists frames pointing at slots above 180.

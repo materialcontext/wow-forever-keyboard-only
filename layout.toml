@@ -101,7 +101,10 @@ a = "INTERACTTARGET"
 # Frost Mage, WoW: Forever. Beta caps at 30; spells or talents you don't
 # have yet are skipped (the addon lists them) until you learn them.
 # Rotation (right hand, main bar)
-j = { bar = 1, button = 1, spell = "Frostbolt" }
+# Frostbolt that also pops Blood Fury (Orc racial) whenever it's ready, so
+# the racial goes off on the first bolt of every fight. Blood Fury is
+# (believed) off the global cooldown; its "not ready" error is cleared.
+j = { bar = 1, button = 1, macro = "Bolt", body = "#showtooltip Frostbolt\n/cast Blood Fury\n/cast Frostbolt\n/run UIErrorsFrame:Clear()" }
 k = { bar = 1, button = 2, spell = "Ice Lance" }
 l = { bar = 1, button = 3, spell = "Fire Blast" }
 ";" = { bar = 1, button = 4, spell = "Fireball" }
@@ -119,10 +122,7 @@ m = { bar = 1, button = 12, spell = "Evocation" }
 # Polymorph your focus if you have one, else your target: set a focus on
 # the add, keep killing your target, sheep the add without switching.
 "," = { bar = 2, button = 1, macro = "Poly", body = "#showtooltip Polymorph\n/cast [@focus,harm,nodead][] Polymorph" }
-# Orc racial with the opener: Blood Fury is (believed) off the global
-# cooldown, so one press pops it and starts Frostbolt; on cooldown, just
-# Frostbolt.
-"." = { bar = 2, button = 2, macro = "Opener", body = "#showtooltip Blood Fury\n/cast Blood Fury\n/cast Frostbolt" }
+"." = { bar = 2, button = 2, spell = "Blood Fury" }   # by hand; Bolt also casts it
 # Friendly target if you have one, else yourself.
 "/" = { bar = 2, button = 3, macro = "Decurse", body = "#showtooltip Remove Lesser Curse\n/cast [@target,help,nodead][@player] Remove Lesser Curse" }
 
@@ -321,7 +321,7 @@ does = "leave the group"
 # Arrangement 1 is combat, 2 out of combat, 3 spare; the touchpad pages.
 
 [controller.none]    # all the time: the main casts
-up = { spell = "Frostbolt" }
+up = { macro = "Bolt" }              # Frostbolt + Blood Fury when ready
 right = { spell = "Fireball" }
 left = { macro = "Poly" }
 down = { spell = "Fire Blast" }   # attack is Blizzard's Square
@@ -332,7 +332,7 @@ west = { spell = "Frost Nova" }
 north = { spell = "Cone of Cold" }
 east = { spell = "Blink" }
 up = { macro = "Blizzard" }
-right = { macro = "Opener" }         # Blood Fury + Frostbolt
+right = { spell = "Blood Fury" }
 left = { spell = "Arcane Explosion" }
 down = { spell = "Mana Shield" }
 

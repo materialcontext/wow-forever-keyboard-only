@@ -88,10 +88,10 @@ out of combat → world.
 | Q / B | next / previous enemy | A | interact (loot, talk, use) |
 | T | autorun | Z | mount (level 40) |
 | G | confirm (popup, quest, reward, loot all, trainer) | 1–9 | pick dialog option N |
-| J K L ; | Frostbolt, Ice Lance, Fire Blast, Fireball | U I O P | Arcane Missiles, Arcane Explosion, Cold Snap, Blizzard |
+| J K L ; | Frostbolt (+ Blood Fury when ready), Ice Lance, Fire Blast, Fireball | U I O P | Arcane Missiles, Arcane Explosion, Cold Snap, Blizzard |
 | H | Counterspell (interrupts your own cast first) | Y, N | Mana Shield, Ice Block |
 | M | Evocation | , | Polymorph (focus if set, else target) |
-| . | Blood Fury + Frostbolt | / | Remove Lesser Curse (friendly target, else you) |
+| . | Blood Fury (by hand) | / | Remove Lesser Curse (friendly target, else you) |
 | X C V | Frost Nova, Cone of Cold, Blink | Esc | WoW's own (close, clear target, menu) |
 
 Strafe/turn: W/R strafe, S/F turn (owner preferred turning on the home row).
@@ -177,8 +177,8 @@ standing** (left thumb; moving cancels a cast bar anyway).
 
 | Arrangement 1 (combat) | Face (on the move) | D-pad (standing) |
 |---|---|---|
-| No trigger | Blizzard's (attack is Square) | ↑ Frostbolt → Fireball ← Polymorph ↓ Fire Blast |
-| RT | ✕ Ice Lance □ Frost Nova △ Cone of Cold ○ Blink | ↑ Blizzard → Blood Fury + Frostbolt ← Arcane Explosion ↓ Mana Shield |
+| No trigger | Blizzard's (attack is Square) | ↑ Frostbolt (+ Blood Fury) → Fireball ← Polymorph ↓ Fire Blast |
+| RT | ✕ Ice Lance □ Frost Nova △ Cone of Cold ○ Blink | ↑ Blizzard → Blood Fury ← Arcane Explosion ↓ Mana Shield |
 | LT | ✕ Ice Barrier (40) □ Counterspell △ Ice Block ○ health potion | ↑ Evocation → Arcane Missiles ← sheep + set focus ↓ clear focus |
 | LT+RT | ✕ mana potion □ Cold Snap △ Frost Ward ○ Remove Lesser Curse | ↑ target focus ← Counterspell focus |
 
@@ -197,7 +197,7 @@ global cooldown per press.
 | `SheepFocus` | `/focus` + `/cast [@focus] Polymorph` | sheep the target and remember it |
 | `Interrupt` | `/stopcasting` + `/cast Counterspell` | interrupt now, even mid-Frostbolt |
 | `InterruptFocus` | `/stopcasting` + `/cast [@focus,harm,nodead] Counterspell` | interrupt the focus without retargeting; separate because the focus is often the sheep |
-| `Opener` | `/cast Blood Fury` + `/cast Frostbolt` | racial with the opener; on cooldown just Frostbolt (assumes Blood Fury is off the GCD) |
+| `Bolt` | `/cast Blood Fury` + `/cast Frostbolt` + clear the error text | Frostbolt that pops the racial whenever it's ready, so it goes off on the first bolt of every fight (owner's idea); assumes Blood Fury is off the GCD. Plain Blood Fury stays on `.` / RT → for manual use |
 | `Intellect`, `Decurse` | `/cast [@target,help,nodead][@player] …` | friendly target if any, else yourself |
 | `Blizzard` | `/cast [@player] Blizzard` | ground spell at your feet |
 | potions, drink, eat, hearth, mount, focus | `/use …`, `/focus`… | items and focus commands on keys and bars |
@@ -416,9 +416,9 @@ wow/steam-layers.md        # GENERATED: what to bind in Steam
 
 - [ ] Group finder opens at level 10.
 - [ ] New macros: Interrupt cancels a Frostbolt cast and Counterspells;
-      InterruptFocus hits the focus; Opener pops Blood Fury *and* starts
-      Frostbolt (if only Blood Fury happens, it's on the GCD in Forever:
-      split them again); Intellect/Decurse land on a friendly target, else
+      InterruptFocus hits the focus; the Frostbolt key pops Blood Fury
+      *and* casts Frostbolt (if only Blood Fury happens, it's on the GCD in
+      Forever: undo Bolt), with no "not ready" error text afterwards; Intellect/Decurse land on a friendly target, else
       you; SheepFocus sheeps and sets focus.
 - [ ] Cross accepts a real group invite; G does too on the keyboard.
 - [ ] Gossip options print numbered and 1–9 pick them.
