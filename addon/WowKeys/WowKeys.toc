@@ -6,4 +6,5 @@
 Layout.lua
 Commands.lua
 WowKeys.lua
+Rumble.lua
 Diagnostics.lua

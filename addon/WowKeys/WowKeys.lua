@@ -1,7 +1,8 @@
 -- WowKeys: applies Layout.lua (generated from layout.toml) and shows the
 -- current kanata mode, like Vim's `-- INSERT --`. Also strafe mode and
--- controller bar paging. Probes for learning how the game works live in
--- Diagnostics.lua. Files share the addon's private namespace `ns`.
+-- controller bar paging; controller rumble is in Rumble.lua. Probes for
+-- learning how the game works live in Diagnostics.lua. Files share the
+-- addon's private namespace `ns`.
 --
 -- On every login it rewrites the bindings from the layout and saves them,
 -- so the layout file always wins and WoW's own UI (button hotkey labels,
@@ -34,6 +35,15 @@ end
 
 local shownArrangement
 
+-- Arrangement 1 holds the combat spells ([controller.*] in layout.toml).
+local COMBAT_ARRANGEMENT = 1
+
+-- Combat started (or goes on) outside combat mode, or with the controller
+-- on an out-of-combat arrangement.
+local function wrongForCombat()
+  return current ~= home or (shownArrangement ~= nil and shownArrangement ~= COMBAT_ARRANGEMENT)
+end
+
 -- Controller strafe mode, via the Gamepad UI's "face movement" angle. In
 -- Forever 0 (the default) turns the character toward the stick; 180 keeps
 -- it facing ahead, so the stick strafes left/right and backpedals
@@ -52,7 +62,7 @@ local function showMode()
   local suffix = (shownArrangement and (" · BAR " .. shownArrangement) or "")
     .. (strafing() and " · STRAFE" or "")
   banner:SetText("-- " .. current.label .. suffix .. " --")
-  if InCombatLockdown() and current ~= home then
+  if InCombatLockdown() and wrongForCombat() then
     banner:SetTextColor(1, 0.2, 0.2)
   else
     banner:SetTextColor(1, 0.82, 0)
@@ -304,8 +314,9 @@ owner:SetScript("OnEvent", function(_, event, isInitialLogin, isReload)
     end
   elseif event == "PLAYER_REGEN_DISABLED" then
     showMode()
-    if current ~= home then
+    if wrongForCombat() then
       PlaySound(SOUNDKIT.RAID_WARNING)
+      ns.rumble("wrongSetup") -- Rumble.lua, loaded after this file
     end
   elseif event == "PLAYER_REGEN_ENABLED" then
     for _, fn in ipairs(pending) do

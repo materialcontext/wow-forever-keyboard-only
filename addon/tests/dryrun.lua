@@ -5,6 +5,7 @@
 local combat, cursor = false, nil
 local frames, bindings, macros, cvars, timers = {}, {}, {}, { autoLootDefault = "0" }, {}
 local printed, sounds, banner = {}, 0, nil
+local unitEvents, vibrations = {}, {}
 local spells = { [116] = "Frostbolt", [133] = "Fireball", [168] = "Frost Armor", [1459] = "Arcane Intellect" }
 local known = { Frostbolt = 116, Fireball = 133, ["Frost Armor"] = 168, ["Arcane Intellect"] = 1459 }
 -- What WoW put on the bars before WowKeys ran (the user's screenshot).
@@ -29,6 +30,7 @@ function CreateFrame(_, name)
   function f:RegisterEvent(e)
     if e == "LEARNED_SPELL_IN_TAB" then error("unknown event") end
   end
+  function f:RegisterUnitEvent(e) unitEvents[e] = f end
   if name then frames[name] = f; _G[name] = f end
   return f
 end
@@ -71,6 +73,18 @@ function PickupAction(slot) cursor, actions[slot] = actions[slot], nil end
 function GetActionInfo(slot) local a = actions[slot]; if a then return a[1], a[2] end end
 function print(msg) table.insert(printed, msg) end
 SlashCmdList = {}
+
+-- Controller rumble and what Rumble.lua watches.
+C_GamePad = { SetVibration = function(_, strength) if strength > 0 then table.insert(vibrations, strength) end end,
+  StopVibration = function() end }
+local aura, hostile, castShield, health = nil, true, false, 100
+C_UnitAuras = { GetAuraDataBySpellName = function(_, name) return name == "Fingers of Frost" and aura or nil end }
+function UnitCanAttack() return hostile end
+function UnitCastingInfo() return "Fireball", nil, nil, 0, 1, false, 1, castShield, 133 end
+function UnitChannelInfo() return "Drain", nil, nil, 0, 1, false, castShield, 689 end
+function UnitIsDeadOrGhost() return false end
+function UnitHealth() return health end
+function UnitHealthMax() return 100 end
 
 -- Dialog frames and APIs used by Commands.lua.
 local open = {}
@@ -118,7 +132,7 @@ bindings["1"], bindings.W, bindings.UP = "ACTIONBUTTON1", "MOVEFORWARD", "MOVEFO
 
 -- Load in .toc order, sharing one namespace as WoW does.
 local ns = {}
-for _, file in ipairs({ "Layout.lua", "Commands.lua", "WowKeys.lua", "Diagnostics.lua" }) do
+for _, file in ipairs({ "Layout.lua", "Commands.lua", "WowKeys.lua", "Rumble.lua", "Diagnostics.lua" }) do
   assert(loadfile("addon/WowKeys/" .. file))("WowKeys", ns)
 end
 local owner = frames.WowKeysFrame
@@ -392,8 +406,70 @@ frames.WowKeysMode_chat.scripts.OnClick()
 check(banner == "-- CHAT --", "banner")
 combat = true
 fire("PLAYER_REGEN_DISABLED")
-check(sounds == 1, "combat warning")
+check(sounds == 1 and #vibrations == 1, "combat warning, with rumble")
 combat = false
 fire("PLAYER_REGEN_ENABLED")
+
+-- Combat mode, but the controller on arrangement 2: warns too.
+frames.WowKeysMode_combat.scripts.OnClick()
+_G.GamepadMainActionBarFramePageUnitTopCenteredAnchorTopBarActionButton1 = padButton
+padButton.action = 209
+combat = true
+fire("PLAYER_REGEN_DISABLED")
+check(sounds == 2 and banner == "-- COMBAT · BAR 2 --", "combat on arrangement 2 warns")
+combat = false
+fire("PLAYER_REGEN_ENABLED")
+padButton.action = 181
+combat = true
+fire("PLAYER_REGEN_DISABLED")
+check(sounds == 2, "combat mode on arrangement 1 is quiet")
+combat = false
+fire("PLAYER_REGEN_ENABLED")
+
+-- Rumble alerts.
+local function unitEvent(e) unitEvents[e].scripts.OnEvent(unitEvents[e], e) end
+vibrations = {}
+aura = { applications = 0 }
+unitEvent("UNIT_AURA")
+unitEvent("UNIT_AURA")
+check(#vibrations == 1, "Fingers of Frost rumbles once when it appears")
+aura.applications = 2
+unitEvent("UNIT_AURA")
+aura = nil
+unitEvent("UNIT_AURA")
+check(#vibrations == 2, "and again on a new stack, not when it fades")
+
+vibrations = {}
+unitEvent("UNIT_SPELLCAST_START")
+castShield = true
+unitEvent("UNIT_SPELLCAST_CHANNEL_START")
+castShield, hostile = false, false
+unitEvent("UNIT_SPELLCAST_START")
+check(#vibrations == 1, "an enemy's interruptible cast rumbles; shielded or friendly casts don't")
+hostile = true
+
+vibrations = {}
+health = 30
+unitEvent("UNIT_HEALTH")
+health = 20
+unitEvent("UNIT_HEALTH")
+check(#vibrations == 1, "low health rumbles once")
+health = 60
+unitEvent("UNIT_HEALTH")
+issecretvalue = function() return true end
+health = 20
+unitEvent("UNIT_HEALTH")
+check(#vibrations == 1, "hidden health values stay quiet")
+issecretvalue = nil
+unitEvent("UNIT_HEALTH")
+check(#vibrations == 2, "rumbles again after healing up")
+
+-- /wowkeys rumble plays an alert on demand.
+vibrations, printed = {}, {}
+SlashCmdList.WOWKEYS("rumble proc")
+check(#vibrations == 1 and said("rumble proc"), "rumble command")
+-- A broken alert (here a renamed API) must not raise.
+UnitHealth = function() error("renamed API") end
+unitEvent("UNIT_HEALTH")
 
 io.write("dry run ok\n")

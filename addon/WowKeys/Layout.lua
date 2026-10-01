@@ -87,6 +87,8 @@ ns.layout = {
     { "NUMPAD2", "MACRO Invite" },
     { "NUMPAD3", "MACRO Trade" },
     { "NUMPAD9", "FOLLOWTARGET" },
+    { "NUMPAD0", "RAIDTARGET8" },
+    { "NUMPAD7", "RAIDTARGET5" },
     { "NUMPAD1", "MACRO LeaveGroup" },
   },
   buttons = {

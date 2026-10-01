@@ -123,7 +123,8 @@ Non-combat modes add modifiers so their chords never collide with combat.
 **Banner:** each mode entry also sends Ctrl+Alt+Shift+F9/F10/F11/F12
 (combat/UI/world/chat), sent with kanata `macro` so it never lands in an
 open chat box. WowKeys shows `-- COMBAT --` etc. and warns (red, raid
-sound) if combat starts outside combat mode. Leader has no banner.
+sound, rumble) if combat starts outside combat mode or off controller
+arrangement 1. Leader has no banner.
 
 Known desync: text boxes that open without Enter (mail, AH search, DELETE
 confirm): Esc closes them; UI `'` switches to chat to type into them.
@@ -229,6 +230,20 @@ strafes and backpedals) and the previous values (default **0**: the
 character turns toward the stick). Saved per character; the banner shows
 `· STRAFE`. Forever's meaning is the reverse of our first guess.
 
+### Combat alerts (built)
+
+- **Wrong setup:** if combat starts outside keyboard combat mode *or* with
+  the controller on arrangement 2 or 3, the banner turns red, the raid
+  warning sounds and the controller rumbles. The banner goes back to
+  normal once you page to arrangement 1.
+- **Rumble** (`Rumble.lua`, `C_GamePad.SetVibration`): a Fingers of
+  Frost proc or new stack (light), an enemy target starting a cast you
+  can interrupt (two pulses; casts the game marks as uninterruptible are
+  skipped), health below 35% (one long pulse, re-armed above 50%), wrong
+  setup (three pulses). Patterns and thresholds are a table at the top of
+  the file. Values Midnight hides from addons keep that alert quiet.
+  `/wowkeys rumble <alert>` plays one on demand.
+
 ### Social layer (built)
 
 A Steam **hold** layer on Create: target first (bumpers), hold Create,
@@ -244,8 +259,10 @@ and Circle stay Blizzard's.
 | LT | Numpad 9 | follow target (`FOLLOWTARGET`) |
 | RT | Numpad 3 | trade with target (macro `/trade`) |
 | RB | Numpad 2 | invite target (macro `/invite`) |
+| Right stick → | Numpad 0 | skull on target (`RAIDTARGET8`; kill first) |
+| Right stick ← | Numpad 7 | moon on target (`RAIDTARGET5`; sheep) |
 
-Spare: LB, right stick ←/→, R3. Rarer actions (inspect, whisper,
+Markers toggle: press again to remove. Spare: LB, R3. Rarer actions (inspect, whisper,
 promote, loot settings) are in Blizzard's context menu: target a player,
 Triangle. Leaving a group natively: hold LB + Cross (self), Triangle,
 Leave Group.
@@ -315,6 +332,8 @@ switches → os forks, since kanata needs an alias declared before use.
   frames, LootFrame, ClassTrainerFrame, GossipFrame) and prints numbered
   options when one opens. Trainer: 1–9 learn the Nth available spell, G
   the first; the list reprints.
+- `Rumble.lua`: controller rumble alerts (`ns.rumble`), and
+  `/wowkeys rumble`.
 - `Diagnostics.lua`: the probes below. Nothing depends on them.
 
 **Tests:** `cargo test` (layout parsing, validation, slot map, chords),
@@ -339,6 +358,7 @@ list can't go stale). A failing command prints its Lua error.
 | `frames <text>` | named frames containing text, shown or hidden | finding frames by name |
 | `newframes [s]` | frames that appear within s seconds (default 5) | menus that close when chat opens |
 | `inspect <name>` | a frame's fields, functions and children | reading Blizzard's frames |
+| `rumble [alert]` | play an alert (default `cast`), show `GamePadVibrationStrength` (in `Rumble.lua`) | checking rumble reaches the controller |
 
 Frames whose names aren't plain text (some addons', values the client
 hides) are skipped. In chat output the matches print *above* each
@@ -391,6 +411,7 @@ kanata/wow.kbd             # GENERATED: kanata config
 addon/WowKeys/Layout.lua   # GENERATED: data for the addon
 addon/WowKeys/WowKeys.lua  # bindings, bars, banner, strafe, paging, /wowkeys
 addon/WowKeys/Commands.lua # confirm / choose1-9 (dialogs, loot, trainers)
+addon/WowKeys/Rumble.lua   # controller rumble alerts
 addon/WowKeys/Diagnostics.lua # /wowkeys probes
 addon/tests/dryrun.lua     # the addon against stubbed WoW APIs
 wow/setup.md               # install, game settings, Steam plumbing
@@ -426,7 +447,15 @@ wow/steam-layers.md        # GENERATED: what to bind in Steam
 - [ ] Ctrl+Alt / Ctrl+Alt+Shift chords trigger nothing in Windows.
 - [ ] UI B opens the bank at a banker (Bagnon).
 - [ ] `/wowkeys find auction`, `post`, `cancel` for Auctionator.
-- [ ] Loot rolls and full-bag loot windows: what should keys do?
+- [ ] Rumble reaches the DualSense through Steam (`/wowkeys rumble`;
+      if not, check `GamePadVibrationStrength` and Steam's rumble
+      setting); the proc, cast and low-health alerts fire in a fight, or
+      are quiet because Midnight hides the value.
+- [ ] Combat on arrangement 2 turns the banner red and warns.
+- [ ] Touchpad center toggles autorun; Social right stick ←/→ mark the
+      target (`RAIDTARGET5`/`8` are the retail names).
+- [ ] Full-bag loot windows: what should keys do? (Loot rolls: the owner
+      will use an automation addon.)
 - Later: A on objects (`INTERACTTARGET`); Z mounts at 40; a camera key
   that doesn't turn the character; Assisted Highlight in Forever;
   `/cast [@target,exists][@player] Blizzard` placement.
@@ -439,7 +468,6 @@ wow/steam-layers.md        # GENERATED: what to bind in Steam
   move by hints or H/J/K/L, click through a secure proxy like
   `WowKeysPage`; out of combat). `/equip` and `/use` by name are the
   stopgap.
-- Group loot rolls (need/greed/pass) by key.
 - Leader timeout (1000 ms) and whether a second leader is needed.
 - Whether kanata mouse-movement keys are acceptable as a last resort.
 - Very low priority: keyboard access to addon settings panels (Leatrix
@@ -449,5 +477,24 @@ wow/steam-layers.md        # GENERATED: what to bind in Steam
 
 1. Finish "Still to verify" in game.
 2. Arrangement 3: content once the owner wants it (and confirm its slots).
-3. Keyboard window navigation, then loot rolls.
+3. Keyboard window navigation.
 4. Long cooldowns on the leader layer.
+5. Controller ideas for later (owner's picks, not started):
+   - **Steam radial menus** (touchpad or a held button; one key per
+     wedge) for rare spells and items: conjuring, hearth, Slow Fall,
+     potions. Frees bar slots.
+   - **Steam long-press / double-press** activators for more actions per
+     button (e.g. long-press Circle clears focus).
+   - **Steam's on-screen keyboard** on a spare input, so chat works with
+     no keyboard (LB+RB+D-pad Down opens chat).
+   - **Generate the Steam config** (VDF text) from `layout.toml` instead
+     of binding by hand; the format needs reverse-engineering.
+   - **Arrangement 3 for groups:** moon + sheep, buffs and decurse on
+     party members, focus tools.
+   - **Light bar colour** by mode, strafe or health: probe first; Steam
+     probably shows WoW a virtual Xbox pad, which has no light bar.
+
+Decided against: strafe in combat by default (the owner wants to run
+straight away when a fight starts), gyro camera, auto-paging to
+arrangement 1 when combat starts (too much work for addons' combat
+limits), loot rolls by key (automation addon instead).

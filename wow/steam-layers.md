@@ -35,6 +35,8 @@ normal, so a window you opened navigates natively (D-pad, Cross, Circle).
 | RB | Keypad 2 | invite your target to the group |
 | RT | Keypad 3 | trade with your target (hand out water and food) |
 | LT | Keypad 9 | follow your target |
+| Right stick right | Keypad 0 | skull on your target (kill first) |
+| Right stick left | Keypad 7 | moon on your target (sheep) |
 | Right stick down | Keypad 1 | leave the group |
 
 Keep Num Lock on, in case Steam sends the keypad keys as scan codes.

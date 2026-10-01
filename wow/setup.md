@@ -79,3 +79,7 @@ isn't needed for controller play.
 
 Check the WoW side of any Steam key by pressing the same key on the
 keyboard (Num Lock on for keypad keys).
+
+Rumble alerts: `/wowkeys rumble` plays one. If you feel nothing, check
+that rumble is on in Steam's controller settings and in the game's
+gamepad options (`GamePadVibrationStrength`, which the command prints).
