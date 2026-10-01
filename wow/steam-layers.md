@@ -12,6 +12,7 @@ controller behaviour.
 |---|---|---|
 | Touchpad, right half (click) | F8 | next bar arrangement (1 → 2 → 3 → 1) |
 | Touchpad, left half (click) | F7 | previous bar arrangement (1 → 3 → 2 → 1) |
+| Touchpad, center (click) | Keypad 5 | autorun on/off |
 | L3 (click the left stick) | F9 | strafe mode on/off |
 
 ## Social layer on Create (PlayStation) / View (Xbox)

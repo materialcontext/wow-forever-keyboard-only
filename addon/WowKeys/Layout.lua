@@ -79,6 +79,7 @@ ns.layout = {
     { "CTRL-/", "NAMEPLATES" },
     { "F8", "CLICK WowKeysPage:LeftButton" },
     { "F7", "CLICK WowKeysPage:RightButton" },
+    { "NUMPAD5", "TOGGLEAUTORUN" },
     { "F9", "wowkeys:strafe" },
     { "NUMPAD8", "TOGGLESOCIAL" },
     { "NUMPAD4", "TOGGLEGUILDTAB" },

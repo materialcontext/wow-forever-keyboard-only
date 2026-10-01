@@ -49,7 +49,8 @@ The **input layer owns ergonomics**, the **game owns meaning**.
   disable input until reboot after sleep). Replaces the owner's iCUE
   macros; turn those off so they don't stack.
 - **Controller:** Forever's Gamepad UI plays the game. Steam Input adds
-  what WoW can't do itself (touchpad paging, strafe toggle, Social layer)
+  what WoW can't do itself (touchpad paging and autorun, strafe toggle,
+  Social layer)
   by sending single keys. kanata isn't needed for controller play.
 - **WoW side:** the WowKeys addon applies the bindings, bars, macros and
   settings from `layout.toml`, and shows the current mode in a banner
@@ -217,8 +218,8 @@ press clicking Blizzard's own `GamepadMainActionBarFramePageUnit.PageTracker
 (SecureActionButton, `type=click`, set up out of combat by a ticker once
 the Gamepad UI exists); `CLICK WowKeysPage:LeftButton` = next,
 `:RightButton` = previous. Touchpad right half → F8 next, left half → F7
-previous. The banner shows `· BAR n` (read from the first controller
-button's slot every 0.25 s).
+previous; touchpad center → Numpad 5 → autorun. The banner shows
+`· BAR n` (read from the first controller button's slot every 0.25 s).
 
 ### Strafe mode (built, works)
 

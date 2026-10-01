@@ -56,10 +56,10 @@ The addon also applies the `[cvars]` settings in `layout.toml` on login
 
 Forever's Gamepad UI (Options → Gameplay → Gamepad) plays the game; WowKeys
 fills its bars from `layout.toml`. Steam Input sits between the controller
-and the game for the few extras WoW can't do itself: touchpad paging,
-strafe mode and the Social layer. What to bind is in the generated
-`wow/steam-layers.md`; this is the one-time plumbing. kanata isn't needed
-for controller play.
+and the game for the few extras WoW can't do itself: touchpad paging
+and autorun, strafe mode and the Social layer. What to bind is in the
+generated `wow/steam-layers.md`; this is the one-time plumbing. kanata
+isn't needed for controller play.
 
 1. Steam → Games → Add a Non-Steam Game to My Library → Battle.net
    (or browse to `C:\Program Files (x86)\Battle.net\Battle.net Launcher.exe`).
@@ -68,7 +68,8 @@ for controller play.
 4. Right-click Battle.net in the Steam library → Manage → Controller
    layout. Triggers: **Toggle off** on both (plain holds).
 5. Touchpad: style **Directional Pad** with **Requires Click** on; bind
-   the halves as the sheet says. The radial menu stays on its own button.
+   the halves and the center as the sheet says. The radial menu stays on
+   its own button.
 6. Social layer: follow the sheet. To bind stick directions in a layer,
    set that stick's style to Directional Pad there first; if the new
    layer comes up blank, copy the other inputs from the base layout.
