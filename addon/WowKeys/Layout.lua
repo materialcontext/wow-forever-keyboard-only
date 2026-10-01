@@ -2,7 +2,7 @@
 local _, ns = ...
 ns.layout = {
   -- Changes when buttons or macros change; the addon re-places bars then.
-  revision = "b8dbe949",
+  revision = "7269b2ae",
   modes = {
     { name = "combat", label = "COMBAT", key = "ALT-CTRL-SHIFT-F9" },
     { name = "ui", label = "UI", key = "ALT-CTRL-SHIFT-F10" },
@@ -154,8 +154,8 @@ ns.layout = {
     { "Bolt", "#showtooltip Frostbolt\n/cast Blood Fury\n/cast Frostbolt\n/run UIErrorsFrame:Clear()" },
     { "ClearFocus", "/clearfocus" },
     { "Decurse", "#showtooltip Remove Lesser Curse\n/cast [@target,help,nodead][@player] Remove Lesser Curse" },
-    { "Drink", "#showtooltip\n/use Conjured Water" },
-    { "Eat", "#showtooltip\n/use Conjured Muffin" },
+    { "Drink", "#showtooltip\n/use Conjured Fresh Water" },
+    { "Eat", "#showtooltip\n/use Conjured Bread" },
     { "HealthPot", "#showtooltip\n/use Minor Healing Potion" },
     { "Hearth", "#showtooltip\n/use Hearthstone" },
     { "Intellect", "#showtooltip Arcane Intellect\n/cast [@target,help,nodead][@player] Arcane Intellect" },

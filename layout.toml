@@ -166,8 +166,11 @@ k = { macro = "Intellect", body = "#showtooltip Arcane Intellect\n/cast [@target
 l = { spell = "Conjure Water" }
 ";" = { spell = "Conjure Food" }
 # Conjured item names change with each rank; update when you learn one.
-u = { macro = "Drink", body = "#showtooltip\n/use Conjured Water" }
-i = { macro = "Eat", body = "#showtooltip\n/use Conjured Muffin" }
+# Classic's names (Forever may differ): water Water, Fresh (rank 2),
+# Purified, Spring, Mineral, Sparkling, Crystal; food Muffin, Bread
+# (rank 2), Rye, Pumpernickel, Sourdough, Sweet Roll, Cinnamon Roll.
+u = { macro = "Drink", body = "#showtooltip\n/use Conjured Fresh Water" }
+i = { macro = "Eat", body = "#showtooltip\n/use Conjured Bread" }
 h = { macro = "Hearth", body = "#showtooltip\n/use Hearthstone" }
 n = "CAMERAZOOMIN"
 m = "CAMERAZOOMOUT"
