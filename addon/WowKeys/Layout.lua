@@ -2,7 +2,7 @@
 local _, ns = ...
 ns.layout = {
   -- Changes when buttons or macros change; the addon re-places bars then.
-  revision = "b44d0944",
+  revision = "b8dbe949",
   modes = {
     { name = "combat", label = "COMBAT", key = "ALT-CTRL-SHIFT-F9" },
     { name = "ui", label = "UI", key = "ALT-CTRL-SHIFT-F10" },
@@ -74,6 +74,7 @@ ns.layout = {
     { "CTRL-K", "MACRO ManaPot" },
     { "CTRL-L", "MULTIACTIONBAR1BUTTON8" },
     { "CTRL-C", "MACRO ClearFocus" },
+    { "CTRL-V", "MULTIACTIONBAR1BUTTON9" },
     { "CTRL-,", "MACRO SheepFocus" },
     { "CTRL-/", "NAMEPLATES" },
     { "F8", "CLICK WowKeysPage:LeftButton" },
@@ -108,6 +109,7 @@ ns.layout = {
     { slot = 66, spell = "Blink" },
     { slot = 67, macro = "Mount" },
     { slot = 68, spell = "Frost Ward" },
+    { slot = 69, spell = "Slow Fall" },
     { slot = 181, macro = "Poly" },
     { slot = 182, macro = "Bolt" },
     { slot = 183, spell = "Fireball" },
@@ -130,6 +132,7 @@ ns.layout = {
     { slot = 200, spell = "Ice Lance" },
     { slot = 201, macro = "InterruptFocus" },
     { slot = 202, macro = "TargetFocus" },
+    { slot = 204, spell = "Slow Fall" },
     { slot = 205, spell = "Cold Snap" },
     { slot = 206, spell = "Frost Ward" },
     { slot = 207, macro = "Decurse" },

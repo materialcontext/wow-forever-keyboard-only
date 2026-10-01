@@ -34,7 +34,7 @@ Classic-style classes, permanent. Launches 2026-11-04; the beta
 - Existing addons are fine once the owner has verified them. Suggest,
   don't assume. **Record addon binding names, but don't bind them until
   the layout for them is agreed.**
-- Plays an **Orc Frost Mage** (~level 9 in the beta). Blood Fury is the
+- Plays an **Orc Frost Mage** (level 12 in the beta). Blood Fury is the
   only active racial; used every fight.
 - Wants to pick each cast (not the Single-Button Assistant). Plan: normal
   bars plus Blizzard's Assisted Highlight, if Forever has it.
@@ -105,7 +105,7 @@ Non-combat modes add modifiers so their chords never collide with combat.
 
 - **Leader** (Right Alt; one-shot, 1000 ms; Ctrl+key): J health potion,
   K mana potion (macros; update item names as you find better potions),
-  L Frost Ward, F set focus, T target focus, C clear focus, / toggle enemy
+  L Frost Ward, V Slow Fall, F set focus, T target focus, C clear focus, / toggle enemy
   nameplates, `,` sheep + set focus (combat `,` re-sheeps the focus
   later), H Counterspell your focus.
 - **UI** (Tab; Ctrl+Alt+key): U bags (Bagnon), I character, O spellbook,
@@ -180,7 +180,7 @@ standing** (left thumb; moving cancels a cast bar anyway).
 | No trigger | Blizzard's (attack is Square) | ↑ Frostbolt (+ Blood Fury) → Fireball ← Polymorph ↓ Fire Blast |
 | RT | ✕ Ice Lance □ Frost Nova △ Cone of Cold ○ Blink | ↑ Blizzard → Blood Fury ← Arcane Explosion ↓ Mana Shield |
 | LT | ✕ Ice Barrier (40) □ Counterspell △ Ice Block ○ health potion | ↑ Evocation → Arcane Missiles ← sheep + set focus ↓ clear focus |
-| LT+RT | ✕ mana potion □ Cold Snap △ Frost Ward ○ Remove Lesser Curse | ↑ target focus ← Counterspell focus |
+| LT+RT | ✕ mana potion □ Cold Snap △ Frost Ward ○ Remove Lesser Curse | ↑ target focus ← Counterspell focus ↓ Slow Fall |
 
 Arrangement 2 (out of combat): no trigger D-pad ↑ drink → eat ↓ Conjure
 Water ← Conjure Food; RT D-pad ↑ Frost Armor → Arcane Intellect ↓ hearth
