@@ -34,8 +34,11 @@ Classic-style classes, permanent. Launches 2026-11-04; the beta
 - Existing addons are fine once the owner has verified them. Suggest,
   don't assume. **Record addon binding names, but don't bind them until
   the layout for them is agreed.**
-- Plays an **Orc Frost Mage** (level 12 in the beta). Blood Fury is the
-  only active racial; used every fight.
+- Plays an **Undead Frost Mage**, restarted from level 1 in 2026-11 (was
+  an Orc to level 12 in the beta). Racials: **Will of the Forsaken**
+  (breaks fear, charm and sleep; 2 min) on a combat key, **Cannibalize**
+  (heal from a humanoid or undead corpse after a fight) out of combat;
+  shadow resistance and water breathing are passive.
 - Wants to pick each cast (not the Single-Button Assistant). Plan: normal
   bars plus Blizzard's Assisted Highlight, if Forever has it.
 
@@ -89,10 +92,10 @@ out of combat → world.
 | Q / B | next / previous enemy | A | interact (loot, talk, use) |
 | T | autorun | Z | mount (level 40) |
 | G | confirm (popup, quest, reward, loot all, trainer) | 1–9 | pick dialog option N |
-| J K L ; | Frostbolt (+ Blood Fury when ready), Ice Lance, Fire Blast, Fireball | U I O P | Arcane Missiles, Arcane Explosion, Cold Snap, Blizzard |
+| J K L ; | Frostbolt, Ice Lance, Fire Blast, Fireball | U I O P | Arcane Missiles, Arcane Explosion, Cold Snap, Blizzard |
 | H | Counterspell (interrupts your own cast first) | Y, N | Mana Shield, Ice Block |
 | M | Evocation | , | Polymorph (focus if set, else target) |
-| . | Blood Fury (by hand) | / | Remove Lesser Curse (friendly target, else you) |
+| . | Will of the Forsaken (breaks fear) | / | Remove Lesser Curse (friendly target, else you) |
 | X C V | Frost Nova, Cone of Cold, Blink | Esc | WoW's own (close, clear target, menu) |
 
 Strafe/turn: W/R strafe, S/F turn (owner preferred turning on the home row).
@@ -115,7 +118,8 @@ Non-combat modes add modifiers so their chords never collide with combat.
   windows. Navigating *inside* windows is still unsolved on the keyboard.
 - **World** (Left Shift; Ctrl+Alt+Shift+key): J Frost Armor, K Arcane
   Intellect (friendly target, else you), L Conjure Water, ; Conjure Food, U drink, I eat (macros;
-  update conjured item names per rank), H hearthstone, N/M camera zoom.
+  update conjured item names per rank), O Cannibalize, H hearthstone,
+  N/M camera zoom.
 - **Chat** (Enter): full passthrough. Enter sends, Esc **and Caps** cancel;
   both return to combat. Caps sends Esc there, or the chat box keeps focus
   and movement keys type into it.
@@ -179,10 +183,10 @@ standing** (left thumb; moving cancels a cast bar anyway).
 
 | Arrangement 1 (combat) | Face (on the move) | D-pad (standing) |
 |---|---|---|
-| No trigger | Blizzard's (attack is Square) | ↑ Frostbolt (+ Blood Fury) → Fireball ← Polymorph ↓ Fire Blast |
-| RT | ✕ Ice Lance □ Frost Nova △ Cone of Cold ○ Blink | ↑ Blizzard → Blood Fury ← Arcane Explosion ↓ Mana Shield |
+| No trigger | Blizzard's (attack is Square) | ↑ Frostbolt → Fireball ← Polymorph ↓ Fire Blast |
+| RT | ✕ Ice Lance □ Frost Nova △ Cone of Cold ○ Blink | ↑ Blizzard → Will of the Forsaken ← Arcane Explosion ↓ Mana Shield |
 | LT | ✕ Ice Barrier (40) □ Counterspell △ Ice Block ○ health potion | ↑ Evocation → Arcane Missiles ← sheep + set focus ↓ clear focus |
-| LT+RT | ✕ mana potion □ Cold Snap △ Frost Ward ○ Remove Lesser Curse | ↑ target focus ← Counterspell focus ↓ Slow Fall |
+| LT+RT | ✕ mana potion □ Cold Snap △ Frost Ward ○ Remove Lesser Curse | ↑ target focus → Cannibalize ← Counterspell focus ↓ Slow Fall |
 
 Arrangement 2 (out of combat): no trigger D-pad ↑ drink → eat ↓ Conjure
 Water ← Conjure Food; RT D-pad ↑ Frost Armor → Arcane Intellect ↓ hearth
@@ -199,12 +203,13 @@ global cooldown per press.
 | `SheepFocus` | `/focus` + `/cast [@focus] Polymorph` | sheep the target and remember it |
 | `Interrupt` | `/stopcasting` + `/cast Counterspell` | interrupt now, even mid-Frostbolt |
 | `InterruptFocus` | `/stopcasting` + `/cast [@focus,harm,nodead] Counterspell` | interrupt the focus without retargeting; separate because the focus is often the sheep |
-| `Bolt` | `/cast Blood Fury` + `/cast Frostbolt` + clear the error text | Frostbolt that pops the racial whenever it's ready, so it goes off on the first bolt of every fight (owner's idea); assumes Blood Fury is off the GCD. Plain Blood Fury stays on `.` / RT → for manual use |
 | `Intellect`, `Decurse` | `/cast [@target,help,nodead][@player] …` | friendly target if any, else yourself |
 | `Blizzard` | `/cast [@player] Blizzard` | ground spell at your feet |
 | potions, drink, eat, hearth, mount, focus | `/use …`, `/focus`… | items and focus commands on keys and bars |
 
-History: v1 put the main spells on the D-pad (the left thumb can't move
+History: the Orc character had a `Bolt` macro (Blood Fury + Frostbolt,
+popping the racial on the first bolt); dropped with the Undead restart,
+whose active racial is reactive. v1 put the main spells on the D-pad (the left thumb can't move
 and press it); v2 latched LT as a combat home layer, which hid Blizzard's
 Square attack. Latching is possible with Steam's per-trigger Toggle if
 ever wanted again.
@@ -438,10 +443,11 @@ wow/steam-layers.md        # GENERATED: what to bind in Steam
 
 - [ ] Group finder opens at level 10.
 - [ ] New macros: Interrupt cancels a Frostbolt cast and Counterspells;
-      InterruptFocus hits the focus; the Frostbolt key pops Blood Fury
-      *and* casts Frostbolt (if only Blood Fury happens, it's on the GCD in
-      Forever: undo Bolt), with no "not ready" error text afterwards; Intellect/Decurse land on a friendly target, else
-      you; SheepFocus sheeps and sets focus.
+      InterruptFocus hits the focus; Intellect/Decurse land on a friendly
+      target, else you; SheepFocus sheeps and sets focus.
+- [ ] Undead racials: Will of the Forsaken and Cannibalize land on `.` /
+      RT → and world O / LT+RT → (if Forever renamed them, login lists
+      them as not learned).
 - [ ] Cross accepts a real group invite; G does too on the keyboard.
 - [ ] Gossip options print numbered and 1–9 pick them.
 - [ ] Ctrl+Alt / Ctrl+Alt+Shift chords trigger nothing in Windows.
