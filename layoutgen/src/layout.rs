@@ -16,6 +16,110 @@ pub struct Layout {
     pub cvars: BTreeMap<String, String>,
     #[serde(rename = "mode")]
     pub modes: Vec<Mode>,
+    /// Forever's Gamepad UI bars: layer -> input -> spell or macro.
+    #[serde(default)]
+    pub controller: BTreeMap<String, BTreeMap<String, Button>>,
+    /// A Steam Input action layer, active while one controller button is
+    /// held; steam buttons naming it live in it (social actions on Create).
+    pub steam_layer: Option<SteamLayer>,
+    /// Controller inputs Steam turns into one key each, for actions the
+    /// Gamepad UI can't hold (e.g. next bar arrangement, a window, a macro).
+    #[serde(default, rename = "steam_button")]
+    pub steam_buttons: Vec<SteamButton>,
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+pub struct SteamButton {
+    /// The Steam layer this input lives in; none = the base layout.
+    pub layer: Option<String>,
+    /// The controller input, for the setup sheet.
+    pub input: String,
+    /// The one key Steam sends (Steam binds one key per input).
+    pub key: String,
+    /// WoW binding command, or `wowkeys:<command>`. Or instead a macro,
+    /// bound to the key directly: `macro` plus `body` (or just `macro` for
+    /// one defined elsewhere in the layout).
+    pub command: Option<String>,
+    #[serde(rename = "macro")]
+    pub macro_name: Option<String>,
+    pub body: Option<String>,
+    /// What it does, for the setup sheet.
+    pub does: String,
+}
+
+impl SteamButton {
+    pub fn chord(&self) -> Chord {
+        Chord::new(&[], &self.key)
+    }
+
+    /// The WoW binding command for the key; none if neither is given.
+    pub fn binding(&self) -> Option<String> {
+        match (&self.command, &self.macro_name) {
+            (Some(c), _) => Some(c.clone()),
+            (None, Some(name)) => Some(format!("MACRO {name}")),
+            _ => None,
+        }
+    }
+}
+
+#[derive(Debug, Deserialize)]
+#[serde(deny_unknown_fields)]
+/// Always a hold layer: a latched one would keep the D-pad from Blizzard's
+/// window navigation (tested with the dropped UI layer).
+pub struct SteamLayer {
+    pub name: String,
+    /// The controller button held for the layer (for the setup sheet).
+    pub button: String,
+}
+
+/// Action slot for a controller layer and input. The layer name may end in
+/// the bar arrangement (1-3, default 1): `lt` = `lt1`, `rt2`, `none3`.
+/// Slots are 180 + 28 per arrangement + layer offset + button index. Mapped
+/// in game: arrangement 1's Top bar (no trigger, D-pad only) is 181-184,
+/// LT 185-192, RT 193-200, LT+RT 201-208; arrangement 2 is the same at
+/// 209-236. Buttons 1-4 are D-pad left/up/right/down, 5-8 the face buttons
+/// west/north/east/south (Square/Triangle/Circle/Cross, Xbox X/Y/B/A).
+pub fn pad_slot(layer: &str, input: &str) -> Result<u16, String> {
+    let (base, arrangement) = match layer.char_indices().last() {
+        Some((i, c)) if c.is_ascii_digit() => (&layer[..i], c.to_digit(10).unwrap_or(0) as u16),
+        _ => (layer, 1),
+    };
+    if !(1..=3).contains(&arrangement) {
+        return Err(format!("`{layer}`: bar arrangements are 1, 2 and 3"));
+    }
+    let offset = match base {
+        "none" => 0,
+        "lt" => 4,
+        "rt" => 12,
+        "ltrt" => 20,
+        _ => {
+            return Err(format!(
+                "unknown layer `{layer}` (none, lt, rt, ltrt, optionally ending in 1-3)"
+            ));
+        }
+    };
+    let index = match input {
+        "left" => 1,
+        "up" => 2,
+        "right" => 3,
+        "down" => 4,
+        "west" => 5,
+        "north" => 6,
+        "east" => 7,
+        "south" => 8,
+        _ => {
+            return Err(format!(
+                "unknown input `{input}` (up, right, down, left, north, east, south, west)"
+            ));
+        }
+    };
+    if base == "none" && index > 4 {
+        return Err(
+            "face buttons without a trigger are fixed (jump, interact, menu, cancel)".into(),
+        );
+    }
+    Ok(180 + 28 * (arrangement - 1) + offset + index)
 }
 
 #[derive(Debug, Deserialize)]
@@ -97,6 +201,26 @@ impl Chord {
         Chord::new(&[Mod::Alt, Mod::Ctrl, Mod::Shift], key)
     }
 
+    /// For people, e.g. `Ctrl + Alt + I` (Steam's editor, docs).
+    pub fn human(&self) -> String {
+        let mut parts: Vec<&str> = [
+            (Mod::Ctrl, "Ctrl"),
+            (Mod::Alt, "Alt"),
+            (Mod::Shift, "Shift"),
+        ]
+        .iter()
+        .filter(|(m, _)| self.mods.contains(m))
+        .map(|(_, name)| *name)
+        .collect();
+        // Steam's key picker calls these "Keypad 8".
+        let key = match self.key.strip_prefix("kp") {
+            Some(n) if keys::is_numpad_digit(&self.key) => format!("Keypad {n}"),
+            _ => keys::wow_name(&self.key).expect("validated key"),
+        };
+        parts.push(&key);
+        parts.join(" + ")
+    }
+
     /// kanata syntax, e.g. `A-C-S-f9`.
     pub fn kanata(&self) -> String {
         let prefix: String = self
@@ -129,8 +253,8 @@ impl Chord {
 
 /// Commands the WowKeys addon implements itself, as `wowkeys:<name>`.
 pub const ADDON_COMMANDS: &[&str] = &[
-    "confirm", "vendor", "choose1", "choose2", "choose3", "choose4", "choose5", "choose6",
-    "choose7", "choose8", "choose9",
+    "confirm", "strafe", "choose1", "choose2", "choose3", "choose4", "choose5",
+    "choose6", "choose7", "choose8", "choose9",
 ];
 
 impl Button {
@@ -261,13 +385,8 @@ fn validate(layout: &Layout) -> Vec<String> {
                     continue;
                 }
                 Action::Command(c) => {
-                    if let Some(name) = c.strip_prefix("wowkeys:")
-                        && !ADDON_COMMANDS.contains(&name)
-                    {
-                        errors.push(format!(
-                            "{at}: unknown addon command `{name}` (have: {})",
-                            ADDON_COMMANDS.join(", ")
-                        ));
+                    if let Err(e) = check_command(c) {
+                        errors.push(format!("{at}: {e}"));
                     }
                     c.clone()
                 }
@@ -320,7 +439,90 @@ fn validate(layout: &Layout) -> Vec<String> {
             }
         }
     }
+    for (layer, inputs) in &layout.controller {
+        for (input, b) in inputs {
+            let at = format!("controller.{layer}.{input}");
+            if let Err(e) = pad_slot(layer, input) {
+                errors.push(format!("{at}: {e}"));
+            }
+            // `{ macro = "Poly" }` may refer to a macro defined in a mode.
+            let reference = b.macro_name.is_some() && b.body.is_none() && b.spell.is_none();
+            if b.bar.is_some() || b.button.is_some() {
+                errors.push(format!(
+                    "{at}: no bar/button here; the input picks the slot"
+                ));
+            } else if reference {
+                let name = b.macro_name.as_deref().unwrap_or_default();
+                if !macros.contains_key(name) {
+                    errors.push(format!("{at}: macro `{name}` isn't defined in any mode"));
+                }
+                continue;
+            } else if let Err(e) = check_button(b) {
+                errors.push(format!("{at}: {e}"));
+            }
+            if let Some(name) = &b.macro_name {
+                match macros.get(name.as_str()) {
+                    Some((body, other_at)) if *body != b.body.as_deref() => errors.push(format!(
+                        "{at}: macro `{name}` has a different body at {other_at}"
+                    )),
+                    _ => {
+                        macros.insert(name, (b.body.as_deref(), at.clone()));
+                    }
+                }
+            }
+        }
+    }
+    for (i, b) in layout.steam_buttons.iter().enumerate() {
+        let at = format!("steam_button {} ({})", i + 1, b.input);
+        if let Some(layer) = &b.layer
+            && layout.steam_layer.as_ref().is_none_or(|l| l.name != *layer)
+        {
+            errors.push(format!("{at}: no [steam_layer] named `{layer}`"));
+        }
+        match (&b.command, &b.macro_name, &b.body) {
+            (Some(c), None, None) => {
+                if let Err(e) = check_command(c) {
+                    errors.push(format!("{at}: {e}"));
+                }
+            }
+            (None, Some(name), body) => match (macros.get(name.as_str()), body) {
+                (None, None) => errors.push(format!("{at}: macro `{name}` needs a body")),
+                (Some((other, other_at)), Some(body)) if *other != Some(body.as_str()) => errors
+                    .push(format!(
+                        "{at}: macro `{name}` has a different body at {other_at}"
+                    )),
+                (None, Some(body)) => {
+                    macros.insert(name, (Some(body.as_str()), at.clone()));
+                }
+                _ => {}
+            },
+            _ => errors.push(format!("{at}: give a `command`, or a `macro` (with `body`)")),
+        }
+        if keys::wow_name(&b.key).is_none() {
+            errors.push(format!("{at}: WoW can't bind `{}`", b.key));
+            continue;
+        }
+        let (chord, command) = (b.chord().wow(), b.binding().unwrap_or_default());
+        match wow_bindings.get(&chord) {
+            Some((other, other_at)) if *other != command => errors.push(format!(
+                "{at}: {chord} is already bound to {other} at {other_at}"
+            )),
+            _ => {
+                wow_bindings.insert(chord, (command, at));
+            }
+        }
+    }
     errors
+}
+
+fn check_command(command: &str) -> Result<(), String> {
+    match command.strip_prefix("wowkeys:") {
+        Some(name) if !ADDON_COMMANDS.contains(&name) => Err(format!(
+            "unknown addon command `{name}` (have: {})",
+            ADDON_COMMANDS.join(", ")
+        )),
+        _ => Ok(()),
+    }
 }
 
 fn check_button(b: &Button) -> Result<(), String> {
@@ -454,6 +656,105 @@ mod tests {
             "#,
         );
         assert_eq!(e.len(), 2, "{e:?}");
+    }
+
+    #[test]
+    fn controller_slots_match_the_game() {
+        // Pairs confirmed in game (test with a PlayStation pad).
+        assert_eq!(pad_slot("rt", "north"), Ok(198)); // Fire Blast, RT+Triangle
+        assert_eq!(pad_slot("rt", "east"), Ok(199)); // Fireball, RT+Circle
+        assert_eq!(pad_slot("rt", "south"), Ok(200)); // Frostbolt, RT+Cross
+        assert_eq!(pad_slot("none", "left"), Ok(181));
+        assert_eq!(pad_slot("lt", "up"), Ok(186));
+        assert_eq!(pad_slot("ltrt", "down"), Ok(204));
+        assert!(pad_slot("none", "south").is_err());
+        // Arrangement 2, mapped in game: Top.1 = 209, Left.2 = 214, Bottom.8 = 236.
+        assert_eq!(pad_slot("none2", "left"), Ok(209));
+        assert_eq!(pad_slot("lt2", "up"), Ok(214));
+        assert_eq!(pad_slot("ltrt2", "south"), Ok(236));
+        assert_eq!(pad_slot("lt1", "up"), pad_slot("lt", "up"));
+        assert!(pad_slot("rt4", "up").is_err());
+        assert!(pad_slot("none2", "north").is_err());
+    }
+
+    #[test]
+    fn controller_entries_are_checked() {
+        let e = errors(
+            r#"
+            [[mode]]
+            name = "a"
+            label = "A"
+            banner = "f9"
+            [mode.keys]
+            j = { macro = "M", body = "/sit" }
+            [controller.none]
+            south = { spell = "Jump" }
+            [controller.rt]
+            up = { macro = "M", body = "/dance" }
+            down = { macro = "M" }
+            left = { macro = "Nope" }
+            sideways = { spell = "Blink" }
+            "#,
+        );
+        assert_eq!(e.len(), 4, "{e:?}");
+        assert!(
+            e.iter().any(|m| m.contains("`Nope` isn't defined")),
+            "{e:?}"
+        );
+    }
+
+    #[test]
+    fn steam_buttons_are_checked() {
+        let e = errors(
+            r#"
+            [[mode]]
+            name = "a"
+            label = "A"
+            banner = "f9"
+            [mode.keys]
+            j = "JUMP"
+            [[steam_button]]
+            input = "Touchpad"
+            key = "j"
+            command = "SITORSTAND"
+            does = "sit"
+            [[steam_button]]
+            input = "R3"
+            key = "lsft"
+            command = "wowkeys:dance"
+            does = "dance"
+            [[steam_button]]
+            layer = "Nope"
+            input = "D-pad Up"
+            key = "kp8"
+            command = "TOGGLECHARACTER0"
+            does = "character"
+            [[steam_button]]
+            input = "L3"
+            key = "kp1"
+            macro = "Leave"
+            does = "leave group"
+            [[steam_button]]
+            input = "R3"
+            key = "kp2"
+            does = "nothing"
+            "#,
+        );
+        assert_eq!(e.len(), 6, "{e:?}");
+        assert!(e[4].contains("`Leave` needs a body"), "{e:?}");
+        assert!(e[5].contains("give a `command`"), "{e:?}");
+        assert!(e[3].contains("no [steam_layer] named `Nope`"), "{e:?}");
+        assert!(e[0].contains("already bound to JUMP"), "{e:?}");
+    }
+
+    #[test]
+    fn human_chords() {
+        assert_eq!(
+            Chord::new(&[Mod::Alt, Mod::Ctrl], "i").human(),
+            "Ctrl + Alt + I"
+        );
+        assert_eq!(Chord::banner("f10").human(), "Ctrl + Alt + Shift + F10");
+        assert_eq!(Chord::new(&[], "kp8").human(), "Keypad 8");
     }
 
     #[test]

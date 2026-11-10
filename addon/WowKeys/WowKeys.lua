@@ -1,12 +1,16 @@
 -- WowKeys: applies Layout.lua (generated from layout.toml) and shows the
--- current kanata mode, like Vim's `-- INSERT --`.
+-- current kanata mode, like Vim's `-- INSERT --`. Also strafe mode and
+-- controller bar paging; controller rumble is in Rumble.lua. Probes for
+-- learning how the game works live in Diagnostics.lua. Files share the
+-- addon's private namespace `ns`.
 --
 -- On every login it rewrites the bindings from the layout and saves them,
 -- so the layout file always wins and WoW's own UI (button hotkey labels,
 -- the keybinding menu) shows the real keys. Bars are re-placed when the
 -- layout's buttons change, when you learn a spell, or on `/wowkeys bars`.
 
-local L = WowKeysLayout
+local _, ns = ...
+local L = ns.layout
 local home = L.modes[1]
 local owner = CreateFrame("Frame", "WowKeysFrame", UIParent)
 local current = home
@@ -16,9 +20,49 @@ local current = home
 local banner = owner:CreateFontString(nil, "OVERLAY", "GameFontNormalLarge")
 banner:SetPoint("TOP", UIParent, "TOP", 0, -12)
 
+-- Which controller bar arrangement is on screen (1-3), read from the slot
+-- the Gamepad UI's first bar button shows: 181, 209 or 237. Nil when the
+-- Gamepad UI isn't showing.
+local PAD_FIRST_BUTTON = "GamepadMainActionBarFramePageUnitTopCenteredAnchorTopBarActionButton1"
+
+local function padArrangement()
+  local button = _G[PAD_FIRST_BUTTON]
+  if not (button and button:IsVisible()) then return nil end
+  local slot = button.action or (button.GetAttribute and button:GetAttribute("action"))
+  if type(slot) ~= "number" or slot < 181 then return nil end
+  return math.floor((slot - 181) / 28) + 1
+end
+
+local shownArrangement
+
+-- Arrangement 1 holds the combat spells ([controller.*] in layout.toml).
+local COMBAT_ARRANGEMENT = 1
+
+-- Combat started (or goes on) outside combat mode, or with the controller
+-- on an out-of-combat arrangement.
+local function wrongForCombat()
+  return current ~= home or (shownArrangement ~= nil and shownArrangement ~= COMBAT_ARRANGEMENT)
+end
+
+-- Controller strafe mode, via the Gamepad UI's "face movement" angle. In
+-- Forever 0 (the default) turns the character toward the stick; 180 keeps
+-- it facing ahead, so the stick strafes left/right and backpedals
+-- (tested: the owner found our first guess, 0 = strafe, backwards).
+local FACE_CVARS = { "GamePadFaceMovementMaxAngle", "GamePadFaceMovementMaxAngleCombat" }
+local STRAFE_ANGLE = "180"
+local getCVar = C_CVar and C_CVar.GetCVar or GetCVar
+local setCVar = C_CVar and C_CVar.SetCVar or SetCVar
+
+local function strafing()
+  return (tonumber(getCVar(FACE_CVARS[1])) or 0) >= tonumber(STRAFE_ANGLE)
+end
+
 local function showMode()
-  banner:SetText("-- " .. current.label .. " --")
-  if InCombatLockdown() and current ~= home then
+  shownArrangement = padArrangement()
+  local suffix = (shownArrangement and (" · BAR " .. shownArrangement) or "")
+    .. (strafing() and " · STRAFE" or "")
+  banner:SetText("-- " .. current.label .. suffix .. " --")
+  if InCombatLockdown() and wrongForCombat() then
     banner:SetTextColor(1, 0.2, 0.2)
   else
     banner:SetTextColor(1, 0.82, 0)
@@ -40,20 +84,44 @@ end
 
 -- Addon commands --------------------------------------------------------
 
--- One hidden button per command in Commands.lua; bindings "click" it.
+-- Toggles strafe mode, restoring the angles you had before (saved per
+-- character; 0 if none were saved).
+ns.commands.strafe = function()
+  if getCVar(FACE_CVARS[1]) == nil then
+    print("WowKeys: this client has no " .. FACE_CVARS[1] .. "; try /wowkeys pad for the gamepad settings")
+    return
+  end
+  WowKeysDB = WowKeysDB or {}
+  local db = WowKeysDB
+  local turning = not strafing()
+  if turning then db.faceAngles = {} end
+  for _, name in ipairs(FACE_CVARS) do
+    local value = getCVar(name)
+    if value ~= nil then
+      if turning then
+        db.faceAngles[name] = value
+        setCVar(name, STRAFE_ANGLE)
+      else
+        local saved = db.faceAngles and tonumber(db.faceAngles[name])
+        setCVar(name, (saved and saved < tonumber(STRAFE_ANGLE)) and tostring(saved) or "0")
+      end
+    end
+  end
+  showMode()
+end
+
+-- One hidden button per command (Commands.lua, plus strafe above);
+-- bindings "click" it.
 local function commandButtonName(name)
   return "WowKeysCmd_" .. name
 end
 
-for name, fn in pairs(WowKeysCommands) do
+for name, fn in pairs(ns.commands) do
   local button = CreateFrame("Button", commandButtonName(name), owner)
   button:SetScript("OnClick", fn)
 end
 
 -- Settings ----------------------------------------------------------------
-
-local getCVar = C_CVar and C_CVar.GetCVar or GetCVar
-local setCVar = C_CVar and C_CVar.SetCVar or SetCVar
 
 local function applyCVars()
   for _, c in ipairs(L.cvars) do
@@ -105,6 +173,27 @@ local function isPlainCommand(command)
   return not (command:find("^wowkeys:") or command:find("^SPELL ") or command:find("^MACRO "))
 end
 
+-- Warns about binding commands the game doesn't know (a typo, or a name
+-- that differs in Forever); CLICK commands name our own buttons instead.
+local function reportUnknownCommands()
+  if not GetNumBindings then return end
+  local known, unknown = {}, {}
+  for i = 1, GetNumBindings() do
+    local command = GetBinding(i)
+    if command then known[command] = true end
+  end
+  for _, b in ipairs(L.bindings) do
+    local command = b[2]
+    if isPlainCommand(command) and not command:find("^CLICK ") and not known[command] then
+      table.insert(unknown, command)
+    end
+  end
+  if #unknown > 0 then
+    print("WowKeys: the game has no binding command " .. table.concat(unknown, ", ")
+      .. " (find the right name with /wowkeys find)")
+  end
+end
+
 local function applyBindings()
   -- Unbind other keys from the commands we own (e.g. `1` from
   -- ACTIONBUTTON1), so button labels show our key, not the old one.
@@ -132,6 +221,7 @@ local function applyBindings()
     end
   end
   SaveBindings(GetCurrentBindingSet())
+  reportUnknownCommands()
 end
 
 -- Bars --------------------------------------------------------------------
@@ -152,6 +242,10 @@ end
 -- items and macros there are left alone.
 local function applyBars(verbose)
   local missing, cleared = {}, {}
+  -- Our macros in a slot the layout now gives to something else are
+  -- leftovers from an older layout; other macros and items are yours.
+  local ourMacros = {}
+  for _, m in ipairs(L.macros) do ourMacros[m[1]] = true end
   for _, b in ipairs(L.buttons) do
     ClearCursor()
     pickup(b)
@@ -161,8 +255,9 @@ local function applyBars(verbose)
     else
       table.insert(missing, b.spell or b.macro)
       local kind, id = GetActionInfo(b.slot)
-      if kind == "spell" then
-        table.insert(cleared, spellName(id) or tostring(id))
+      local macroName = kind == "macro" and GetMacroInfo(id)
+      if kind == "spell" or (macroName and ourMacros[macroName] and macroName ~= b.macro) then
+        table.insert(cleared, macroName or spellName(id) or tostring(id))
         PickupAction(b.slot)
         ClearCursor()
       end
@@ -219,8 +314,9 @@ owner:SetScript("OnEvent", function(_, event, isInitialLogin, isReload)
     end
   elseif event == "PLAYER_REGEN_DISABLED" then
     showMode()
-    if current ~= home then
+    if wrongForCombat() then
       PlaySound(SOUNDKIT.RAID_WARNING)
+      ns.rumble("wrongSetup") -- Rumble.lua, loaded after this file
     end
   elseif event == "PLAYER_REGEN_ENABLED" then
     for _, fn in ipairs(pending) do
@@ -236,86 +332,75 @@ end)
 
 showMode()
 
+-- WowKeysPage: a secure button that clicks the Gamepad UI's own
+-- change-page button, so a bound key ("CLICK WowKeysPage:LeftButton")
+-- cycles controller arrangements as Blizzard code would. Calling
+-- SetCurrentPage from an addon is blocked (tested). Secure buttons can
+-- only be set up out of combat, and the Gamepad UI may appear later.
+local pageButtonReady = false
+
+local function setUpPageButton()
+  local unit = GamepadMainActionBarFramePageUnit
+  local target = unit and unit.PageTracker and unit.PageTracker.ChangePageButton
+  if not target then return false end
+  local button = CreateFrame("Button", "WowKeysPage", UIParent, "SecureActionButtonTemplate")
+  -- Both transitions; the template acts on the one ActionButtonUseKeyDown picks.
+  button:RegisterForClicks("AnyUp", "AnyDown")
+  button:SetAttribute("type", "click")
+  button:SetAttribute("clickbutton", target)
+  return true
+end
+
+-- The Gamepad UI has no event we know of for arrangement changes, so check
+-- a few times a second and redraw only when it changes.
+C_Timer.NewTicker(0.25, function()
+  if not pageButtonReady and not InCombatLockdown() then
+    pageButtonReady = setUpPageButton()
+  end
+  if padArrangement() ~= shownArrangement then showMode() end
+end)
+
+-- /wowkeys ----------------------------------------------------------------
+
+-- Helpers Diagnostics.lua shares.
+ns.getCVar, ns.spellName, ns.padArrangement = getCVar, spellName, padArrangement
+
+-- tostring that survives values the client hides from addons.
+function ns.safeString(v)
+  local ok, s = pcall(function() return tostring(v) end)
+  return ok and s or "?"
+end
+
+-- Subcommands: name -> { usage, help, run(rest) }. A usage with <...>
+-- needs an argument. Diagnostics.lua registers its probes here too.
+ns.slash = {}
+
+function ns.addSlash(name, usage, help, run)
+  ns.slash[name] = { usage = usage, help = help, run = run }
+end
+
+ns.addSlash("bars", "bars", "re-place spells and macros on the bars",
+  function() outOfCombat(applyBarsVerbose) end)
+
+local function dispatch(arg)
+  local name, rest = arg:match("^(%S*)%s*(.-)%s*$")
+  local entry = ns.slash[name]
+  if entry and not (entry.usage:find("<", 1, true) and rest == "") then
+    entry.run(rest)
+    return
+  end
+  print("WowKeys: mode " .. current.label .. ", layout " .. L.revision)
+  local names = {}
+  for n in pairs(ns.slash) do table.insert(names, n) end
+  table.sort(names)
+  for _, n in ipairs(names) do
+    print(("  /wowkeys %s  |cff999999%s|r"):format(ns.slash[n].usage, ns.slash[n].help))
+  end
+end
+
 SLASH_WOWKEYS1 = "/wowkeys"
--- Lists binding commands matching some text, so addon bindings (Auctionator,
--- DBM, ...) can go into layout.toml by their exact command name.
-local function findBindings(text)
-  text = text:lower()
-  local shown = 0
-  for i = 1, GetNumBindings() do
-    local command, _, key1, key2 = GetBinding(i)
-    local name = command and GetBindingName(command) or ""
-    -- HEADER_* entries are section titles in the keybinding menu, not bindings.
-    local isHeader = command and command:find("^HEADER_")
-    if command and not isHeader
-      and (command:lower():find(text, 1, true) or name:lower():find(text, 1, true)) then
-      shown = shown + 1
-      if shown <= 40 then
-        local keys = key1 and (" [" .. key1 .. (key2 and (", " .. key2) or "") .. "]") or ""
-        print(("  %s  |cff999999%s%s|r"):format(command, name, keys))
-      end
-    end
-  end
-  print(("WowKeys: %d binding(s) match \"%s\"%s"):format(shown, text, shown > 40 and " (first 40 shown)" or ""))
-end
-
--- Lists everything bound to a controller button, plus the controller
--- settings, to learn how Forever's gamepad UI stores its bindings.
-local GAMEPAD_CVARS = { "GamePadEnable", "GamePadEmulateShift", "GamePadEmulateCtrl",
-  "GamePadEmulateAlt", "GamePadEmulateEsc" }
-
-local function padBindings()
-  local shown = 0
-  for i = 1, GetNumBindings() do
-    local command, _, key1, key2 = GetBinding(i)
-    for _, key in ipairs({ key1, key2 }) do
-      if command and key and key:find("PAD", 1, true) then
-        shown = shown + 1
-        print(("  %s  ->  %s"):format(key, command))
-      end
-    end
-  end
-  print(("WowKeys: %d controller binding(s)"):format(shown))
-  for _, name in ipairs(GAMEPAD_CVARS) do
-    local value = getCVar(name)
-    if value ~= nil then
-      print(("  %s = %s"):format(name, value))
-    end
-  end
-end
-
--- Lists every filled action slot with its id, to learn which slots the
--- controller's bars (12 bars of 8) use. Slot ids go up to 180.
-local function listSlots()
-  local shown = 0
-  for slot = 1, 180 do
-    local kind, id = GetActionInfo(slot)
-    if kind then
-      shown = shown + 1
-      local name = (kind == "spell" and spellName(id))
-        or (kind == "macro" and GetMacroInfo and GetMacroInfo(id))
-        or tostring(id)
-      print(("  %3d  %s  %s"):format(slot, kind, name or "?"))
-    end
-  end
-  print(("WowKeys: %d filled action slot(s)"):format(shown))
-end
-
+-- A failing command prints its error instead of failing silently.
 SlashCmdList.WOWKEYS = function(arg)
-  local text = arg:match("^find%s+(.+)$")
-  if arg == "bars" then
-    outOfCombat(applyBarsVerbose)
-  elseif arg == "pad" then
-    padBindings()
-  elseif arg == "slots" then
-    listSlots()
-  elseif text then
-    findBindings(text)
-  else
-    print("WowKeys: mode " .. current.label .. ", layout " .. L.revision)
-    print("  /wowkeys bars         re-place spells and macros on the bars")
-    print("  /wowkeys find <text>  list binding commands to use in layout.toml")
-    print("  /wowkeys pad          list controller bindings and settings")
-    print("  /wowkeys slots        list filled action slots by id")
-  end
+  local ok, err = pcall(dispatch, arg)
+  if not ok then print("WowKeys error: " .. ns.safeString(err)) end
 end

@@ -21,7 +21,7 @@
 #   { macro = "Name", body = "..." }           bar slot (fine outside combat;
 #                                              bars show cooldowns and glows)
 #   "wowkeys:confirm"                          a WowKeys addon command:
-#                                              confirm, vendor, choose1..9
+#                                              confirm, strafe, choose1..9
 #   { mode = "chat", send = "ret" }            switch mode, optionally sending
 #                                              a key (Enter opens chat)
 #
@@ -98,7 +98,7 @@ q = "TARGETNEARESTENEMY"     # press again to cycle to the next enemy
 b = "TARGETPREVIOUSENEMY"    # cycle back
 a = "INTERACTTARGET"
 
-# Frost Mage, WoW: Forever. Beta caps at 30; spells or talents you don't
+# Undead Frost Mage, WoW: Forever. Spells, racials or talents you don't
 # have yet are skipped (the addon lists them) until you learn them.
 # Rotation (right hand, main bar)
 j = { bar = 1, button = 1, spell = "Frostbolt" }
@@ -111,15 +111,19 @@ o = { bar = 1, button = 7, spell = "Cold Snap" }
 p = { bar = 1, button = 8, macro = "Blizzard", body = "#showtooltip\n/cast [@player] Blizzard" }
 
 # Interrupt, defensives, cooldowns
-h = { bar = 1, button = 9, spell = "Counterspell" }
+# Interrupts: /stopcasting drops your own cast so Counterspell goes off now.
+h = { bar = 1, button = 9, macro = "Interrupt", body = "#showtooltip Counterspell\n/stopcasting\n/cast Counterspell" }
 y = { bar = 1, button = 10, spell = "Mana Shield" }
 n = { bar = 1, button = 11, spell = "Ice Block" }
 m = { bar = 1, button = 12, spell = "Evocation" }
 # Polymorph your focus if you have one, else your target: set a focus on
 # the add, keep killing your target, sheep the add without switching.
 "," = { bar = 2, button = 1, macro = "Poly", body = "#showtooltip Polymorph\n/cast [@focus,harm,nodead][] Polymorph" }
-"." = { bar = 2, button = 2, spell = "Blood Fury" }   # Orc racial, every fight
-"/" = { bar = 2, button = 3, spell = "Remove Lesser Curse" }
+# Undead racial: breaks fear, charm and sleep (2 min). Press it while
+# feared; spells still cast when you can't move.
+"." = { bar = 2, button = 2, spell = "Will of the Forsaken" }
+# Friendly target if you have one, else yourself.
+"/" = { bar = 2, button = 3, macro = "Decurse", body = "#showtooltip Remove Lesser Curse\n/cast [@target,help,nodead][@player] Remove Lesser Curse" }
 
 # Extras (left hand)
 x = { bar = 2, button = 4, spell = "Frost Nova" }
@@ -129,7 +133,7 @@ v = { bar = 2, button = 6, spell = "Blink" }
 # have one (level 40).
 z = { bar = 2, button = 7, macro = "Mount", body = "/run C_MountJournal.SummonByID(0)" }
 
-# Windows and vendors. Tab, then a key; Caps to leave. Esc closes windows.
+# Windows. Tab, then a key; Caps to leave. Esc closes windows.
 [[mode]]
 name = "ui"
 label = "UI"
@@ -157,12 +161,18 @@ mods = ["alt", "ctrl", "shift"]
 
 [mode.keys]
 j = { spell = "Frost Armor" }       # Ice Armor replaces it at 30
-k = { spell = "Arcane Intellect" }
+k = { macro = "Intellect", body = "#showtooltip Arcane Intellect\n/cast [@target,help,nodead][@player] Arcane Intellect" }   # friendly target, else you
 l = { spell = "Conjure Water" }
 ";" = { spell = "Conjure Food" }
 # Conjured item names change with each rank; update when you learn one.
+# Classic's names (Forever may differ): water Water, Fresh (rank 2),
+# Purified, Spring, Mineral, Sparkling, Crystal; food Muffin, Bread
+# (rank 2), Rye, Pumpernickel, Sourdough, Sweet Roll, Cinnamon Roll.
 u = { macro = "Drink", body = "#showtooltip\n/use Conjured Water" }
 i = { macro = "Eat", body = "#showtooltip\n/use Conjured Muffin" }
+# Undead racial: eat a humanoid or undead corpse after a fight to heal
+# (health only; still drink for mana). Next to eat.
+o = { spell = "Cannibalize" }
 h = { macro = "Hearth", body = "#showtooltip\n/use Hearthstone" }
 n = "CAMERAZOOMIN"
 m = "CAMERAZOOMOUT"
@@ -181,10 +191,16 @@ j = { macro = "HealthPot", body = "#showtooltip\n/use Minor Healing Potion" }
 k = { macro = "ManaPot", body = "#showtooltip\n/use Minor Mana Potion" }
 # Situational: only against frost damage. On a bar so its cooldown shows.
 l = { bar = 2, button = 8, spell = "Frost Ward" }
+# Slow Fall: walked off a ledge or knocked back. Under combat V (Blink).
+v = { bar = 2, button = 9, spell = "Slow Fall" }
 # Focus: a second remembered target, for CC or watching an add.
 f = "FOCUSTARGET"                               # current target becomes focus
 t = "TARGETFOCUS"                               # target your focus
 c = { macro = "ClearFocus", body = "/clearfocus" }
+# Sheep the target and make it your focus in one press; re-sheep with the
+# plain Poly (combat ,: focus if set) after switching targets.
+h = { macro = "InterruptFocus", body = "#showtooltip Counterspell\n/stopcasting\n/cast [@focus,harm,nodead] Counterspell" }   # interrupt your focus
+"," = { macro = "SheepFocus", body = "#showtooltip Polymorph\n/focus\n/cast [@focus] Polymorph" }
 "/" = "NAMEPLATES" # toggle enemy nameplates; off again at login
 
 [[mode]]
@@ -198,3 +214,186 @@ passthrough = true
 ret = { mode = "combat", send = "ret" }
 esc = { mode = "combat", send = "esc" }
 caps = { mode = "combat", send = "esc" }
+
+# Steam Input: controller inputs that each send one key (Steam sends one
+# key per input), which WowKeys binds to a WoW command. `input` and `does`
+# are for the setup sheet `cargo run` writes to wow/steam-layers.md; a
+# `layer` puts the input in the [steam_layer].
+#
+# WowKeysPage is a secure button that clicks the Gamepad UI's own
+# change-page button (an addon may not page it directly). LeftButton =
+# next arrangement, RightButton = previous (tested).
+[[steam_button]]
+input = "Touchpad, right half (click)"
+key = "f8"
+command = "CLICK WowKeysPage:LeftButton"
+does = "next bar arrangement (1 → 2 → 3 → 1)"
+
+[[steam_button]]
+input = "Touchpad, left half (click)"
+key = "f7"
+command = "CLICK WowKeysPage:RightButton"
+does = "previous bar arrangement (1 → 3 → 2 → 1)"
+
+# Autorun on the touchpad's center: used often, so it gets a base input.
+[[steam_button]]
+input = "Touchpad, center (click)"
+key = "kp5"
+command = "TOGGLEAUTORUN"
+does = "autorun on/off"
+
+# L3 toggles strafe mode: the stick strafes and backpedals instead of
+# turning (WowKeys sets the Gamepad UI's face-movement angle to 180; the
+# banner shows STRAFE).
+[[steam_button]]
+input = "L3 (click the left stick)"
+key = "f9"
+command = "wowkeys:strafe"
+does = "strafe mode on/off"
+
+# Social layer: hold Create, press a button, let go. A hold (not a latch)
+# because Blizzard's Gamepad UI navigates windows with the D-pad; the
+# D-pad, left stick, Cross and Circle stay Blizzard's. The radial menu
+# covers character, bags, quests and map. Cross confirms invites natively.
+[steam_layer]
+name = "Social"
+button = "Create (PlayStation) / View (Xbox)"
+
+[[steam_button]]
+layer = "Social"
+input = "Triangle / Y"
+key = "kp8"
+command = "TOGGLESOCIAL"
+does = "social window (friends, who, raid)"
+
+[[steam_button]]
+layer = "Social"
+input = "Square / X"
+key = "kp4"
+command = "TOGGLEGUILDTAB"
+does = "guild & communities"
+
+[[steam_button]]
+layer = "Social"
+input = "Right stick up"
+key = "kp6"
+command = "TOGGLEGROUPFINDER"
+does = "group finder"
+
+# Actions on your target sit on the shoulders: pick the target first
+# (Blizzard's bumpers), then hold Create and pull or press.
+[[steam_button]]
+layer = "Social"
+input = "RB"
+key = "kp2"
+macro = "Invite"
+body = "/invite"
+does = "invite your target to the group"
+
+[[steam_button]]
+layer = "Social"
+input = "RT"
+key = "kp3"
+macro = "Trade"
+body = "/trade"
+does = "trade with your target (hand out water and food)"
+
+[[steam_button]]
+layer = "Social"
+input = "LT"
+key = "kp9"
+command = "FOLLOWTARGET"
+does = "follow your target"
+
+# Target markers, by group habit: skull = kill first, moon = sheep.
+# Press again to take the marker off.
+[[steam_button]]
+layer = "Social"
+input = "Right stick right"
+key = "kp0"
+command = "RAIDTARGET8"
+does = "skull on your target (kill first)"
+
+[[steam_button]]
+layer = "Social"
+input = "Right stick left"
+key = "kp7"
+command = "RAIDTARGET5"
+does = "moon on your target (sheep)"
+
+# Only while Create is held, so it isn't pressed by accident.
+[[steam_button]]
+layer = "Social"
+input = "Right stick down"
+key = "kp1"
+macro = "LeaveGroup"
+body = "/run C_PartyInfo.LeaveParty()"
+does = "leave the group"
+
+# Controller (Forever's Gamepad UI). The addon fills these bars the same
+# way it fills the keyboard bars; bind nothing by hand.
+#   Layers: none (no trigger), lt, rt, ltrt (both). End a layer in 2 or 3
+#   for the other bar arrangements: [controller.lt2], [controller.none3].
+#   Inputs: up, right, down, left (D-pad); north, east, south, west (face:
+#   Triangle/Y, Circle/B, Cross/A, Square/X). Without a trigger only the
+#   D-pad is free; the face buttons are jump, interact, menu, cancel.
+#   Macros defined in a mode above can be named without repeating the body.
+#
+# Two thumbs: the left one moves, so the D-pad holds what you cast standing
+# still (moving cancels a cast bar anyway); the right one presses face
+# buttons while you move, so instants go there. Both triggers are plain
+# holds. Every arrangement ranks its layers the same way:
+#   no trigger  all the time (D-pad only; the face buttons stay Blizzard's:
+#               jump, attack/interact, menu, cancel)
+#   RT          often, above all in combat
+#   LT          less often
+#   LT+RT       rarely
+# Arrangement 1 is combat, 2 out of combat, 3 spare; the touchpad pages.
+
+[controller.none]    # all the time: the main casts
+up = { spell = "Frostbolt" }
+right = { spell = "Fireball" }
+left = { macro = "Poly" }
+down = { spell = "Fire Blast" }   # attack is Blizzard's Square
+
+[controller.rt]      # often: instants on the move, then standing casts
+south = { spell = "Ice Lance" }
+west = { spell = "Frost Nova" }
+north = { spell = "Cone of Cold" }
+east = { spell = "Blink" }
+up = { macro = "Blizzard" }
+right = { spell = "Will of the Forsaken" }   # breaks fear, charm, sleep
+left = { spell = "Arcane Explosion" }
+down = { spell = "Mana Shield" }
+
+[controller.lt]      # less often
+south = { spell = "Ice Barrier" }   # level 40; placed once learned
+west = { macro = "Interrupt" }
+north = { spell = "Ice Block" }
+east = { macro = "HealthPot" }
+up = { spell = "Evocation" }
+right = { spell = "Arcane Missiles" }
+left = { macro = "SheepFocus" }   # sheep + set focus (defined on leader ,)
+down = { macro = "ClearFocus" }
+
+[controller.ltrt]    # rarely
+south = { macro = "ManaPot" }
+west = { spell = "Cold Snap" }
+north = { spell = "Frost Ward" }
+east = { macro = "Decurse" }
+up = { macro = "TargetFocus", body = "/target focus" }
+right = { spell = "Cannibalize" }   # after a fight, at a corpse
+left = { macro = "InterruptFocus" }
+down = { spell = "Slow Fall" }
+
+[controller.none2]   # out of combat, all the time
+up = { macro = "Drink" }
+right = { macro = "Eat" }
+down = { spell = "Conjure Water" }
+left = { spell = "Conjure Food" }
+
+[controller.rt2]     # out of combat, often
+up = { spell = "Frost Armor" }       # Ice Armor replaces it at 30
+right = { macro = "Intellect" }
+down = { macro = "Hearth" }
+left = { macro = "Mount" }

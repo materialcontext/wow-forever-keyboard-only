@@ -5,6 +5,7 @@
 local combat, cursor = false, nil
 local frames, bindings, macros, cvars, timers = {}, {}, {}, { autoLootDefault = "0" }, {}
 local printed, sounds, banner = {}, 0, nil
+local unitEvents, vibrations = {}, {}
 local spells = { [116] = "Frostbolt", [133] = "Fireball", [168] = "Frost Armor", [1459] = "Arcane Intellect" }
 local known = { Frostbolt = 116, Fireball = 133, ["Frost Armor"] = 168, ["Arcane Intellect"] = 1459 }
 -- What WoW put on the bars before WowKeys ran (the user's screenshot).
@@ -12,6 +13,9 @@ local actions = {
   [1] = { "spell", 116 }, [3] = { "spell", 168 }, [4] = { "spell", 133 },
   [5] = { "spell", 1459 }, [6] = { "spell", 116 }, [7] = { "spell", 133 },
   [10] = { "item", 1 }, [11] = { "item", 2 }, [12] = { "item", 3 },
+  -- An older layout's Poly macro where unlearned Ice Block now goes, and
+  -- the player's own macro where unlearned Cold Snap goes.
+  [190] = { "macro", "Poly" }, [197] = { "macro", "MyOwn" },
 }
 
 function CreateFrame(_, name)
@@ -20,16 +24,22 @@ function CreateFrame(_, name)
     return { SetPoint = function() end, SetText = function(_, t) banner = t end, SetTextColor = function() end }
   end
   function f:SetScript(k, fn) self.scripts[k] = fn end
+  f.attributes = {}
+  function f:SetAttribute(k, v) self.attributes[k] = v end
+  function f:RegisterForClicks() end
   function f:RegisterEvent(e)
     if e == "LEARNED_SPELL_IN_TAB" then error("unknown event") end
   end
-  if name then frames[name] = f end
+  function f:RegisterUnitEvent(e) unitEvents[e] = f end
+  if name then frames[name] = f; _G[name] = f end
   return f
 end
 UIParent, SOUNDKIT = {}, { RAID_WARNING = 1 }
 function PlaySound() sounds = sounds + 1 end
 function InCombatLockdown() return combat end
-C_Timer = { After = function(_, fn) table.insert(timers, fn) end }
+local tickers = {}
+C_Timer = { After = function(_, fn) table.insert(timers, fn) end,
+  NewTicker = function(_, fn) table.insert(tickers, fn) end }
 C_CVar = {
   GetCVar = function(n) return cvars[n] end,
   SetCVar = function(n, v) cvars[n] = v end,
@@ -55,6 +65,7 @@ function GetMacroIndexByName(n) return macros[n] and 1 or 0 end
 function CreateMacro(n, _, body) macros[n] = body end
 function EditMacro(_, n, _, body) macros[n] = body end
 function PickupMacro(n) cursor = macros[n] and { "macro", n } end
+function GetMacroInfo(id) return id end -- action ids here are macro names
 function GetCursorInfo() return cursor end
 function ClearCursor() cursor = nil end
 function PlaceAction(slot) cursor, actions[slot] = actions[slot], cursor end
@@ -63,11 +74,23 @@ function GetActionInfo(slot) local a = actions[slot]; if a then return a[1], a[2
 function print(msg) table.insert(printed, msg) end
 SlashCmdList = {}
 
+-- Controller rumble and what Rumble.lua watches.
+C_GamePad = { SetVibration = function(_, strength) if strength > 0 then table.insert(vibrations, strength) end end,
+  StopVibration = function() end }
+local aura, hostile, castShield, health = nil, true, false, 100
+C_UnitAuras = { GetAuraDataBySpellName = function(_, name) return name == "Fingers of Frost" and aura or nil end }
+function UnitCanAttack() return hostile end
+function UnitCastingInfo() return "Fireball", nil, nil, 0, 1, false, 1, castShield, 133 end
+function UnitChannelInfo() return "Drain", nil, nil, 0, 1, false, castShield, 689 end
+function UnitIsDeadOrGhost() return false end
+function UnitHealth() return health end
+function UnitHealthMax() return 100 end
+
 -- Dialog frames and APIs used by Commands.lua.
 local open = {}
 local function frame(name) _G[name] = { IsShown = function() return open[name] end } end
 for _, n in ipairs({ "ClassTrainerFrame", "GossipFrame", "QuestFrameDetailPanel", "QuestFrameProgressPanel",
-  "QuestFrameRewardPanel", "QuestFrameGreetingPanel", "LootFrame", "MerchantFrame" }) do
+  "QuestFrameRewardPanel", "QuestFrameGreetingPanel", "LootFrame" }) do
   frame(n)
 end
 local calls = {}
@@ -93,9 +116,6 @@ function GetNumAvailableQuests() return 0 end
 function GetNumLootItems() return 2 end
 function GetLootSlotInfo(i) return nil, ({ "Linen Cloth", "Copper Coin" })[i], i end
 LootSlot = record("LootSlot")
-C_MerchantFrame = { SellAllJunkItems = record("SellAllJunkItems") }
-function CanMerchantRepair() return true end
-RepairAllItems = record("RepairAllItems")
 local services = { { "Frost Nova", "", "available" }, { "Fireball", "Rank 2", "used" },
   { "Frost Armor", "Rank 2", "available" }, { "Blizzard", "", "unavailable" } }
 function GetNumTrainerServices() return #services end
@@ -110,9 +130,11 @@ end
 -- Defaults WoW ships with.
 bindings["1"], bindings.W, bindings.UP = "ACTIONBUTTON1", "MOVEFORWARD", "MOVEFORWARD"
 
-dofile("addon/WowKeys/Layout.lua")
-dofile("addon/WowKeys/Commands.lua")
-dofile("addon/WowKeys/WowKeys.lua")
+-- Load in .toc order, sharing one namespace as WoW does.
+local ns = {}
+for _, file in ipairs({ "Layout.lua", "Commands.lua", "WowKeys.lua", "Rumble.lua", "Diagnostics.lua" }) do
+  assert(loadfile("addon/WowKeys/" .. file))("WowKeys", ns)
+end
 local owner = frames.WowKeysFrame
 local function fire(e, ...) owner.scripts.OnEvent(owner, e, ...) end
 local function said(pattern)
@@ -136,11 +158,31 @@ check(bindings["ALT-CTRL-SHIFT-F12"] == "CLICK WowKeysMode_chat", "banner chord"
 check(cvars.autoLootDefault == "1", "auto loot on")
 check(said("no setting AutoPushSpellToActionBar"), "unknown cvar reported")
 
-check(actions[1][2] == 116 and actions[4][2] == 133, "known spells placed")
+check(actions[1][2] == 116 and actions[8][1] == "macro", "known spells and macros placed")
 check(actions[6] == nil and actions[7] == nil, "duplicate Frostbolt/Fireball cleared")
 check(actions[3] == nil and actions[5] == nil, "stray spells cleared from managed slots")
 check(actions[10][1] == "item" and actions[12][1] == "item", "items left alone")
 check(actions[8][1] == "macro", "Blizzard macro")
+check(actions[182][2] == 116 and actions[184] == nil, "controller: Frostbolt on D-pad Up; unlearned Fire Blast slot empty")
+check(actions[181][1] == "macro" and actions[185][1] == "macro", "controller: Poly and focus macros")
+check(actions[190] == nil and said("took off the bars.*Poly"), "old layout's macro cleared from an unlearned spell's slot")
+check(actions[197][2] == "MyOwn", "the player's own macro left alone")
+check(actions[222][2] == 168 and actions[223][1] == "macro", "controller: Frost Armor and the Intellect macro on arrangement 2's RT layer")
+check(bindings["F8"] == "CLICK WowKeysPage:LeftButton" and bindings["F7"] == "CLICK WowKeysPage:RightButton",
+  "touchpad keys page the controller bars both ways")
+check(bindings["F9"] == "CLICK WowKeysCmd_strafe", "L3's key toggles strafe mode")
+check(bindings["NUMPAD3"] == "MACRO Trade" and macros.Trade == "/trade" and bindings["NUMPAD9"] == "FOLLOWTARGET",
+  "Social layer: trade and follow")
+
+-- Strafe mode: face-movement angles go to 0, then back to what they were.
+-- Forever: 0 turns toward the stick (default), 180 strafes.
+cvars.GamePadFaceMovementMaxAngle, cvars.GamePadFaceMovementMaxAngleCombat = "0", "45"
+frames.WowKeysCmd_strafe.scripts.OnClick()
+check(cvars.GamePadFaceMovementMaxAngle == "180" and cvars.GamePadFaceMovementMaxAngleCombat == "180"
+  and banner:find("STRAFE"), "strafe on: stick strafes, banner says so")
+frames.WowKeysCmd_strafe.scripts.OnClick()
+check(cvars.GamePadFaceMovementMaxAngle == "0" and cvars.GamePadFaceMovementMaxAngleCombat == "45"
+  and not banner:find("STRAFE"), "strafe off: previous angles restored")
 check(said("took off the bars.*Frostbolt"), "reports what it cleared")
 check(said("not learned yet: .*Ice Lance"), "reports unlearned spells")
 
@@ -206,12 +248,6 @@ open.ClassTrainerFrame = nil
 cmd("choose1")
 check(said("nothing to pick from"), "explains where numbers work")
 
-cmd("vendor")
-check(said("talk to a vendor first"), "vendor needs a vendor")
-open.MerchantFrame = true
-cmd("vendor")
-check(called("SellAllJunkItems") and called("RepairAllItems"), "vendor sells junk and repairs")
-
 -- /wowkeys find lists binding commands for layout.toml.
 local allBindings = { { "MOVEFORWARD", "HEADER", "E" }, { "HEADER_AUCTIONATOR", "ADDONS" },
   { "AUCTIONATOR_POST", "ADDONS" }, { "AUCTIONATOR_CANCEL", "ADDONS" } }
@@ -223,27 +259,217 @@ SlashCmdList.WOWKEYS("find auctionator")
 check(said("AUCTIONATOR_POST.*Post item") and said("2 binding%(s%) match"), "find lists matching bindings")
 check(not said("HEADER_AUCTIONATOR"), "find skips keybinding-menu headers")
 
+-- /wowkeys alone lists every subcommand from the registry; one that
+-- needs an argument shows the list instead of running without it.
+printed = {}
+SlashCmdList.WOWKEYS("")
+check(said("/wowkeys bars") and said("/wowkeys inspect <name>") and said("/wowkeys newframes %[s%]"),
+  "help lists core and diagnostic commands")
+printed = {}
+SlashCmdList.WOWKEYS("find")
+check(said("/wowkeys find <text>") and not said("binding%(s%) match"), "find without text shows help")
+
+-- Login warns about binding commands the game doesn't have.
+printed = {}
+fire("PLAYER_ENTERING_WORLD", false, true)
+check(said("no binding command .*TOGGLESOCIAL") and not said("no binding command .*CLICK"),
+  "unknown binding commands are reported, CLICK ones skipped")
+check(not said("no binding command .*MOVEFORWARD"), "known commands aren't reported")
+
 -- /wowkeys pad lists controller bindings and gamepad CVars.
-allBindings = { { "JUMP", "MOVEMENT", "SPACE", "PAD1" }, { "ACTIONBUTTON1", "ACTIONBAR", "J", "SHIFT-PAD2" } }
+allBindings = { { "JUMP", "MOVEMENT", "SPACE", "PAD1" }, { "ACTIONBUTTON1", "ACTIONBAR", "J", "SHIFT-PAD2" },
+  { "VEHICLEEXIT", "VEHICLE", "NUMPAD5" } }
 cvars.GamePadEnable, cvars.GamePadEmulateShift = "1", "PADLTRIGGER"
 printed = {}
 SlashCmdList.WOWKEYS("pad")
 check(said("PAD1  %->  JUMP") and said("SHIFT%-PAD2  %->  ACTIONBUTTON1"), "pad lists pad bindings")
 check(said("2 controller binding") and said("GamePadEmulateShift = PADLTRIGGER"), "pad shows gamepad cvars")
+check(not said("NUMPAD5"), "numpad keys aren't controller buttons")
 
 -- /wowkeys slots lists filled action slots by id.
 printed = {}
 SlashCmdList.WOWKEYS("slots")
-check(said("  1  spell  Frostbolt"), "slots lists a spell slot by id")
+check(said("  4  spell  Fireball") and said("  1  spell  Frostbolt") and said("  8  macro  Blizzard"), "slots lists spell and macro slots by id")
 check(said("filled action slot"), "slots prints a count")
+
+-- /wowkeys padbuttons lists frames pointing at slots above 180.
+local fakeFrames = {
+  { action = 197, GetDebugName = function() return "GamepadMainActionBarFramePageUnitRightCenteredAnchorRightBarActionButton5" end,
+    GetCenter = function() return 900.4, 120.6 end },
+  { action = 197, GetDebugName = function() return "GamepadActionBarEditFramePageUnitRightCenteredAnchorRightBarActionButton5" end },
+  { action = 5 },
+  { action = 182, GetDebugName = function() return "GamepadMainActionBarFramePageUnitTopCenteredAnchorTopBarActionButton2" end },
+}
+function EnumerateFrames(after)
+  if not after then return fakeFrames[1] end
+  for i, f in ipairs(fakeFrames) do if f == after then return fakeFrames[i + 1] end end
+end
+printed = {}
+SlashCmdList.WOWKEYS("padbuttons")
+check(said("182  Top.2") and said("197  Right.5  %(900, 120%)"), "padbuttons shows short names and positions")
+check(said("2 button%(s%) on slots above 180"), "padbuttons skips keyboard slots and edit-frame duplicates")
+
+-- /wowkeys frames lists named frames matching some text.
+fakeFrames = {
+  { GetName = function() return "GamepadShortcutNextPageButton" end, GetObjectType = function() return "Button" end,
+    IsShown = function() return false end },
+  { GetName = function() return "PlayerFrame" end },
+  { GetName = function() return nil end },
+  { GetName = function() return {} end },  -- a name that isn't text
+  { GetName = function() return "PageBroken" end, GetObjectType = function() error("secret") end },
+}
+printed = {}
+SlashCmdList.WOWKEYS("frames page")
+check(said("GamepadShortcutNextPageButton.*Button, hidden") and said("1 frame%(s%) match"), "frames finds named frames")
+
+-- /wowkeys newframes lists frames shown after a delay that weren't before.
+local menuUp = false
+fakeFrames[1].IsShown = function() return menuUp end
+fakeFrames[2].IsShown = function() return true end
+printed, timers = {}, {}
+SlashCmdList.WOWKEYS("newframes 3")
+check(#timers == 1 and said("listing new frames in 3 s"), "newframes waits")
+menuUp = true
+timers[1](); timers = {}
+check(said("GamepadShortcutNextPageButton.*shown") and not said("PlayerFrame")
+  and said("1 frame%(s%) appeared in the last 3 s"), "newframes lists only frames that appeared")
+
+-- /wowkeys inspect shows a frame's fields, functions and children.
+local nextButton = { GetName = function() end, GetObjectType = function() return "Button" end,
+  IsShown = function() return true end, GetText = function() return "Next" end, GetChildren = function() end }
+local shortcuts = { currentPage = 2, NextPage = function() end, Next = nextButton,
+  GetName = function() return "GamepadMainActionBarFramePageUnitShortcutsActionBar" end,
+  GetObjectType = function() return "Frame" end, GetChildren = function() return nextButton end }
+fakeFrames = { shortcuts, { GetName = function() return "PlayerFrame" end } }
+printed = {}
+SlashCmdList.WOWKEYS("inspect ShortcutsActionBar")
+check(said("currentPage=2") and said("NextPage") and said("Next Button \"Next\""), "inspect lists fields, functions, children")
+printed = {}
+SlashCmdList.WOWKEYS("inspect Frame")
+check(said("2 frame%(s%) match"), "inspect asks to pick when several frames match")
+
+-- /wowkeys page probes the Gamepad UI's page functions.
+local pageNow = 1 -- the addon only reads it
+GamepadMainActionBarFramePageUnit = {
+  GetCurrentPage = function() return pageNow end,
+  pageableActionBarsIndexOrder = { { GetName = function() return "PageBar1" end } },
+}
+printed = {}
+SlashCmdList.WOWKEYS("page")
+check(said("GetCurrentPage %-> 1") and said("page order 1: PageBar1"), "page shows the current page")
+-- /wowkeys pagecontrols inspects the tracker and menu, two levels deep.
+local pageButton = { GetName = function() end, GetObjectType = function() return "Button" end,
+  IsShown = function() return true end, GetChildren = function() end }
+local pips = { NextButton = pageButton, GetName = function() end, GetObjectType = function() return "Frame" end,
+  IsShown = function() return true end, GetChildren = function() return pageButton end }
+GamepadMainActionBarFramePageUnit.PageTracker = { Pips = pips, GetObjectType = function() return "Frame" end,
+  GetChildren = function() return pips end }
+printed = {}
+SlashCmdList.WOWKEYS("pagecontrols")
+check(said("PageTracker %(Frame%)") and said("Pips%.NextButton Button") and said("no ShortcutsActionBar"),
+  "pagecontrols lists nested children by parent key")
+GamepadMainActionBarFramePageUnit.PageTracker.GetObjectType = function() error("secret") end
+printed = {}
+SlashCmdList.WOWKEYS("pagecontrols")
+check(said("WowKeys error: .*secret"), "a failing command prints its error")
+
+-- WowKeysPage is set up out of combat once the Gamepad UI exists.
+local changePage = {}
+GamepadMainActionBarFramePageUnit.PageTracker = { ChangePageButton = changePage }
+combat = true
+for _, fn in ipairs(tickers) do fn() end
+check(frames.WowKeysPage == nil, "page button waits for the end of combat")
+combat = false
+for _, fn in ipairs(tickers) do fn() end
+check(frames.WowKeysPage.attributes.type == "click" and frames.WowKeysPage.attributes.clickbutton == changePage,
+  "page button clicks the Gamepad UI's change-page button")
+frames.WowKeysPage = nil
+for _, fn in ipairs(tickers) do fn() end
+check(frames.WowKeysPage == nil, "page button is made once")
+GamepadMainActionBarFramePageUnit = nil
+
+-- Controller arrangement shows in the banner, and updates when it changes.
+frames.WowKeysMode_combat.scripts.OnClick()
+check(banner == "-- COMBAT --", "no arrangement shown without the Gamepad UI")
+local padButton = { action = 209, IsVisible = function() return true end }
+_G.GamepadMainActionBarFramePageUnitTopCenteredAnchorTopBarActionButton1 = padButton
+for _, fn in ipairs(tickers) do fn() end
+check(banner == "-- COMBAT · BAR 2 --", "banner shows arrangement 2")
+padButton.action = 181
+for _, fn in ipairs(tickers) do fn() end
+check(banner == "-- COMBAT · BAR 1 --", "banner follows arrangement changes")
+_G.GamepadMainActionBarFramePageUnitTopCenteredAnchorTopBarActionButton1 = nil
+for _, fn in ipairs(tickers) do fn() end
 
 -- Chat banner, then combat starts: warning sound.
 frames.WowKeysMode_chat.scripts.OnClick()
 check(banner == "-- CHAT --", "banner")
 combat = true
 fire("PLAYER_REGEN_DISABLED")
-check(sounds == 1, "combat warning")
+check(sounds == 1 and #vibrations == 1, "combat warning, with rumble")
 combat = false
 fire("PLAYER_REGEN_ENABLED")
+
+-- Combat mode, but the controller on arrangement 2: warns too.
+frames.WowKeysMode_combat.scripts.OnClick()
+_G.GamepadMainActionBarFramePageUnitTopCenteredAnchorTopBarActionButton1 = padButton
+padButton.action = 209
+combat = true
+fire("PLAYER_REGEN_DISABLED")
+check(sounds == 2 and banner == "-- COMBAT · BAR 2 --", "combat on arrangement 2 warns")
+combat = false
+fire("PLAYER_REGEN_ENABLED")
+padButton.action = 181
+combat = true
+fire("PLAYER_REGEN_DISABLED")
+check(sounds == 2, "combat mode on arrangement 1 is quiet")
+combat = false
+fire("PLAYER_REGEN_ENABLED")
+
+-- Rumble alerts.
+local function unitEvent(e) unitEvents[e].scripts.OnEvent(unitEvents[e], e) end
+vibrations = {}
+aura = { applications = 0 }
+unitEvent("UNIT_AURA")
+unitEvent("UNIT_AURA")
+check(#vibrations == 1, "Fingers of Frost rumbles once when it appears")
+aura.applications = 2
+unitEvent("UNIT_AURA")
+aura = nil
+unitEvent("UNIT_AURA")
+check(#vibrations == 2, "and again on a new stack, not when it fades")
+
+vibrations = {}
+unitEvent("UNIT_SPELLCAST_START")
+castShield = true
+unitEvent("UNIT_SPELLCAST_CHANNEL_START")
+castShield, hostile = false, false
+unitEvent("UNIT_SPELLCAST_START")
+check(#vibrations == 1, "an enemy's interruptible cast rumbles; shielded or friendly casts don't")
+hostile = true
+
+vibrations = {}
+health = 30
+unitEvent("UNIT_HEALTH")
+health = 20
+unitEvent("UNIT_HEALTH")
+check(#vibrations == 1, "low health rumbles once")
+health = 60
+unitEvent("UNIT_HEALTH")
+issecretvalue = function() return true end
+health = 20
+unitEvent("UNIT_HEALTH")
+check(#vibrations == 1, "hidden health values stay quiet")
+issecretvalue = nil
+unitEvent("UNIT_HEALTH")
+check(#vibrations == 2, "rumbles again after healing up")
+
+-- /wowkeys rumble plays an alert on demand.
+vibrations, printed = {}, {}
+SlashCmdList.WOWKEYS("rumble proc")
+check(#vibrations == 1 and said("rumble proc"), "rumble command")
+-- A broken alert (here a renamed API) must not raise.
+UnitHealth = function() error("renamed API") end
+unitEvent("UNIT_HEALTH")
 
 io.write("dry run ok\n")

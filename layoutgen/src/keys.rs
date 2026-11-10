@@ -35,6 +35,7 @@ pub fn wow_name(key: &str) -> Option<String> {
         "spc" => "SPACE",
         "grv" => "`",
         k if is_function_key(k) => return Some(k.to_uppercase()),
+        k if is_numpad_digit(k) => return Some(format!("NUMPAD{}", &k[2..])),
         k if k.chars().count() == 1 && is_key(k) => return Some(k.to_uppercase()),
         _ => return None,
     };
@@ -58,6 +59,13 @@ pub fn alias_safe(key: &str) -> &str {
     }
 }
 
+/// kp0..kp9, the numpad digits: not on the grid (kanata passes them
+/// through), so Steam can send them to WoW without clashing with a mode.
+pub fn is_numpad_digit(key: &str) -> bool {
+    key.strip_prefix("kp")
+        .is_some_and(|n| n.len() == 1 && n.chars().all(|c| c.is_ascii_digit()))
+}
+
 /// f1..f24: not on the grid, but valid for banner chords.
 pub fn is_function_key(key: &str) -> bool {
     key.strip_prefix('f')
@@ -75,6 +83,8 @@ mod tests {
         assert_eq!(wow_name(";").as_deref(), Some(";"));
         assert_eq!(wow_name("spc").as_deref(), Some("SPACE"));
         assert_eq!(wow_name("f12").as_deref(), Some("F12"));
+        assert_eq!(wow_name("kp8").as_deref(), Some("NUMPAD8"));
+        assert_eq!(wow_name("kp10"), None);
         assert_eq!(wow_name("lsft"), None);
         assert_eq!(wow_name("f25"), None);
     }
