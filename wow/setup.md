@@ -11,11 +11,14 @@ Link the repo's addon folder into WoW so every regenerate is picked up by a
 
 ```powershell
 New-Item -ItemType Junction `
-  -Path "C:\Program Files (x86)\World of Warcraft\_classic_beta_\Interface\AddOns\WowKeys" `
+  -Path "C:\Program Files (x86)\World of Warcraft\_forever_\Interface\AddOns\WowKeys" `
   -Target "C:\path\to\wow-forever-keyboard-only\addon\WowKeys"
 ```
 
-Adjust both paths. If the addon list says "out of date", run
+Adjust both paths. The live game installs to `_forever_` (the beta used
+`_classic_beta_`; a junction made there doesn't carry over). To find the
+folder: Battle.net → WoW Forever → gear → Show in Explorer. If
+`Interface\AddOns` doesn't exist yet, start the game once or create it. If the addon list says "out of date", run
 `/dump select(4, GetBuildInfo())` in game and add that number to the
 `## Interface:` line in `addon/WowKeys/WowKeys.toc`.
 
@@ -74,7 +77,7 @@ isn't needed for controller play.
    set that stick's style to Directional Pad there first; if the new
    layer comes up blank, copy the other inputs from the base layout.
 7. If Steam's changes don't reach the game, add the game's own exe (in
-   the `_classic_beta_` folder) as a second non-Steam game and launch that
+   the `_forever_` folder) as a second non-Steam game and launch that
    from Steam with Battle.net running.
 
 Check the WoW side of any Steam key by pressing the same key on the

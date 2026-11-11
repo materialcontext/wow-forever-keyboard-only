@@ -9,9 +9,9 @@ the decisions and why. Keep it current when things change.
 ## The game: WoW: Forever (not retail, not Classic Era)
 
 Blizzard's "Classic+": the original continents, level 60 cap, reworked
-Classic-style classes, permanent. Launches 2026-11-04; the beta
-(2026-09-17 to 2026-10-21) caps at level 30 and installs to
-`World of Warcraft\_classic_beta_\` (expect a different folder at launch).
+Classic-style classes, permanent. Live since 2026-11-04 and installs to
+`World of Warcraft\_forever_\` (per launch guides; the owner should confirm).
+The beta (2026-09-17 to 2026-10-21, level 30 cap) used `_classic_beta_`.
 
 - **Modern client and addon API** (mainline 12.1.5) with Midnight's
   combat restrictions for addons. Retail API docs apply, Classic Era ones
