@@ -332,6 +332,10 @@ switches → os forks, since kanata needs an alias declared before use.
     WowKeys' own leftover macros; items and your own macros stay.
   - **Also:** the mode banner, strafe mode, `WowKeysPage`, and the
     `/wowkeys` registry. Bindings and bars queue until combat ends.
+  - **Setup steps are independent** (settings, macros, bindings, bars):
+    each runs in `pcall` and prints its error, since WoW hides Lua errors
+    and one failure used to stop the rest. A refused setting or binding
+    is named in chat; login prints "N key bindings set".
 - `Commands.lua`: `confirm` and `choose1`–`9`. It reads which dialog is
   open from Blizzard's frames at keypress time (StaticPopup1, Quest
   frames, LootFrame, ClassTrainerFrame, GossipFrame) and prints numbered
@@ -354,6 +358,7 @@ list can't go stale). A failing command prints its Lua error.
 | Command | Does | Used for |
 |---|---|---|
 | `bars` | re-place spells and macros (not a probe) | after moving spells by hand |
+| `apply` | re-run everything login does: settings, macros, bindings, bars (not a probe) | bindings missing; shows what failed |
 | `find <text>` | binding commands matching text, with names and keys | exact names for `layout.toml` |
 | `pad` | bindings on PAD keys, GamePad settings, all GamePad CVar names | controller settings (found the strafe CVars) |
 | `slots` | every filled action slot 1–1000 | found the controller slots |

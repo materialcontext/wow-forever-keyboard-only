@@ -3,7 +3,7 @@
 -- Scenario: a level 5 mage whose bars WoW already filled.
 
 local combat, cursor = false, nil
-local frames, bindings, macros, cvars, timers = {}, {}, {}, { autoLootDefault = "0" }, {}
+local frames, bindings, macros, cvars, timers = {}, {}, {}, { autoLootDefault = "0", nameplateShowEnemies = "1" }, {}
 local printed, sounds, banner = {}, 0, nil
 local unitEvents, vibrations = {}, {}
 local spells = { [116] = "Frostbolt", [133] = "Fireball", [168] = "Frost Armor", [1459] = "Arcane Intellect" }
@@ -42,7 +42,10 @@ C_Timer = { After = function(_, fn) table.insert(timers, fn) end,
   NewTicker = function(_, fn) table.insert(tickers, fn) end }
 C_CVar = {
   GetCVar = function(n) return cvars[n] end,
-  SetCVar = function(n, v) cvars[n] = v end,
+  SetCVar = function(n, v)
+    if n == "nameplateShowEnemies" then error("protected setting") end
+    cvars[n] = v
+  end,
 }
 function GetBindingKey(command)
   local keys = {}
@@ -53,7 +56,11 @@ end
 function SetBinding(k, c) bindings[k] = c end
 function SetBindingClick(k, b) bindings[k] = "CLICK " .. b end
 function SetBindingSpell(k, s) bindings[k] = "SPELL " .. s end
-function SetBindingMacro(k, m) bindings[k] = "MACRO " .. m end
+function SetBindingMacro(k, m)
+  if m == "LeaveGroup" then return false end -- the game refuses this one
+  bindings[k] = "MACRO " .. m
+  return true
+end
 function tContains(t, v) for _, x in ipairs(t) do if x == v then return true end end end
 function GetCurrentBindingSet() return 1 end
 function SaveBindings() end
@@ -157,6 +164,8 @@ check(bindings.UP == nil, "old UP unbound from MOVEFORWARD")
 check(bindings["ALT-CTRL-SHIFT-F12"] == "CLICK WowKeysMode_chat", "banner chord")
 check(cvars.autoLootDefault == "1", "auto loot on")
 check(said("no setting AutoPushSpellToActionBar"), "unknown cvar reported")
+check(said("refused setting nameplateShowEnemies"), "a refused setting is reported and the rest still apply")
+check(said("refused NUMPAD1 %-> MACRO LeaveGroup") and said("%d+ key bindings set"), "refused bindings are reported")
 
 check(actions[1][2] == 116 and actions[8][1] == "macro", "known spells and macros placed")
 check(actions[6] == nil and actions[7] == nil, "duplicate Frostbolt/Fireball cleared")
@@ -268,6 +277,16 @@ check(said("/wowkeys bars") and said("/wowkeys inspect <name>") and said("/wowke
 printed = {}
 SlashCmdList.WOWKEYS("find")
 check(said("/wowkeys find <text>") and not said("binding%(s%) match"), "find without text shows help")
+
+-- /wowkeys apply re-runs everything; a step that crashes reports itself
+-- and the steps after it still run.
+local realGetMacroIndex = GetMacroIndexByName
+GetMacroIndexByName = function() error("macro API changed") end
+bindings.J, printed = nil, {}
+SlashCmdList.WOWKEYS("apply")
+check(said("macros failed: .*macro API changed") and bindings.J == "ACTIONBUTTON1",
+  "a failing step is reported and bindings still apply")
+GetMacroIndexByName = realGetMacroIndex
 
 -- Login warns about binding commands the game doesn't have.
 printed = {}

@@ -123,12 +123,14 @@ end
 
 -- Settings ----------------------------------------------------------------
 
+-- One setting the client refuses (a protected or renamed CVar) mustn't
+-- stop the others.
 local function applyCVars()
   for _, c in ipairs(L.cvars) do
     if getCVar(c[1]) == nil then
       print("WowKeys: this client has no setting " .. c[1])
-    else
-      setCVar(c[1], c[2])
+    elseif not pcall(setCVar, c[1], c[2]) then
+      print("WowKeys: the client refused setting " .. c[1])
     end
   end
 end
@@ -144,8 +146,8 @@ local function applyMacros()
       if not ok then
         print("WowKeys: couldn't create macro " .. name .. " (macro slots full?)")
       end
-    else
-      EditMacro(index, name, nil, body)
+    elseif not pcall(EditMacro, index, name, nil, body) then
+      print("WowKeys: couldn't update macro " .. name)
     end
   end
 end
@@ -159,13 +161,13 @@ local function bind(key, command)
   local spell = command:match("^SPELL (.+)$")
   local macro = command:match("^MACRO (.+)$")
   if addonCommand then
-    SetBindingClick(key, commandButtonName(addonCommand))
+    return SetBindingClick(key, commandButtonName(addonCommand))
   elseif spell then
-    SetBindingSpell(key, spell)
+    return SetBindingSpell(key, spell)
   elseif macro then
-    SetBindingMacro(key, macro)
+    return SetBindingMacro(key, macro)
   else
-    SetBinding(key, command)
+    return SetBinding(key, command)
   end
 end
 
@@ -212,8 +214,13 @@ local function applyBindings()
     end
   end
 
+  -- The Set* functions return false for a binding the game refuses.
+  local failed = {}
   for _, b in ipairs(L.bindings) do
-    bind(b[1], b[2])
+    local ok, set = pcall(bind, b[1], b[2])
+    if not ok or set == false then
+      table.insert(failed, b[1] .. " -> " .. b[2])
+    end
   end
   for _, mode in ipairs(L.modes) do
     if mode.key then -- one-shot modes have no banner
@@ -221,6 +228,10 @@ local function applyBindings()
     end
   end
   SaveBindings(GetCurrentBindingSet())
+  print(("WowKeys: %d key bindings set"):format(#L.bindings - #failed))
+  if #failed > 0 then
+    print("WowKeys: the game refused " .. table.concat(failed, ", "))
+  end
   reportUnknownCommands()
 end
 
@@ -291,8 +302,31 @@ local function outOfCombat(fn)
   end
 end
 
-local function applyBarsVerbose() applyBars(true) end
-local function applyBarsQuiet() applyBars(false) end
+-- Each setup step runs on its own: a step that fails prints its error
+-- (WoW hides Lua errors by default) and the steps after it still run.
+local function step(name, fn)
+  return function()
+    local ok, err = pcall(fn)
+    if not ok then
+      print("WowKeys: " .. name .. " failed: " .. ns.safeString(err))
+    end
+  end
+end
+
+local setupCVars = step("settings", applyCVars)
+local setupMacros = step("macros", applyMacros)
+local setupBindings = step("key bindings", applyBindings)
+local applyBarsVerbose = step("bars", function() applyBars(true) end)
+local applyBarsQuiet = step("bars", function() applyBars(false) end)
+
+-- Everything a login applies, in order (macros must exist before the
+-- bindings and bars that use them).
+local function applyAll(bars)
+  outOfCombat(setupCVars)
+  outOfCombat(setupMacros)
+  outOfCombat(setupBindings)
+  if bars then outOfCombat(applyBarsVerbose) end
+end
 
 owner:RegisterEvent("PLAYER_ENTERING_WORLD")
 owner:RegisterEvent("PLAYER_REGEN_DISABLED")
@@ -305,12 +339,7 @@ owner:SetScript("OnEvent", function(_, event, isInitialLogin, isReload)
   if event == "PLAYER_ENTERING_WORLD" then
     if isInitialLogin or isReload then
       WowKeysDB = WowKeysDB or {}
-      outOfCombat(applyCVars)
-      outOfCombat(applyMacros) -- before bindings and bars that use them
-      outOfCombat(applyBindings)
-      if WowKeysDB.revision ~= L.revision then
-        outOfCombat(applyBarsVerbose)
-      end
+      applyAll(WowKeysDB.revision ~= L.revision)
     end
   elseif event == "PLAYER_REGEN_DISABLED" then
     showMode()
@@ -381,6 +410,8 @@ end
 
 ns.addSlash("bars", "bars", "re-place spells and macros on the bars",
   function() outOfCombat(applyBarsVerbose) end)
+ns.addSlash("apply", "apply", "re-apply settings, macros, key bindings and bars (what login does)",
+  function() applyAll(true) end)
 
 local function dispatch(arg)
   local name, rest = arg:match("^(%S*)%s*(.-)%s*$")
