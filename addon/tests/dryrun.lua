@@ -3,7 +3,7 @@
 -- Scenario: a level 5 mage whose bars WoW already filled.
 
 local combat, cursor = false, nil
-local frames, bindings, macros, cvars, timers = {}, {}, {}, { autoLootDefault = "0" }, {}
+local frames, bindings, macros, cvars, timers = {}, {}, {}, { autoLootDefault = "0", nameplateShowEnemies = "1" }, {}
 local printed, sounds, banner = {}, 0, nil
 local unitEvents, vibrations = {}, {}
 local spells = { [116] = "Frostbolt", [133] = "Fireball", [168] = "Frost Armor", [1459] = "Arcane Intellect" }
@@ -29,8 +29,13 @@ function CreateFrame(_, name)
   function f:RegisterForClicks() end
   function f:RegisterEvent(e)
     if e == "LEARNED_SPELL_IN_TAB" then error("unknown event") end
+    unitEvents[e] = unitEvents[e] or {}
+    table.insert(unitEvents[e], f)
   end
-  function f:RegisterUnitEvent(e) unitEvents[e] = f end
+  function f:RegisterUnitEvent(e)
+    unitEvents[e] = unitEvents[e] or {}
+    table.insert(unitEvents[e], f)
+  end
   if name then frames[name] = f; _G[name] = f end
   return f
 end
@@ -42,7 +47,10 @@ C_Timer = { After = function(_, fn) table.insert(timers, fn) end,
   NewTicker = function(_, fn) table.insert(tickers, fn) end }
 C_CVar = {
   GetCVar = function(n) return cvars[n] end,
-  SetCVar = function(n, v) cvars[n] = v end,
+  SetCVar = function(n, v)
+    if n == "nameplateShowEnemies" then error("protected setting") end
+    cvars[n] = v
+  end,
 }
 function GetBindingKey(command)
   local keys = {}
@@ -53,7 +61,11 @@ end
 function SetBinding(k, c) bindings[k] = c end
 function SetBindingClick(k, b) bindings[k] = "CLICK " .. b end
 function SetBindingSpell(k, s) bindings[k] = "SPELL " .. s end
-function SetBindingMacro(k, m) bindings[k] = "MACRO " .. m end
+function SetBindingMacro(k, m)
+  if m == "LeaveGroup" then return false end -- the game refuses this one
+  bindings[k] = "MACRO " .. m
+  return true
+end
 function tContains(t, v) for _, x in ipairs(t) do if x == v then return true end end end
 function GetCurrentBindingSet() return 1 end
 function SaveBindings() end
@@ -62,6 +74,7 @@ C_Spell = {
   GetSpellName = function(id) return spells[id] end,
 }
 function GetMacroIndexByName(n) return macros[n] and 1 or 0 end
+function GetMacroBody(n) return macros[n] end
 function CreateMacro(n, _, body) macros[n] = body end
 function EditMacro(_, n, _, body) macros[n] = body end
 function PickupMacro(n) cursor = macros[n] and { "macro", n } end
@@ -74,11 +87,34 @@ function GetActionInfo(slot) local a = actions[slot]; if a then return a[1], a[2
 function print(msg) table.insert(printed, msg) end
 SlashCmdList = {}
 
+-- Bags for Scrolls.lua: two undeciphered scrolls, then deciphered ones.
+local bag0 = {
+  { 900, "Scroll: KWYJIBO" }, { 901, "Scroll: DOST OREM" },
+  { 910, "Scroll of Imbue Lesser Flame", "Imbue Lesser Flame" }, { 911, "Scroll of Imbue Frost", "Imbue Frost" },
+  { 920, "Scroll of Rat Familiar", "Rat Familiar" }, { 921, "Scroll of Cat Familiar", "Cat Familiar" },
+  { 930, "Scroll of Minor Evocation", "Minor Evocation" }, { 912, "Scroll of Imbue Iceknife", "Imbue Iceknife" },
+}
+local byID = {}
+for _, it in ipairs(bag0) do byID[it[1]] = it end
+C_Container = {
+  GetContainerNumSlots = function(bag) return bag == 0 and #bag0 or 0 end,
+  GetContainerItemInfo = function(bag, slot) local it = bag == 0 and bag0[slot]; return it and { itemID = it[1] } end,
+}
+C_Item = {
+  GetItemNameByID = function(id) return byID[id] and byID[id][2] end,
+  GetItemSpell = function(id) return byID[id] and byID[id][3] end,
+}
+local weaponEnchant = false
+function GetWeaponEnchantInfo() return weaponEnchant end
+time = os.time
+spells[5000], spells[5001] = "Comprehend Scroll", "Cat Familiar"
+
 -- Controller rumble and what Rumble.lua watches.
 C_GamePad = { SetVibration = function(_, strength) if strength > 0 then table.insert(vibrations, strength) end end,
   StopVibration = function() end }
 local aura, hostile, castShield, health = nil, true, false, 100
-C_UnitAuras = { GetAuraDataBySpellName = function(_, name) return name == "Fingers of Frost" and aura or nil end }
+C_UnitAuras = { GetAuraDataBySpellName = function(_, name) return name == "Fingers of Frost" and aura or nil end,
+  GetAuraDataByIndex = function() return nil end }
 function UnitCanAttack() return hostile end
 function UnitCastingInfo() return "Fireball", nil, nil, 0, 1, false, 1, castShield, 133 end
 function UnitChannelInfo() return "Drain", nil, nil, 0, 1, false, castShield, 689 end
@@ -132,7 +168,7 @@ bindings["1"], bindings.W, bindings.UP = "ACTIONBUTTON1", "MOVEFORWARD", "MOVEFO
 
 -- Load in .toc order, sharing one namespace as WoW does.
 local ns = {}
-for _, file in ipairs({ "Layout.lua", "Commands.lua", "WowKeys.lua", "Rumble.lua", "Diagnostics.lua" }) do
+for _, file in ipairs({ "Layout.lua", "Commands.lua", "WowKeys.lua", "Rumble.lua", "Scrolls.lua", "Diagnostics.lua" }) do
   assert(loadfile("addon/WowKeys/" .. file))("WowKeys", ns)
 end
 local owner = frames.WowKeysFrame
@@ -157,6 +193,8 @@ check(bindings.UP == nil, "old UP unbound from MOVEFORWARD")
 check(bindings["ALT-CTRL-SHIFT-F12"] == "CLICK WowKeysMode_chat", "banner chord")
 check(cvars.autoLootDefault == "1", "auto loot on")
 check(said("no setting AutoPushSpellToActionBar"), "unknown cvar reported")
+check(said("refused setting nameplateShowEnemies"), "a refused setting is reported and the rest still apply")
+check(said("refused NUMPAD1 %-> MACRO LeaveGroup") and said("%d+ key bindings set"), "refused bindings are reported")
 
 check(actions[1][2] == 116 and actions[8][1] == "macro", "known spells and macros placed")
 check(actions[6] == nil and actions[7] == nil, "duplicate Frostbolt/Fireball cleared")
@@ -170,19 +208,10 @@ check(actions[197][2] == "MyOwn", "the player's own macro left alone")
 check(actions[222][2] == 168 and actions[223][1] == "macro", "controller: Frost Armor and the Intellect macro on arrangement 2's RT layer")
 check(bindings["F8"] == "CLICK WowKeysPage:LeftButton" and bindings["F7"] == "CLICK WowKeysPage:RightButton",
   "touchpad keys page the controller bars both ways")
-check(bindings["F9"] == "CLICK WowKeysCmd_strafe", "L3's key toggles strafe mode")
+check(bindings["NUMPAD5"] == "TOGGLEAUTORUN", "L3's key toggles autorun")
 check(bindings["NUMPAD3"] == "MACRO Trade" and macros.Trade == "/trade" and bindings["NUMPAD9"] == "FOLLOWTARGET",
   "Social layer: trade and follow")
 
--- Strafe mode: face-movement angles go to 0, then back to what they were.
--- Forever: 0 turns toward the stick (default), 180 strafes.
-cvars.GamePadFaceMovementMaxAngle, cvars.GamePadFaceMovementMaxAngleCombat = "0", "45"
-frames.WowKeysCmd_strafe.scripts.OnClick()
-check(cvars.GamePadFaceMovementMaxAngle == "180" and cvars.GamePadFaceMovementMaxAngleCombat == "180"
-  and banner:find("STRAFE"), "strafe on: stick strafes, banner says so")
-frames.WowKeysCmd_strafe.scripts.OnClick()
-check(cvars.GamePadFaceMovementMaxAngle == "0" and cvars.GamePadFaceMovementMaxAngleCombat == "45"
-  and not banner:find("STRAFE"), "strafe off: previous angles restored")
 check(said("took off the bars.*Frostbolt"), "reports what it cleared")
 check(said("not learned yet: .*Ice Lance"), "reports unlearned spells")
 
@@ -268,6 +297,16 @@ check(said("/wowkeys bars") and said("/wowkeys inspect <name>") and said("/wowke
 printed = {}
 SlashCmdList.WOWKEYS("find")
 check(said("/wowkeys find <text>") and not said("binding%(s%) match"), "find without text shows help")
+
+-- /wowkeys apply re-runs everything; a step that crashes reports itself
+-- and the steps after it still run.
+local realGetMacroIndex = GetMacroIndexByName
+GetMacroIndexByName = function() error("macro API changed") end
+bindings.J, printed = nil, {}
+SlashCmdList.WOWKEYS("apply")
+check(said("macros failed: .*macro API changed") and bindings.J == "ACTIONBUTTON1",
+  "a failing step is reported and bindings still apply")
+GetMacroIndexByName = realGetMacroIndex
 
 -- Login warns about binding commands the game doesn't have.
 printed = {}
@@ -427,7 +466,9 @@ combat = false
 fire("PLAYER_REGEN_ENABLED")
 
 -- Rumble alerts.
-local function unitEvent(e) unitEvents[e].scripts.OnEvent(unitEvents[e], e) end
+local function unitEvent(e, ...)
+  for _, f in ipairs(unitEvents[e]) do f.scripts.OnEvent(f, e, ...) end
+end
 vibrations = {}
 aura = { applications = 0 }
 unitEvent("UNIT_AURA")
@@ -471,5 +512,30 @@ check(#vibrations == 1 and said("rumble proc"), "rumble command")
 -- A broken alert (here a renamed API) must not raise.
 UnitHealth = function() error("renamed API") end
 unitEvent("UNIT_HEALTH")
+
+-- Mage scrolls: the Decipher and Scrolls macros follow your bags.
+combat = false
+unitEvent("BAG_UPDATE_DELAYED")
+check(macros.Decipher == "#showtooltip Comprehend Scroll\n/cast Comprehend Scroll\n/use 0 1",
+  "Decipher reads the first undeciphered scroll")
+check(macros.Scrolls == "#showtooltip Scroll of Imbue Frost\n/use 0 4", "Scrolls picks the Frost imbue first")
+weaponEnchant = true
+unitEvent("UNIT_INVENTORY_CHANGED")
+check(macros.Scrolls == "#showtooltip Scroll of Cat Familiar\n/use 0 6", "with an imbue on, the best familiar is next")
+unitEvent("UNIT_SPELLCAST_SUCCEEDED", "player", "guid", 5001)
+check(macros.Scrolls == "/wowkeys scrolls", "with a familiar out, nothing left (Evocation and dagger imbues are skipped)")
+unitEvent("UNIT_SPELLCAST_SUCCEEDED", "player", "guid", 5000)
+check(macros.Decipher:find("/use 0 2$"), "a scroll that stayed after reading (failed) waits; the next one is tried")
+unitEvent("UNIT_SPELLCAST_SUCCEEDED", "player", "guid", 5000)
+check(macros.Decipher:find("/use 0 1$"), "once every scroll was tried, start over")
+combat, bag0[1] = true, { 999, "Linen Cloth" }
+byID[999] = bag0[1]
+unitEvent("BAG_UPDATE_DELAYED")
+check(macros.Decipher:find("/use 0 1$"), "macros don't change in combat")
+combat = false
+printed = {}
+SlashCmdList.WOWKEYS("scrolls")
+check(said("1 scroll%(s%) to decipher; next: Scroll: DOST OREM") and said("no scroll to use %(imbue on, familiar out%)"),
+  "/wowkeys scrolls explains the keys")
 
 io.write("dry run ok\n")

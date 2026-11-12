@@ -21,7 +21,7 @@
 #   { macro = "Name", body = "..." }           bar slot (fine outside combat;
 #                                              bars show cooldowns and glows)
 #   "wowkeys:confirm"                          a WowKeys addon command:
-#                                              confirm, strafe, choose1..9
+#                                              confirm, choose1..9
 #   { mode = "chat", send = "ret" }            switch mode, optionally sending
 #                                              a key (Enter opens chat)
 #
@@ -132,6 +132,10 @@ v = { bar = 2, button = 6, spell = "Blink" }
 # Mount: random favorite from the mount journal. Does nothing until you
 # have one (level 40).
 z = { bar = 2, button = 7, macro = "Mount", body = "/run C_MountJournal.SummonByID(0)" }
+# Wand: finish mobs and save mana. The end of the right-hand home row,
+# after the other single-target attacks. `!` keeps it shooting when
+# pressed again (Shoot otherwise toggles off). Needs a wand equipped.
+"'" = { bar = 2, button = 10, macro = "Wand", body = "#showtooltip Shoot\n/cast !Shoot" }
 
 # Windows. Tab, then a key; Caps to leave. Esc closes windows.
 [[mode]]
@@ -173,6 +177,12 @@ i = { macro = "Eat", body = "#showtooltip\n/use Conjured Muffin" }
 # Undead racial: eat a humanoid or undead corpse after a fight to heal
 # (health only; still drink for mana). Next to eat.
 o = { spell = "Cannibalize" }
+# Mage scrolls (Forever). The top row uses things from your bags: Y
+# deciphers, U drinks, I eats, O cannibalizes, P uses scrolls. WowKeys
+# rewrites these two macros out of combat so each press does the next
+# useful thing; press until it says there's nothing left (Scrolls.lua).
+y = { macro = "Decipher", body = "/wowkeys scrolls" }   # Comprehend Scroll on the next "Scroll: ..."
+p = { macro = "Scrolls", body = "/wowkeys scrolls" }    # best imbue, familiar, ... you don't have
 h = { macro = "Hearth", body = "#showtooltip\n/use Hearthstone" }
 n = "CAMERAZOOMIN"
 m = "CAMERAZOOMOUT"
@@ -235,21 +245,12 @@ key = "f7"
 command = "CLICK WowKeysPage:RightButton"
 does = "previous bar arrangement (1 → 3 → 2 → 1)"
 
-# Autorun on the touchpad's center: used often, so it gets a base input.
+# Autorun on L3: used often, and the thumb is already on the stick.
 [[steam_button]]
-input = "Touchpad, center (click)"
+input = "L3 (click the left stick)"
 key = "kp5"
 command = "TOGGLEAUTORUN"
 does = "autorun on/off"
-
-# L3 toggles strafe mode: the stick strafes and backpedals instead of
-# turning (WowKeys sets the Gamepad UI's face-movement angle to 180; the
-# banner shows STRAFE).
-[[steam_button]]
-input = "L3 (click the left stick)"
-key = "f9"
-command = "wowkeys:strafe"
-does = "strafe mode on/off"
 
 # Social layer: hold Create, press a button, let go. A hold (not a latch)
 # because Blizzard's Gamepad UI navigates windows with the D-pad; the
@@ -352,7 +353,7 @@ does = "leave the group"
 
 [controller.none]    # all the time: the main casts
 up = { spell = "Frostbolt" }
-right = { spell = "Fireball" }
+right = { macro = "Wand" }          # filler: finish mobs, save mana
 left = { macro = "Poly" }
 down = { spell = "Fire Blast" }   # attack is Blizzard's Square
 
@@ -374,7 +375,7 @@ east = { macro = "HealthPot" }
 up = { spell = "Evocation" }
 right = { spell = "Arcane Missiles" }
 left = { macro = "SheepFocus" }   # sheep + set focus (defined on leader ,)
-down = { macro = "ClearFocus" }
+down = { spell = "Fireball" }     # for mobs immune to frost
 
 [controller.ltrt]    # rarely
 south = { macro = "ManaPot" }
@@ -397,3 +398,8 @@ up = { spell = "Frost Armor" }       # Ice Armor replaces it at 30
 right = { macro = "Intellect" }
 down = { macro = "Hearth" }
 left = { macro = "Mount" }
+
+[controller.lt2]     # out of combat, less often: scrolls
+up = { macro = "Scrolls" }
+left = { macro = "Decipher" }
+down = { macro = "ClearFocus" }

@@ -253,7 +253,7 @@ impl Chord {
 
 /// Commands the WowKeys addon implements itself, as `wowkeys:<name>`.
 pub const ADDON_COMMANDS: &[&str] = &[
-    "confirm", "strafe", "choose1", "choose2", "choose3", "choose4", "choose5",
+    "confirm", "choose1", "choose2", "choose3", "choose4", "choose5",
     "choose6", "choose7", "choose8", "choose9",
 ];
 

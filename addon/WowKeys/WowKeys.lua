@@ -1,8 +1,8 @@
 -- WowKeys: applies Layout.lua (generated from layout.toml) and shows the
--- current kanata mode, like Vim's `-- INSERT --`. Also strafe mode and
--- controller bar paging; controller rumble is in Rumble.lua. Probes for
--- learning how the game works live in Diagnostics.lua. Files share the
--- addon's private namespace `ns`.
+-- current kanata mode, like Vim's `-- INSERT --`. Also controller bar
+-- paging; controller rumble is in Rumble.lua, mage scrolls in
+-- Scrolls.lua. Probes for learning how the game works live in
+-- Diagnostics.lua. Files share the addon's private namespace `ns`.
 --
 -- On every login it rewrites the bindings from the layout and saves them,
 -- so the layout file always wins and WoW's own UI (button hotkey labels,
@@ -44,23 +44,12 @@ local function wrongForCombat()
   return current ~= home or (shownArrangement ~= nil and shownArrangement ~= COMBAT_ARRANGEMENT)
 end
 
--- Controller strafe mode, via the Gamepad UI's "face movement" angle. In
--- Forever 0 (the default) turns the character toward the stick; 180 keeps
--- it facing ahead, so the stick strafes left/right and backpedals
--- (tested: the owner found our first guess, 0 = strafe, backwards).
-local FACE_CVARS = { "GamePadFaceMovementMaxAngle", "GamePadFaceMovementMaxAngleCombat" }
-local STRAFE_ANGLE = "180"
 local getCVar = C_CVar and C_CVar.GetCVar or GetCVar
 local setCVar = C_CVar and C_CVar.SetCVar or SetCVar
 
-local function strafing()
-  return (tonumber(getCVar(FACE_CVARS[1])) or 0) >= tonumber(STRAFE_ANGLE)
-end
-
 local function showMode()
   shownArrangement = padArrangement()
-  local suffix = (shownArrangement and (" · BAR " .. shownArrangement) or "")
-    .. (strafing() and " · STRAFE" or "")
+  local suffix = shownArrangement and (" · BAR " .. shownArrangement) or ""
   banner:SetText("-- " .. current.label .. suffix .. " --")
   if InCombatLockdown() and wrongForCombat() then
     banner:SetTextColor(1, 0.2, 0.2)
@@ -84,34 +73,7 @@ end
 
 -- Addon commands --------------------------------------------------------
 
--- Toggles strafe mode, restoring the angles you had before (saved per
--- character; 0 if none were saved).
-ns.commands.strafe = function()
-  if getCVar(FACE_CVARS[1]) == nil then
-    print("WowKeys: this client has no " .. FACE_CVARS[1] .. "; try /wowkeys pad for the gamepad settings")
-    return
-  end
-  WowKeysDB = WowKeysDB or {}
-  local db = WowKeysDB
-  local turning = not strafing()
-  if turning then db.faceAngles = {} end
-  for _, name in ipairs(FACE_CVARS) do
-    local value = getCVar(name)
-    if value ~= nil then
-      if turning then
-        db.faceAngles[name] = value
-        setCVar(name, STRAFE_ANGLE)
-      else
-        local saved = db.faceAngles and tonumber(db.faceAngles[name])
-        setCVar(name, (saved and saved < tonumber(STRAFE_ANGLE)) and tostring(saved) or "0")
-      end
-    end
-  end
-  showMode()
-end
-
--- One hidden button per command (Commands.lua, plus strafe above);
--- bindings "click" it.
+-- One hidden button per command (Commands.lua); bindings "click" it.
 local function commandButtonName(name)
   return "WowKeysCmd_" .. name
 end
@@ -123,12 +85,14 @@ end
 
 -- Settings ----------------------------------------------------------------
 
+-- One setting the client refuses (a protected or renamed CVar) mustn't
+-- stop the others.
 local function applyCVars()
   for _, c in ipairs(L.cvars) do
     if getCVar(c[1]) == nil then
       print("WowKeys: this client has no setting " .. c[1])
-    else
-      setCVar(c[1], c[2])
+    elseif not pcall(setCVar, c[1], c[2]) then
+      print("WowKeys: the client refused setting " .. c[1])
     end
   end
 end
@@ -144,8 +108,8 @@ local function applyMacros()
       if not ok then
         print("WowKeys: couldn't create macro " .. name .. " (macro slots full?)")
       end
-    else
-      EditMacro(index, name, nil, body)
+    elseif not pcall(EditMacro, index, name, nil, body) then
+      print("WowKeys: couldn't update macro " .. name)
     end
   end
 end
@@ -159,13 +123,13 @@ local function bind(key, command)
   local spell = command:match("^SPELL (.+)$")
   local macro = command:match("^MACRO (.+)$")
   if addonCommand then
-    SetBindingClick(key, commandButtonName(addonCommand))
+    return SetBindingClick(key, commandButtonName(addonCommand))
   elseif spell then
-    SetBindingSpell(key, spell)
+    return SetBindingSpell(key, spell)
   elseif macro then
-    SetBindingMacro(key, macro)
+    return SetBindingMacro(key, macro)
   else
-    SetBinding(key, command)
+    return SetBinding(key, command)
   end
 end
 
@@ -212,8 +176,13 @@ local function applyBindings()
     end
   end
 
+  -- The Set* functions return false for a binding the game refuses.
+  local failed = {}
   for _, b in ipairs(L.bindings) do
-    bind(b[1], b[2])
+    local ok, set = pcall(bind, b[1], b[2])
+    if not ok or set == false then
+      table.insert(failed, b[1] .. " -> " .. b[2])
+    end
   end
   for _, mode in ipairs(L.modes) do
     if mode.key then -- one-shot modes have no banner
@@ -221,6 +190,10 @@ local function applyBindings()
     end
   end
   SaveBindings(GetCurrentBindingSet())
+  print(("WowKeys: %d key bindings set"):format(#L.bindings - #failed))
+  if #failed > 0 then
+    print("WowKeys: the game refused " .. table.concat(failed, ", "))
+  end
   reportUnknownCommands()
 end
 
@@ -291,8 +264,31 @@ local function outOfCombat(fn)
   end
 end
 
-local function applyBarsVerbose() applyBars(true) end
-local function applyBarsQuiet() applyBars(false) end
+-- Each setup step runs on its own: a step that fails prints its error
+-- (WoW hides Lua errors by default) and the steps after it still run.
+local function step(name, fn)
+  return function()
+    local ok, err = pcall(fn)
+    if not ok then
+      print("WowKeys: " .. name .. " failed: " .. ns.safeString(err))
+    end
+  end
+end
+
+local setupCVars = step("settings", applyCVars)
+local setupMacros = step("macros", applyMacros)
+local setupBindings = step("key bindings", applyBindings)
+local applyBarsVerbose = step("bars", function() applyBars(true) end)
+local applyBarsQuiet = step("bars", function() applyBars(false) end)
+
+-- Everything a login applies, in order (macros must exist before the
+-- bindings and bars that use them).
+local function applyAll(bars)
+  outOfCombat(setupCVars)
+  outOfCombat(setupMacros)
+  outOfCombat(setupBindings)
+  if bars then outOfCombat(applyBarsVerbose) end
+end
 
 owner:RegisterEvent("PLAYER_ENTERING_WORLD")
 owner:RegisterEvent("PLAYER_REGEN_DISABLED")
@@ -305,12 +301,7 @@ owner:SetScript("OnEvent", function(_, event, isInitialLogin, isReload)
   if event == "PLAYER_ENTERING_WORLD" then
     if isInitialLogin or isReload then
       WowKeysDB = WowKeysDB or {}
-      outOfCombat(applyCVars)
-      outOfCombat(applyMacros) -- before bindings and bars that use them
-      outOfCombat(applyBindings)
-      if WowKeysDB.revision ~= L.revision then
-        outOfCombat(applyBarsVerbose)
-      end
+      applyAll(WowKeysDB.revision ~= L.revision)
     end
   elseif event == "PLAYER_REGEN_DISABLED" then
     showMode()
@@ -381,6 +372,8 @@ end
 
 ns.addSlash("bars", "bars", "re-place spells and macros on the bars",
   function() outOfCombat(applyBarsVerbose) end)
+ns.addSlash("apply", "apply", "re-apply settings, macros, key bindings and bars (what login does)",
+  function() applyAll(true) end)
 
 local function dispatch(arg)
   local name, rest = arg:match("^(%S*)%s*(.-)%s*$")
