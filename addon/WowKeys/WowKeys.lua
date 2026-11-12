@@ -1,8 +1,8 @@
 -- WowKeys: applies Layout.lua (generated from layout.toml) and shows the
--- current kanata mode, like Vim's `-- INSERT --`. Also strafe mode and
--- controller bar paging; controller rumble is in Rumble.lua. Probes for
--- learning how the game works live in Diagnostics.lua. Files share the
--- addon's private namespace `ns`.
+-- current kanata mode, like Vim's `-- INSERT --`. Also controller bar
+-- paging; controller rumble is in Rumble.lua, mage scrolls in
+-- Scrolls.lua. Probes for learning how the game works live in
+-- Diagnostics.lua. Files share the addon's private namespace `ns`.
 --
 -- On every login it rewrites the bindings from the layout and saves them,
 -- so the layout file always wins and WoW's own UI (button hotkey labels,
@@ -44,23 +44,12 @@ local function wrongForCombat()
   return current ~= home or (shownArrangement ~= nil and shownArrangement ~= COMBAT_ARRANGEMENT)
 end
 
--- Controller strafe mode, via the Gamepad UI's "face movement" angle. In
--- Forever 0 (the default) turns the character toward the stick; 180 keeps
--- it facing ahead, so the stick strafes left/right and backpedals
--- (tested: the owner found our first guess, 0 = strafe, backwards).
-local FACE_CVARS = { "GamePadFaceMovementMaxAngle", "GamePadFaceMovementMaxAngleCombat" }
-local STRAFE_ANGLE = "180"
 local getCVar = C_CVar and C_CVar.GetCVar or GetCVar
 local setCVar = C_CVar and C_CVar.SetCVar or SetCVar
 
-local function strafing()
-  return (tonumber(getCVar(FACE_CVARS[1])) or 0) >= tonumber(STRAFE_ANGLE)
-end
-
 local function showMode()
   shownArrangement = padArrangement()
-  local suffix = (shownArrangement and (" · BAR " .. shownArrangement) or "")
-    .. (strafing() and " · STRAFE" or "")
+  local suffix = shownArrangement and (" · BAR " .. shownArrangement) or ""
   banner:SetText("-- " .. current.label .. suffix .. " --")
   if InCombatLockdown() and wrongForCombat() then
     banner:SetTextColor(1, 0.2, 0.2)
@@ -84,34 +73,7 @@ end
 
 -- Addon commands --------------------------------------------------------
 
--- Toggles strafe mode, restoring the angles you had before (saved per
--- character; 0 if none were saved).
-ns.commands.strafe = function()
-  if getCVar(FACE_CVARS[1]) == nil then
-    print("WowKeys: this client has no " .. FACE_CVARS[1] .. "; try /wowkeys pad for the gamepad settings")
-    return
-  end
-  WowKeysDB = WowKeysDB or {}
-  local db = WowKeysDB
-  local turning = not strafing()
-  if turning then db.faceAngles = {} end
-  for _, name in ipairs(FACE_CVARS) do
-    local value = getCVar(name)
-    if value ~= nil then
-      if turning then
-        db.faceAngles[name] = value
-        setCVar(name, STRAFE_ANGLE)
-      else
-        local saved = db.faceAngles and tonumber(db.faceAngles[name])
-        setCVar(name, (saved and saved < tonumber(STRAFE_ANGLE)) and tostring(saved) or "0")
-      end
-    end
-  end
-  showMode()
-end
-
--- One hidden button per command (Commands.lua, plus strafe above);
--- bindings "click" it.
+-- One hidden button per command (Commands.lua); bindings "click" it.
 local function commandButtonName(name)
   return "WowKeysCmd_" .. name
 end

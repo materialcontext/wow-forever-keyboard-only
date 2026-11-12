@@ -1,6 +1,5 @@
 -- WowKeys commands: keyboard control of NPC dialogs, loot, popups and
--- trainers, bound through layout.toml as "wowkeys:<name>". (Strafe mode
--- lives in WowKeys.lua with the banner it updates.)
+-- trainers, bound through layout.toml as "wowkeys:<name>".
 --
 -- Which dialog is open is read from Blizzard's frames at the moment you
 -- press the key, so event order never leaves it confused.

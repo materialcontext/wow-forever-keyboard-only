@@ -7,4 +7,5 @@ Layout.lua
 Commands.lua
 WowKeys.lua
 Rumble.lua
+Scrolls.lua
 Diagnostics.lua

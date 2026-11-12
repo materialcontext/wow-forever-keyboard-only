@@ -21,7 +21,15 @@ The beta (2026-09-17 to 2026-10-21, level 30 cap) used `_classic_beta_`.
 - No flying. Ground mounts at level 40 (none in the beta).
 - **Frost Mage kit:** Classic-style plus Ice Lance and Fingers of Frost.
   Ice Barrier at 40. No Flurry, Glacial Spike, Comet Storm, Ray of Frost,
-  Shifting Power.
+  Shifting Power. Wands (Shoot) are the mage's filler.
+- **Mage scrolls (Forever only):** enemies drop "Scroll: KWYJIBO"-style
+  items; **Comprehend Scroll** (level 6, 5 s cast) deciphers one into a
+  "Scroll of …" (Comprehension skill +1 per success; a failed read
+  sheeps you for 8 s and keeps the scroll). Results: 1-hour staff
+  imbues (Frost, Flame, Greater/Lesser), dagger imbues, familiars (Rat
+  +2 / Frog +6 / Cat +12 Intellect, one at a time), Minor Evocation
+  (mana), Comprehension (+15 skill), Khadgar's Unlocking, Saber/Blade
+  (crafting). From fan guides at launch; names unconfirmed in game.
 - Built-in damage meter and Cooldown Manager. The group finder is locked
   until level 10 (probably; it did nothing at 9).
 
@@ -52,9 +60,8 @@ The **input layer owns ergonomics**, the **game owns meaning**.
   disable input until reboot after sleep). Replaces the owner's iCUE
   macros; turn those off so they don't stack.
 - **Controller:** Forever's Gamepad UI plays the game. Steam Input adds
-  what WoW can't do itself (touchpad paging and autorun, strafe toggle,
-  Social layer)
-  by sending single keys. kanata isn't needed for controller play.
+  what WoW can't do itself (touchpad paging, autorun on L3, Social
+  layer) by sending single keys. kanata isn't needed for controller play.
 - **WoW side:** the WowKeys addon applies the bindings, bars, macros and
   settings from `layout.toml`, and shows the current mode in a banner
   (kanata and WoW can't see each other's state).
@@ -96,7 +103,8 @@ out of combat → world.
 | H | Counterspell (interrupts your own cast first) | Y, N | Mana Shield, Ice Block |
 | M | Evocation | , | Polymorph (focus if set, else target) |
 | . | Will of the Forsaken (breaks fear) | / | Remove Lesser Curse (friendly target, else you) |
-| X C V | Frost Nova, Cone of Cold, Blink | Esc | WoW's own (close, clear target, menu) |
+| X C V | Frost Nova, Cone of Cold, Blink | ' | Wand (`/cast !Shoot`) |
+| Esc | WoW's own (close, clear target, menu) | | |
 
 Strafe/turn: W/R strafe, S/F turn (owner preferred turning on the home row).
 
@@ -118,8 +126,9 @@ Non-combat modes add modifiers so their chords never collide with combat.
   windows. Navigating *inside* windows is still unsolved on the keyboard.
 - **World** (Left Shift; Ctrl+Alt+Shift+key): J Frost Armor, K Arcane
   Intellect (friendly target, else you), L Conjure Water, ; Conjure Food, U drink, I eat (macros;
-  update conjured item names per rank), O Cannibalize, H hearthstone,
-  N/M camera zoom.
+  update conjured item names per rank), O Cannibalize, Y decipher the
+  next scroll, P use the next scroll (see Mage scrolls), H hearthstone,
+  N/M camera zoom. The top row uses things from your bags.
 - **Chat** (Enter): full passthrough. Enter sends, Esc **and Caps** cancel;
   both return to combat. Caps sends Esc there, or the chat box keeps focus
   and movement keys type into it.
@@ -183,14 +192,15 @@ standing** (left thumb; moving cancels a cast bar anyway).
 
 | Arrangement 1 (combat) | Face (on the move) | D-pad (standing) |
 |---|---|---|
-| No trigger | Blizzard's (attack is Square) | ↑ Frostbolt → Fireball ← Polymorph ↓ Fire Blast |
+| No trigger | Blizzard's (attack is Square) | ↑ Frostbolt → Wand ← Polymorph ↓ Fire Blast |
 | RT | ✕ Ice Lance □ Frost Nova △ Cone of Cold ○ Blink | ↑ Blizzard → Will of the Forsaken ← Arcane Explosion ↓ Mana Shield |
-| LT | ✕ Ice Barrier (40) □ Counterspell △ Ice Block ○ health potion | ↑ Evocation → Arcane Missiles ← sheep + set focus ↓ clear focus |
+| LT | ✕ Ice Barrier (40) □ Counterspell △ Ice Block ○ health potion | ↑ Evocation → Arcane Missiles ← sheep + set focus ↓ Fireball |
 | LT+RT | ✕ mana potion □ Cold Snap △ Frost Ward ○ Remove Lesser Curse | ↑ target focus → Cannibalize ← Counterspell focus ↓ Slow Fall |
 
 Arrangement 2 (out of combat): no trigger D-pad ↑ drink → eat ↓ Conjure
 Water ← Conjure Food; RT D-pad ↑ Frost Armor → Arcane Intellect ↓ hearth
-← mount. Arrangement 3 spare.
+← mount; LT D-pad ↑ use scrolls ← decipher ↓ clear focus. Arrangement 3
+spare.
 
 **Macros** (shared by keyboard and controller; keyboard modes define the
 body, controller entries name them). A macro may run any number of free
@@ -205,11 +215,16 @@ global cooldown per press.
 | `InterruptFocus` | `/stopcasting` + `/cast [@focus,harm,nodead] Counterspell` | interrupt the focus without retargeting; separate because the focus is often the sheep |
 | `Intellect`, `Decurse` | `/cast [@target,help,nodead][@player] …` | friendly target if any, else yourself |
 | `Blizzard` | `/cast [@player] Blizzard` | ground spell at your feet |
+| `Wand` | `/cast !Shoot` | wand filler; `!` keeps it shooting when pressed again |
+| `Decipher`, `Scrolls` | rewritten by `Scrolls.lua` | one key per job; see Mage scrolls |
 | potions, drink, eat, hearth, mount, focus | `/use …`, `/focus`… | items and focus commands on keys and bars |
 
 History: the Orc character had a `Bolt` macro (Blood Fury + Frostbolt,
 popping the racial on the first bolt); dropped with the Undead restart,
-whose active racial is reactive. v1 put the main spells on the D-pad (the left thumb can't move
+whose active racial is reactive. Strafe mode (L3 toggled the Gamepad UI's
+face-movement angle) was removed 2026-11: not needed, and L3 became
+autorun. Fireball moved off no-trigger D-pad → for the wand (frost
+mages rarely need Fireball). v1 put the main spells on the D-pad (the left thumb can't move
 and press it); v2 latched LT as a combat home layer, which hid Blizzard's
 Square attack. Latching is possible with Steam's per-trigger Toggle if
 ever wanted again.
@@ -224,16 +239,27 @@ press clicking Blizzard's own `GamepadMainActionBarFramePageUnit.PageTracker
 (SecureActionButton, `type=click`, set up out of combat by a ticker once
 the Gamepad UI exists); `CLICK WowKeysPage:LeftButton` = next,
 `:RightButton` = previous. Touchpad right half → F8 next, left half → F7
-previous; touchpad center → Numpad 5 → autorun. The banner shows
+previous; L3 → Numpad 5 → autorun. The banner shows
 `· BAR n` (read from the first controller button's slot every 0.25 s).
 
-### Strafe mode (built, works)
+### Mage scrolls (built)
 
-L3 → F9 → `wowkeys:strafe` toggles the face-movement angle
-(`GamePadFaceMovementMaxAngle` and `…Combat`) between **180** (the stick
-strafes and backpedals) and the previous values (default **0**: the
-character turns toward the stick). Saved per character; the banner shows
-`· STRAFE`. Forever's meaning is the reverse of our first guess.
+`Scrolls.lua` rewrites two macros out of combat (bags, buffs, weapon,
+combat end, every 15 s), so one key does the next useful thing; press it
+until it says there's nothing left:
+
+- **Decipher** (world Y, arrangement 2 LT + ←): `/cast Comprehend
+  Scroll` + `/use <bag> <slot>` on the next "Scroll: …". A scroll tried
+  this session waits until the others were tried (a failed read keeps it).
+- **Scrolls** (world P, arrangement 2 LT + ↑): `/use` the best "Scroll
+  of …" whose effect you lack: one imbue (weapon has no temporary
+  enchant) and one familiar (no "Familiar" buff, none cast in the last
+  hour). Best first: Frost, Flame, Cat, Frog, Rat; Greater > plain >
+  Lesser. Never: Evocation, Comprehension, Unlocking, Saber, Blade,
+  dagger imbues (`knife`). Lists at the top of the file.
+- Nothing to do: both run `/wowkeys scrolls`, which says why.
+- Unverified: that Comprehend Scroll targets the item (`/cast` + `/use`,
+  like Disenchant), the item and familiar names.
 
 ### Combat alerts (built)
 
@@ -304,7 +330,7 @@ hold layer).
 **Action kinds:** WoW binding command; spell or macro on a bar button
 (`bar` 1–8, `button` 1–12); spell or macro bound directly (`SPELL x` /
 `MACRO x`, no bar slot); mode switch (optionally sending a key);
-`wowkeys:<command>` (`confirm`, `strafe`, `choose1`–`choose9`).
+`wowkeys:<command>` (`confirm`, `choose1`–`choose9`).
 `{ macro = "Poly" }` may name a macro defined elsewhere without its body.
 
 **The generator rejects:** unknown keys or modes, two keys fighting over
@@ -330,7 +356,7 @@ switches → os forks, since kanata needs an alias declared before use.
     (revision hash), when a spell is learned, or on `/wowkeys bars`. A
     slot whose spell isn't learned yet is cleared of other spells and of
     WowKeys' own leftover macros; items and your own macros stay.
-  - **Also:** the mode banner, strafe mode, `WowKeysPage`, and the
+  - **Also:** the mode banner, `WowKeysPage`, and the
     `/wowkeys` registry. Bindings and bars queue until combat ends.
   - **Setup steps are independent** (settings, macros, bindings, bars):
     each runs in `pcall` and prints its error, since WoW hides Lua errors
@@ -343,6 +369,7 @@ switches → os forks, since kanata needs an alias declared before use.
   the first; the list reprints.
 - `Rumble.lua`: controller rumble alerts (`ns.rumble`), and
   `/wowkeys rumble`.
+- `Scrolls.lua`: the Decipher and Scrolls macros, and `/wowkeys scrolls`.
 - `Diagnostics.lua`: the probes below. Nothing depends on them.
 
 **Tests:** `cargo test` (layout parsing, validation, slot map, chords),
@@ -368,6 +395,7 @@ list can't go stale). A failing command prints its Lua error.
 | `frames <text>` | named frames containing text, shown or hidden | finding frames by name |
 | `newframes [s]` | frames that appear within s seconds (default 5) | menus that close when chat opens |
 | `inspect <name>` | a frame's fields, functions and children | reading Blizzard's frames |
+| `scrolls` | what the Decipher and Scrolls keys do next, and why not (in `Scrolls.lua`) | mage scrolls |
 | `rumble [alert]` | play an alert (default `cast`), show `GamePadVibrationStrength` (in `Rumble.lua`) | checking rumble reaches the controller |
 
 Frames whose names aren't plain text (some addons', values the client
@@ -419,9 +447,10 @@ layout.toml                # the layout; edit this
 layoutgen/                 # Rust generator: layout.toml -> GENERATED files
 kanata/wow.kbd             # GENERATED: kanata config
 addon/WowKeys/Layout.lua   # GENERATED: data for the addon
-addon/WowKeys/WowKeys.lua  # bindings, bars, banner, strafe, paging, /wowkeys
+addon/WowKeys/WowKeys.lua  # bindings, bars, banner, paging, /wowkeys
 addon/WowKeys/Commands.lua # confirm / choose1-9 (dialogs, loot, trainers)
 addon/WowKeys/Rumble.lua   # controller rumble alerts
+addon/WowKeys/Scrolls.lua  # mage scrolls: Decipher and Scrolls macros
 addon/WowKeys/Diagnostics.lua # /wowkeys probes
 addon/tests/dryrun.lua     # the addon against stubbed WoW APIs
 wow/setup.md               # install, game settings, Steam plumbing
@@ -441,8 +470,9 @@ wow/steam-layers.md        # GENERATED: what to bind in Steam
   resurrection, all addons load, Plater with Q/B. F13–F24 aren't
   available (the keyboard can't send them).
 - **Controller:** layout v3 on arrangements 1 and 2, touchpad paging in
-  and out of combat, triggers as holds, keyboard bars untouched, strafe
-  mode, Social layer (all inputs; invite/trade/follow need a target).
+  and out of combat, triggers as holds, keyboard bars untouched, Social
+  layer (all inputs; invite/trade/follow need a target), live-client
+  bindings (after the 2026-11 setup fix), autorun on L3.
 
 ## Still to verify
 
@@ -463,8 +493,13 @@ wow/steam-layers.md        # GENERATED: what to bind in Steam
       setting); the proc, cast and low-health alerts fire in a fight, or
       are quiet because Midnight hides the value.
 - [ ] Combat on arrangement 2 turns the banner red and warns.
-- [ ] Touchpad center toggles autorun; Social right stick ←/→ mark the
-      target (`RAIDTARGET5`/`8` are the retail names).
+- [ ] Social right stick ←/→ mark the target (`RAIDTARGET5`/`8` are the
+      retail names).
+- [ ] Mage scrolls: Decipher reads a "Scroll: …" (if the cast doesn't
+      take the item, Comprehend Scroll works differently: tell Claude);
+      Scrolls imbues the staff, then summons a familiar, then says
+      nothing's left; `/wowkeys scrolls` names what's next.
+- [ ] Wand key `'` / no-trigger D-pad → shoots once a wand is equipped.
 - [ ] Full-bag loot windows: what should keys do? (Loot rolls: the owner
       will use an automation addon.)
 - Later: A on objects (`INTERACTTARGET`); Z mounts at 40; a camera key
@@ -491,6 +526,7 @@ wow/steam-layers.md        # GENERATED: what to bind in Steam
 3. Keyboard window navigation.
 4. Long cooldowns on the leader layer.
 5. Controller ideas for later (owner's picks, not started):
+   - **Touchpad center** is free again (autorun moved to L3).
    - **Steam radial menus** (touchpad or a held button; one key per
      wedge) for rare spells and items: conjuring, hearth, Slow Fall,
      potions. Frees bar slots.
@@ -502,7 +538,7 @@ wow/steam-layers.md        # GENERATED: what to bind in Steam
      of binding by hand; the format needs reverse-engineering.
    - **Arrangement 3 for groups:** moon + sheep, buffs and decurse on
      party members, focus tools.
-   - **Light bar colour** by mode, strafe or health: probe first; Steam
+   - **Light bar colour** by mode or health: probe first; Steam
      probably shows WoW a virtual Xbox pad, which has no light bar.
 
 Decided against: strafe in combat by default (the owner wants to run
